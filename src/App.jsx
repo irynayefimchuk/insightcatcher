@@ -606,7 +606,12 @@ function SetupPhase({ script, participantId, setParticipantId, onStart }) {
           className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
       </div>
-
+{script.description && (
+  <div className="bg-slate-900 rounded-xl p-6 border border-slate-800">
+    <h2 className="text-lg font-semibold text-white mb-3">About this test</h2>
+    <p className="text-slate-300 leading-relaxed">{script.description}</p>
+  </div>
+)}
       <div className="bg-blue-950/50 rounded-xl p-6 border border-blue-900">
         <div className="flex items-center gap-2 mb-4">
           <Mic className="text-blue-400" size={20} />
