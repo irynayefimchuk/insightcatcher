@@ -4,6 +4,13 @@
   "subtitle": "Snapshot tab + Opportunity Cards",
   "version": "1.0",
   "totalTimeMinutes": 40,
+  {
+  "id": "cci-snapshot-2026-04",
+  "title": "CCI Snapshot Usability Test",
+  "subtitle": "Snapshot tab + Opportunity Cards",
+  "version": "1.0",
+  "totalTimeMinutes": 40,
+  "description": "We're testing whether the Snapshot tab helps users quickly find where to focus and navigate to opportunity cards. We want to learn: (1) Does Snapshot work at all? Can users orient themselves? (2) What's missing or confusing? (3) Can users understand and compare Supply vs Routine Services cards?",
   "setup": {
     "rules": [
       "We're testing the product, not you. There are no wrong answers.",
