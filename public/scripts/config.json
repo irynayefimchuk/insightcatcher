@@ -1,0 +1,26 @@
+{
+  "projects": [
+    {
+      "id": "cci",
+      "name": "CCI (Clinical Cost Intelligence)",
+      "scripts": [
+        {
+          "id": "snapshot-test",
+          "name": "Snapshot Tab Usability Test",
+          "file": "cci-snapshot-test.json"
+        }
+      ]
+    },
+    {
+      "id": "example",
+      "name": "Example Project",
+      "scripts": [
+        {
+          "id": "example-test",
+          "name": "Example Test Template",
+          "file": "example-test.json"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,113 @@
+{
+  "id": "example-test",
+  "title": "Example Test",
+  "subtitle": "Use this as a template",
+  "version": "1.0",
+  "totalTimeMinutes": 30,
+  "setup": {
+    "rules": [
+      "We're testing the product, not you. There are no wrong answers.",
+      "Please think out loud — tell me what you're looking at and thinking.",
+      "If you get stuck, tell me what you expected to happen."
+    ],
+    "noHelpPolicy": "Give 10 seconds of silence before prompting. Ask: 'What would you do next if I wasn't here?'"
+  },
+  "warmup": {
+    "timeMinutes": 5,
+    "intro": "Ask these BEFORE showing the prototype.",
+    "why": "Understand their current mental model before introducing the product.",
+    "questions": [
+      {
+        "id": "w1",
+        "label": "Current process",
+        "question": "How do you currently do [this task]?",
+        "listenFor": "What tools do they use? What's painful?"
+      },
+      {
+        "id": "w2",
+        "label": "Recent example",
+        "question": "Tell me about the last time you did [this task]. What happened?",
+        "listenFor": "Real workflow, not hypothetical"
+      }
+    ]
+  },
+  "tasks": [
+    {
+      "id": "1",
+      "name": "First impression",
+      "subtitle": "Exploration without clicking",
+      "timeMinutes": 3,
+      "script": "Look at this screen for a minute. Without clicking, tell me what you think this is for and what you would do first.",
+      "success": "Can articulate the purpose. Points to a reasonable starting point.",
+      "watchFor": [
+        "What catches their eye first?",
+        "Do they understand the layout?",
+        "Any confusion or hesitation?"
+      ],
+      "learnWhy": "Tests basic comprehension before any interaction."
+    },
+    {
+      "id": "2",
+      "name": "Core task",
+      "subtitle": "Main user flow",
+      "timeMinutes": 5,
+      "script": "Now try to [complete the main task]. Talk me through what you're doing.",
+      "success": "Completes the task without major errors or dead ends.",
+      "watchFor": [
+        "Where do they click first?",
+        "Any wrong turns?",
+        "Do they find the key feature?"
+      ],
+      "learnWhy": "Tests the primary user flow."
+    },
+    {
+      "id": "3",
+      "name": "Edge case",
+      "subtitle": "Secondary flow",
+      "timeMinutes": 3,
+      "optional": true,
+      "script": "Now imagine [edge case scenario]. How would you handle that?",
+      "success": "Finds a reasonable path or explains what they'd expect.",
+      "watchFor": [
+        "Do they discover the secondary feature?",
+        "Is the fallback intuitive?"
+      ],
+      "learnWhy": "Tests whether edge cases are handled."
+    }
+  ],
+  "wrapup": {
+    "timeMinutes": 3,
+    "intro": "Ask after all tasks are complete.",
+    "questions": [
+      {
+        "id": "wrapup1",
+        "label": "Overall",
+        "question": "What worked well? What was frustrating?"
+      },
+      {
+        "id": "wrapup2",
+        "label": "Missing",
+        "question": "Was anything missing that you expected to see?"
+      },
+      {
+        "id": "wrapup3",
+        "label": "Trust",
+        "question": "Would you trust this tool for [the task]? Why or why not?"
+      }
+    ]
+  },
+  "observerNotes": [
+    {
+      "behavior": "Clicks wrong area first",
+      "meaning": "Visual hierarchy may need adjustment"
+    },
+    {
+      "behavior": "Asks 'what does X mean?'",
+      "meaning": "Label or copy is unclear"
+    },
+    {
+      "behavior": "Says 'I expected Y'",
+      "meaning": "Mental model mismatch — note what they expected"
+    }
+  ]
+}
