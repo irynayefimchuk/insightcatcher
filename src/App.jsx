@@ -360,7 +360,7 @@ ${sessionNotes || 'None'}
                 </div>
               ) : (
                 <div>
-                  <h1 className="text-lg font-semibold text-white">Usability Test Runner</h1>
+                  <h1 className="text-lg font-semibold text-white">InsightCatcher</h1>
                   <p className="text-sm text-slate-400">Select a project and test to begin</p>
                 </div>
               )}
