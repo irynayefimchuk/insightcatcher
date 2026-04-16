@@ -836,7 +836,7 @@ function TasksPhase({ tasks, currentIndex, setCurrentIndex, status, updateStatus
           </Card>
 
           {task.note && (
-            <Card style={{ padding: '12px 16px', background: task.note.type === 'warning' ? 'rgba(249,196,0,0.07)' : t.subtleBg }}>
+            <Card style={{ padding: '12px 16px', background: task.note.type === 'warning' ? '#FFFBEB' : t.subtleBg }}>
               <div style={{ display: 'flex', gap: 8 }}>
                 <AlertTriangle size={13} style={{ color: task.note.type === 'warning' ? '#92400E' : t.textDetail, flexShrink: 0, marginTop: 1 }} />
                 <div>
