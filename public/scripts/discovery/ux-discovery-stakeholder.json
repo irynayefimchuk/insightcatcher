@@ -1,0 +1,204 @@
+{
+  "id": "ux-discovery-stakeholder-2026",
+  "type": "discovery",
+  "title": "UX Discovery: Product Development Process",
+  "subtitle": "Understanding where research fits in our org",
+  "version": "1.0",
+  "totalTimeMinutes": 45,
+  "description": "A Mom's Test-style discovery conversation with the Product Director or Head of Product. Goal: understand where the current process breaks down before pitching any solution. Do NOT mention InsightCatcher or any specific tool. Listen for pain, don't create it.",
+
+  "setup": {
+    "rules": [
+      "I've been looking at how we validate new product ideas and I'd love to understand how it actually works in practice today — before I suggest anything.",
+      "There are no right or wrong answers — I'm trying to learn, not audit.",
+      "I may stay quiet at times — I just want to make sure I hear the full picture."
+    ],
+    "noHelpPolicy": "Do NOT mention InsightCatcher, research tools, or any solution you have in mind. If they ask what you're building, say 'I'm still trying to understand the problem first.' This is a learning session, not a pitch. If they ask leading questions back at you, deflect and return to their experience."
+  },
+
+  "warmup": {
+    "timeMinutes": 5,
+    "intro": "Start with context-setting before diving into specifics. You want them talking about their world, not reacting to your agenda.",
+    "why": "These questions establish their frame of reference — how they think about validation, what success looks like to them. Everything else will be filtered through this.",
+    "questions": [
+      {
+        "id": "w1",
+        "label": "Set the scene",
+        "question": "Can you walk me through the last product idea that went through the full process — from pitch to validation? What did that actually look like in practice?",
+        "listenFor": "Where do they slow down or hedge? What steps feel solid vs. hand-wavy? Are they describing a structured process or a series of gut calls?"
+      },
+      {
+        "id": "w2",
+        "label": "What good looks like",
+        "question": "When a product idea has gone really well — where the team felt confident they were building the right thing — what made that different?",
+        "listenFor": "Do they cite user evidence, sales feedback, SME intuition, or data? This tells you what they currently count as validation."
+      }
+    ]
+  },
+
+  "tasks": [
+    {
+      "id": "1",
+      "name": "The idea pitch and what's behind it",
+      "subtitle": "Understanding evidence quality at the pitch stage",
+      "timeMinutes": 8,
+      "script": "When an idea pitch comes to the review board — what evidence is usually attached to it? What does that typically look like in practice?",
+      "success": "You understand what 'customer feedback' means to them concretely — is it a sales call recap, a client email, structured interviews, or something else. You know whether evidence is required or just expected.",
+      "watchFor": [
+        "Vague references to 'client conversations' without specifics",
+        "Sales or account teams as the primary source of user feedback",
+        "'We usually just know' or SME intuition used as evidence",
+        "No defined format for what evidence should look like",
+        "Difference between what the process says and what actually happens"
+      ],
+      "learnWhy": "If evidence at the pitch stage is thin or informal, that's the highest-leverage intervention point. Everything downstream gets built on that foundation."
+    },
+    {
+      "id": "2",
+      "name": "When pitches fail or get sent back",
+      "subtitle": "Finding where the process breaks down",
+      "timeMinutes": 6,
+      "script": "When a pitch has been rejected or sent back — what was usually missing? And has there been a product that got greenlit and then struggled — where in hindsight the team wished they'd known something earlier?",
+      "success": "You have a concrete example of a gap between what was believed and what turned out to be true. Ideally with a cost attached — time, money, rework.",
+      "watchFor": [
+        "Any mention of 'we found out during build' or 'EAP surprised us'",
+        "Features built that users didn't adopt or understand",
+        "Assumptions about users that turned out to be wrong",
+        "Buyer feedback mistaken for user feedback",
+        "Reluctance to name a specific example — may mean the pain is there but politically sensitive"
+      ],
+      "learnWhy": "Concrete past failures are the clearest signal that a problem is real and costly. This is your strongest evidence that structured discovery has value here.",
+      "note": {
+        "type": "warning",
+        "title": "If they can't name an example",
+        "content": "Don't push. Ask: 'Is there a type of feedback you wish you had more of when ideas are being evaluated?' That's a softer version of the same question."
+      }
+    },
+    {
+      "id": "3",
+      "name": "How the team talks to users today",
+      "subtitle": "Understanding current research habits",
+      "timeMinutes": 8,
+      "script": "When PMs or SMEs talk to clients during the idea or validation phase — what does that usually look like? Is it structured, or more of a conversation? And what typically gets captured from those conversations — where does it go?",
+      "success": "You know who talks to users, how often, in what format, and what happens to the output. You know whether 'talking to clients' means economic buyers or actual end users.",
+      "watchFor": [
+        "Conflation of buyer and end user — 'our clients love it' vs 'the analysts who use it'",
+        "Notes living in someone's inbox or head, not shared or structured",
+        "SMEs acting as proxies for users rather than direct user access",
+        "No consistent format — everyone does it differently",
+        "Access to real end users being blocked by account management or client relationships"
+      ],
+      "learnWhy": "This reveals the actual current state of discovery — not the process diagram version. If conversations happen but produce nothing shareable, that's the gap."
+    },
+    {
+      "id": "4",
+      "name": "The EAP and feedback cycles",
+      "subtitle": "Is feedback structured or informal?",
+      "timeMinutes": 6,
+      "script": "During EAP — what does 'rapid feedback cycles' actually look like right now? How structured is it, and when feedback comes back, how does it turn into product changes?",
+      "success": "You understand whether EAP feedback is structured (tasks, observations, findings doc) or informal (call notes, account manager relay). You know whether changes are still feasible at that point.",
+      "watchFor": [
+        "Feedback going through implementation services rather than directly to product",
+        "'By then it's hard to change things' — signals EAP is too late for meaningful iteration",
+        "No defined format for what feedback should look like",
+        "Confusion about who owns the feedback loop",
+        "EAP being treated as validation for launch, not learning for improvement"
+      ],
+      "learnWhy": "EAP is the most natural place to introduce structured usability testing — it's already in the process. If it's currently informal, there's an easy win here."
+    },
+    {
+      "id": "5",
+      "name": "The most expensive mistake",
+      "subtitle": "Surfacing real pain",
+      "timeMinutes": 6,
+      "script": "What's the most expensive mistake the team has made recently from building something that turned out not to work the way users expected? And — if you could know one thing earlier in the process than you currently do, what would it be?",
+      "success": "You have a concrete example with real cost attached. You know what information they wish they had. This is your clearest signal of where structured research would have made a difference.",
+      "watchFor": [
+        "Any story about late-stage discovery of a fundamental problem",
+        "Features that were built but not adopted",
+        "Users who 'workaround' the product rather than using it as designed",
+        "Rework that happened after EAP or even after launch",
+        "The answer to 'what would you want to know earlier' — this is your brief"
+      ],
+      "learnWhy": "This is the Mom's Test equivalent of 'what are the implications of that?' — separating real, costly pain from mild inconvenience. If they have a vivid answer, the problem is real.",
+      "note": {
+        "type": "warning",
+        "title": "This is the most important task",
+        "content": "Don't rush past a good answer here. If they give you a real example, ask follow-up probes: 'When did you first realize something was off?' / 'What would have needed to be true earlier to avoid that?' / 'How much time or money did that cost roughly?'"
+      }
+    },
+    {
+      "id": "6",
+      "name": "Constraints and feasibility",
+      "subtitle": "Understanding what's actually possible",
+      "timeMinutes": 5,
+      "script": "When PMs are in the idea or validation phase — how much time realistically do they have for research activities? And is access to actual end users straightforward, or does that go through account management?",
+      "success": "You understand the real constraints: time, access to users, org politics around client relationships. These determine what solutions are actually viable.",
+      "watchFor": [
+        "Access to end users requiring account manager approval or client permission",
+        "PMs having very little unscheduled time in validation phase",
+        "'We'd have to be careful about that with clients' — signals relationship sensitivity",
+        "A distinction between EAP clients (open access) and general clients (restricted)",
+        "Any mention of internal users or analysts who could be accessed more easily"
+      ],
+      "learnWhy": "A great solution that requires access you don't have is not a solution. Knowing the constraints shapes what you propose."
+    }
+  ],
+
+  "wrapup": {
+    "timeMinutes": 6,
+    "intro": "Close with open questions that surface what they value and what they'd welcome. This is the only moment where you can hint at your agenda — gently.",
+    "questions": [
+      {
+        "id": "wrapup1",
+        "label": "What's working",
+        "question": "Is there anything about how we currently validate ideas that you feel is working well — something we should be careful not to disrupt?"
+      },
+      {
+        "id": "wrapup2",
+        "label": "The one thing",
+        "question": "If UX could make one thing easier for the team in the early phases of a new product — before the design work starts — what would be most valuable?"
+      },
+      {
+        "id": "wrapup3",
+        "label": "Open door",
+        "question": "Is there anyone else on the team you think I should talk to about this — maybe someone who's felt the friction most directly?"
+      }
+    ]
+  },
+
+  "observerNotes": [
+    {
+      "behavior": "Names a specific product failure or late discovery",
+      "meaning": "Real, felt pain — strong signal that structured research would have value. Note the example carefully."
+    },
+    {
+      "behavior": "Says 'we talk to clients' but can't describe the format",
+      "meaning": "Research is happening but unstructured — good entry point for lightweight tooling"
+    },
+    {
+      "behavior": "Conflates buyer with end user throughout",
+      "meaning": "Low UX maturity signal — education needed before tooling. Start with the distinction, not the tool."
+    },
+    {
+      "behavior": "Says 'by EAP it's hard to change things'",
+      "meaning": "Pain exists at a specific point — EAP structured testing is your clearest quick win"
+    },
+    {
+      "behavior": "Mentions access to users going through account management",
+      "meaning": "Real constraint — solution must work within existing client relationships, not require new access"
+    },
+    {
+      "behavior": "Can't answer 'what would you want to know earlier'",
+      "meaning": "Either pain isn't acute enough, or they haven't connected the dots yet. May need more time before proposing anything."
+    },
+    {
+      "behavior": "Enthusiastic about the last wrapup question",
+      "meaning": "They've been thinking about this already — there's appetite. Now is the time to follow up with something concrete."
+    },
+    {
+      "behavior": "Refers you to a PM or SME for more detail",
+      "meaning": "Good sign — they're engaged enough to help you learn more. Follow the thread."
+    }
+  ]
+}
