@@ -578,7 +578,7 @@ function SelectPhase({ config, selectedProject, setSelectedProject, onSelectScri
 function SetupPhase({ script, participantId, setParticipantId, runnerName, setRunnerName, onStart }) {
   return (
     <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-      <div style={{ padding: '16px 0 16px' }}>
+      <div style={{ padding: '16px 0 16px', paddingRight: 'calc(320px + 52px)' }}>
         <h2 style={{ fontSize: 22, fontWeight: 700, color: t.textHeader, marginBottom: 4 }}>{script.title}</h2>
         {script.description && <p style={{ color: t.textSub, fontSize: 14, lineHeight: 1.6 }}>{script.description}</p>}
       </div>
@@ -643,7 +643,7 @@ function WarmupPhase({ warmup, status, setStatus, onNext, startTimer }) {
 
   return (
     <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-      <div style={{ padding: '16px 0 16px' }}>
+      <div style={{ padding: '16px 0 16px', paddingRight: 'calc(320px + 52px)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
           <MessageSquare size={18} style={{ color: t.brand }} />
           <h2 style={{ fontSize: 22, fontWeight: 700, color: t.textHeader }}>Warm-up</h2>
@@ -653,8 +653,8 @@ function WarmupPhase({ warmup, status, setStatus, onNext, startTimer }) {
         {warmup.why && <p style={{ fontSize: 13, color: t.textSub, lineHeight: 1.6 }}>{warmup.why}</p>}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: 16, alignItems: 'start' }}>
-        {/* Left: questions */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: 20, alignItems: 'start' }}>
+        {/* Left: questions */
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           {warmup.questions.map((q, i) => (
             <Card key={q.id} style={{ padding: 20 }}>
@@ -673,7 +673,7 @@ function WarmupPhase({ warmup, status, setStatus, onNext, startTimer }) {
         </div>
 
         {/* Right: Mom's Test reference (fixed) */}
-        <div style={{ position: 'fixed', top: 130, right: 'max(32px, calc((100vw - 1280px) / 2 + 32px))', width: 300, zIndex: 30 }}>
+        <div style={{ position: 'fixed', top: 130, right: 'max(32px, calc((100vw - 1280px) / 2 + 32px))', width: 320, maxHeight: 'calc(100vh - 150px)', overflowY: 'auto', zIndex: 30 }}>
           <Card style={{ overflow: 'hidden' }}>
             <div style={{ padding: '14px 16px', borderBottom: `1px solid ${t.strokeLight}`, background: t.hoverBg }}>
               <div style={{ fontSize: 12, fontWeight: 700, color: t.brand, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Interview guide</div>
@@ -740,9 +740,9 @@ function TasksPhase({ tasks, currentIndex, setCurrentIndex, status, updateStatus
 
   return (
     <div style={{ marginBottom: 80 }}>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: 16, alignItems: 'start' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: 20, alignItems: 'start' }}>
 
-        {/* Left: action card */}
+        {/* Left: action card */
         <Card style={{ overflow: 'hidden' }}>
           <div style={{ padding: '18px 24px', borderBottom: `1px solid ${t.strokeLight}` }}>
             <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
@@ -800,7 +800,7 @@ function TasksPhase({ tasks, currentIndex, setCurrentIndex, status, updateStatus
         </Card>
 
         {/* Right: reference panel (fixed) */}
-        <div style={{ position: 'fixed', top: 150, right: 'max(32px, calc((100vw - 1280px) / 2 + 32px))', width: 340, display: 'flex', flexDirection: 'column', gap: 10, zIndex: 30 }}>
+        <div style={{ position: 'fixed', top: 150, right: 'max(32px, calc((100vw - 1280px) / 2 + 32px))', width: 320, maxHeight: 'calc(100vh - 170px)', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 10, zIndex: 30 }}>
           <Card style={{ overflow: 'hidden' }}>
             <button onClick={() => toggleSection(`success-${task.id}`)}
               style={{ width: '100%', padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'none', border: 'none', cursor: 'pointer' }}>
@@ -836,7 +836,7 @@ function TasksPhase({ tasks, currentIndex, setCurrentIndex, status, updateStatus
           </Card>
 
           {task.note && (
-            <Card style={{ padding: '12px 16px', background: task.note.type === 'warning' ? '#FFFBEB' : t.subtleBg }}>
+            <Card style={{ padding: '12px 16px', background: task.note.type === 'warning' ? 'rgba(249,196,0,0.07)' : t.subtleBg }}>
               <div style={{ display: 'flex', gap: 8 }}>
                 <AlertTriangle size={13} style={{ color: task.note.type === 'warning' ? '#92400E' : t.textDetail, flexShrink: 0, marginTop: 1 }} />
                 <div>
@@ -897,12 +897,12 @@ function WrapupPhase({ wrapup, observerNotes, status, setStatus, sessionNotes, s
 
   return (
     <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-      <div style={{ padding: '16px 0 16px' }}>
+      <div style={{ padding: '16px 0 16px', paddingRight: 'calc(320px + 52px)' }}>
         <h2 style={{ fontSize: 22, fontWeight: 700, color: t.textHeader, marginBottom: 4 }}>Wrap-up</h2>
         <p style={{ fontSize: 14, color: t.textSub }}>{wrapup.intro}</p>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: 16, alignItems: 'start', marginBottom: 80 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: 20, alignItems: 'start', marginBottom: 80 }}>
 
         {/* Left: questions + general notes */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -925,7 +925,7 @@ function WrapupPhase({ wrapup, observerNotes, status, setStatus, sessionNotes, s
 
         {/* Right: observer reference (sticky) */}
         {observerNotes && observerNotes.length > 0 && (
-          <div style={{ position: 'fixed', top: 130, right: 'max(32px, calc((100vw - 1280px) / 2 + 32px))', width: 300, zIndex: 30 }}>
+          <div style={{ position: 'fixed', top: 130, right: 'max(32px, calc((100vw - 1280px) / 2 + 32px))', width: 320, maxHeight: 'calc(100vh - 150px)', overflowY: 'auto', zIndex: 30 }}>
             <Card style={{ padding: 20, borderLeft: `3px solid ${t.brand}` }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
                 <Users size={14} style={{ color: t.brand }} />
