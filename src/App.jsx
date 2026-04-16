@@ -307,7 +307,7 @@ export default function InsightCatcher() {
           <button onClick={() => { setCurrentPhase('select'); setScript(null); }}
             style={{ display: 'flex', alignItems: 'center', gap: 6, color: t.brand, fontWeight: 700, fontSize: 15,
               background: 'none', border: 'none', cursor: 'pointer', padding: 0, whiteSpace: 'nowrap' }}>
-            <Home size={16} />InsightsCatcher
+            <Home size={15} />InsightsCatcher
           </button>
           {script && currentPhase !== 'select' && (
             <>
