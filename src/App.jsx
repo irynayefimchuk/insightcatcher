@@ -34,24 +34,21 @@ const TAGS = [
 ];
 
 const MOMS_TEST_DOS = [
-  'Listen — silence is okay, let them fill it',
-  'Ask about the past, not the future',
-  
   '"Tell me more about that..."',
   '"Walk me through how you do that today."',
   '"When was the last time you did this?"',
   '"What did you expect to happen?"',
-
+  'Listen — silence is okay, let them fill it',
+  'Ask about the past, not the future',
 ];
 
 const MOMS_TEST_DONTS = [
-  'Do NOT explain what things do',
-  'Do NOT defend your design choices',
-  
   '"Would you use this?" — hypothetical',
   '"Did you like it?" — approval-seeking',
   '"What if we added X?" — pitching',
   '"Don\'t you think Y would help?" — leading',
+  'Explaining what things do',
+  'Defending your design choices',
 ];
 
 const PHASES = ['setup', 'warmup', 'tasks', 'wrapup'];
@@ -657,7 +654,7 @@ function WarmupPhase({ warmup, status, setStatus, onNext, startTimer }) {
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: 20, alignItems: 'start' }}>
-        {/* Left: questions */
+        {/* Left: questions */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           {warmup.questions.map((q, i) => (
             <Card key={q.id} style={{ padding: 20 }}>
@@ -745,7 +742,7 @@ function TasksPhase({ tasks, currentIndex, setCurrentIndex, status, updateStatus
     <div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: 20, alignItems: 'start', marginBottom: 80 }}>
 
-        {/* Left: action card */
+        {/* Left: action card */}
         <Card style={{ overflow: 'hidden' }}>
           <div style={{ padding: '18px 24px', borderBottom: `1px solid ${t.strokeLight}` }}>
             <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
