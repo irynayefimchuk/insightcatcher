@@ -254,7 +254,7 @@ export default function InsightCatcher() {
   const exportMarkdown = () => {
     const tasks = script.tasks.map(tk => {
       const s = taskStatus[tk.id] || {};
-      const result = s.success === true ? '✓ Pass' : s.success === false ? '✗ Struggled' : '— Not scored';
+      const result = s.completion === 'completed' ? '✅ Completed' : s.completion === 'partial' ? '⚠️ Partially completed' : s.completion === 'failed' ? '❌ Could not complete' : '— Not scored';
       const tags = s.tags?.length ? `\n**Tags:** ${s.tags.join(', ')}` : '';
       return `### Task ${tk.id}: ${tk.name}\n**Result:** ${result}${tags}\n**Notes:** ${s.notes || 'None'}`;
     }).join('\n\n');
@@ -270,7 +270,8 @@ export default function InsightCatcher() {
   const copySessionSummary = () => {
     const tasks = script.tasks.map(tk => {
       const s = taskStatus[tk.id] || {};
-      return `${tk.id}. ${tk.name}: ${s.done ? (s.success ? '✓ Pass' : s.success === false ? '✗ Struggled' : '— Done') : '○ Not done'}${s.notes ? `\n   ${s.notes}` : ''}`;
+      const result = s.completion === 'completed' ? '✅ Completed' : s.completion === 'partial' ? '⚠️ Partially' : s.completion === 'failed' ? '❌ Couldn\'t do it' : '○ Not scored';
+      return `${tk.id}. ${tk.name}: ${result}${s.notes ? `\n   ${s.notes}` : ''}`;
     }).join('\n');
     navigator.clipboard.writeText(`# ${script.title}\nParticipant: ${participantId || 'Unknown'}\nDate: ${sessionStartTime?.toLocaleDateString()}\n\n${tasks}\n\n${sessionNotes}`);
   };
@@ -429,8 +430,9 @@ export default function InsightCatcher() {
                       ['Run by', runnerName || 'Unknown'],
                       ['Project', config?.projects.find(p => p.id === selectedProject)?.name || '—'],
                       ['Duration', sessionDuration()],
-                      ['Tasks done', `${Object.values(taskStatus).filter(t => t?.done).length} / ${script.tasks.length}`],
-                      ['Struggled', `${Object.values(taskStatus).filter(t => t?.success === false).length} tasks`],
+                      ['Completed', `${Object.values(taskStatus).filter(t => t?.completion === 'completed').length} / ${script.tasks.length}`],
+                      ['Partial', `${Object.values(taskStatus).filter(t => t?.completion === 'partial').length} tasks`],
+                      ['Couldn't do it', `${Object.values(taskStatus).filter(t => t?.completion === 'failed').length} tasks`],
                     ].map(([label, val]) => (
                       <div key={label}>
                         <div style={{ color: t.textDetail, fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 2 }}>{label}</div>
@@ -866,22 +868,22 @@ function TasksPhase({ tasks, currentIndex, setCurrentIndex, status, updateStatus
             {taskStat.done ? <CheckSquare size={14} /> : <Square size={14} />}Done
           </button>
           <div style={{ flex: 1 }} />
-          <button onClick={() => updateStatus(task.id, 'success', taskStat.success === true ? null : true)}
-            style={{ padding: '8px 16px', borderRadius: 6, fontSize: 13, fontWeight: 500, cursor: 'pointer',
-              display: 'flex', alignItems: 'center', gap: 5, fontFamily: 'inherit',
-              background: taskStat.success === true ? t.nearPositive : 'transparent',
-              color: taskStat.success === true ? t.positive : t.textSub,
-              border: `1px solid ${taskStat.success === true ? t.positive : t.strokeDefault}` }}>
-            <CheckCircle2 size={14} />Pass
-          </button>
-          <button onClick={() => updateStatus(task.id, 'success', taskStat.success === false ? null : false)}
-            style={{ padding: '8px 16px', borderRadius: 6, fontSize: 13, fontWeight: 500, cursor: 'pointer',
-              display: 'flex', alignItems: 'center', gap: 5, fontFamily: 'inherit',
-              background: taskStat.success === false ? t.nearNegative : 'transparent',
-              color: taskStat.success === false ? t.negative : t.textSub,
-              border: `1px solid ${taskStat.success === false ? t.negative : t.strokeDefault}` }}>
-            <AlertTriangle size={14} />Struggled
-          </button>
+          {/* 3-point completion scale */}
+          {[
+            { value: 'completed', label: '✅ Completed', bg: t.nearPositive, color: t.positive, border: t.positive },
+            { value: 'partial',   label: '⚠️ Partially',  bg: '#FEF3C7',      color: '#92400E', border: '#F59E0B' },
+            { value: 'failed',    label: '❌ Couldn't do it', bg: t.nearNegative, color: t.negative, border: t.negative },
+          ].map(({ value, label, bg, color, border }) => (
+            <button key={value}
+              onClick={() => updateStatus(task.id, 'completion', taskStat.completion === value ? null : value)}
+              style={{ padding: '8px 14px', borderRadius: 6, fontSize: 13, fontWeight: 500, cursor: 'pointer',
+                display: 'flex', alignItems: 'center', gap: 5, fontFamily: 'inherit',
+                background: taskStat.completion === value ? bg : 'transparent',
+                color: taskStat.completion === value ? color : t.textSub,
+                border: `1px solid ${taskStat.completion === value ? border : t.strokeDefault}` }}>
+              {label}
+            </button>
+          ))}
           <Btn variant="cta" onClick={() => { updateStatus(task.id, 'done', true); onNext(); }}>
             {currentIndex < tasks.length - 1 ? 'Next Task →' : 'Finish Tasks →'}
           </Btn>
