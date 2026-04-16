@@ -8,11 +8,9 @@ const t = {
   subtleBg:     'rgba(233,238,243,0.7)',
   hoverBg:      '#E1EDFA',
   brand:        '#005CB7',
-  brandLight:   '#0A81FF',
   textMain:     '#022212',
   textSub:      '#5E676F',
   textDetail:   '#708090',
-  textPlaceholder: '#95A1AD',
   textDisabled: '#D7DDE4',
   textHeader:   '#003D66',
   strokeDefault:'#E0E3E6',
@@ -147,7 +145,7 @@ export default function InsightCatcher() {
 
   useEffect(() => {
     let iv;
-    if (timerRunning) iv = setInterval(() => setTimer(t => t + 1), 1000);
+    if (timerRunning) iv = setInterval(() => setTimer(s => s + 1), 1000);
     return () => clearInterval(iv);
   }, [timerRunning]);
 
@@ -248,21 +246,19 @@ export default function InsightCatcher() {
   return (
     <div style={{ minHeight: '100vh', background: t.canvasBg, fontFamily: 'system-ui, -apple-system, sans-serif', color: t.textMain }}>
 
-      {/* ── Top header ── */}
+      {/* ── Sticky header ── */}
       <header style={{ position: 'sticky', top: 0, zIndex: 50, background: t.cardBg, borderBottom: `1px solid ${t.strokeDefault}` }}>
         <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 32px', display: 'flex', alignItems: 'center', gap: 16, height: 52 }}>
           <button onClick={() => { setCurrentPhase('select'); setScript(null); }}
             style={{ display: 'flex', alignItems: 'center', gap: 6, color: t.brand, fontWeight: 700, fontSize: 15, background: 'none', border: 'none', cursor: 'pointer', padding: 0, whiteSpace: 'nowrap' }}>
             <Home size={15} style={{ color: t.brand }} />InsightCatcher
           </button>
-
           {script && currentPhase !== 'select' && (
             <>
               <ChevronRight size={14} style={{ color: t.strokeStrong, flexShrink: 0 }} />
-              <span style={{ color: t.textSub, fontSize: 13, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 200 }}>{script.title}</span>
+              <span style={{ color: t.textSub, fontSize: 13, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 240 }}>{script.title}</span>
             </>
           )}
-
           <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 12 }}>
             {script && currentPhase !== 'select' && (
               <>
@@ -298,7 +294,7 @@ export default function InsightCatcher() {
           </div>
         </div>
 
-        {/* ── Phase nav (sticky under header) ── */}
+        {/* Phase nav */}
         {script && currentPhase !== 'select' && (
           <div style={{ borderTop: `1px solid ${t.strokeLight}`, background: t.cardBg }}>
             <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 32px', display: 'flex', alignItems: 'center', gap: 4, height: 40 }}>
@@ -324,7 +320,7 @@ export default function InsightCatcher() {
           </div>
         )}
 
-        {/* ── Task breadcrumb row (only during tasks) ── */}
+        {/* Task breadcrumb row */}
         {script && currentPhase === 'tasks' && (
           <div style={{ borderTop: `1px solid ${t.strokeLight}`, background: t.canvasBg }}>
             <div style={{ maxWidth: 1280, margin: '0 auto', padding: '6px 32px', display: 'flex', gap: 4, overflowX: 'auto', scrollbarWidth: 'none' }}>
@@ -393,12 +389,22 @@ export default function InsightCatcher() {
                   </div>
                 </div>
                 <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
-                  <Btn variant="ghost" style={{ flex: 1, justifyContent: 'center' }} onClick={copySessionSummary}><Copy size={13} />Copy</Btn>
-                  <Btn variant="ghost" style={{ flex: 1, justifyContent: 'center' }} onClick={exportMarkdown}><FileText size={13} />Markdown</Btn>
+                  <Btn variant="ghost" style={{ flex: 1, justifyContent: 'center' }} onClick={copySessionSummary}>
+                    <Copy size={13} />Copy summary
+                  </Btn>
+                  <Btn variant="ghost" style={{ flex: 1, justifyContent: 'center' }} onClick={exportMarkdown}>
+                    <Download size={13} />Download report
+                  </Btn>
                 </div>
                 <div style={{ display: 'flex', gap: 8 }}>
-                  <Btn variant="default" style={{ flex: 1, justifyContent: 'center' }} onClick={() => { setShowCompleteModal(false); resetSession(); setCurrentPhase('setup'); }}>New session</Btn>
-                  <Btn variant="primary" style={{ flex: 1, justifyContent: 'center' }} onClick={() => { setShowCompleteModal(false); resetSession(); setCurrentPhase('select'); setScript(null); }}><Home size={13} />Go home</Btn>
+                  <Btn variant="default" style={{ flex: 1, justifyContent: 'center' }}
+                    onClick={() => { setShowCompleteModal(false); resetSession(); setCurrentPhase('setup'); }}>
+                    New session
+                  </Btn>
+                  <Btn variant="primary" style={{ flex: 1, justifyContent: 'center' }}
+                    onClick={() => { setShowCompleteModal(false); resetSession(); setCurrentPhase('select'); setScript(null); }}>
+                    <Home size={13} />Back to Home
+                  </Btn>
                 </div>
               </>
             )}
@@ -474,7 +480,6 @@ function SelectPhase({ config, selectedProject, setSelectedProject, onSelectScri
         </div>
       </div>
 
-      {/* Type filter */}
       <div style={{ display: 'flex', gap: 2, marginBottom: 16, background: t.subtleBg, borderRadius: 8, padding: 3, width: 'fit-content' }}>
         {[
           { id: 'all', label: 'All' },
@@ -498,8 +503,7 @@ function SelectPhase({ config, selectedProject, setSelectedProject, onSelectScri
             onClick={() => onSelectScript(scriptInfo.projectId, scriptInfo)}
             disabled={loading}
             style={{ background: t.cardBg, border: `1px solid ${t.strokeDefault}`, borderRadius: 10, padding: '16px 20px',
-              textAlign: 'left', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-              fontFamily: 'inherit' }}
+              textAlign: 'left', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontFamily: 'inherit' }}
             onMouseEnter={e => e.currentTarget.style.borderColor = t.brand}
             onMouseLeave={e => e.currentTarget.style.borderColor = t.strokeDefault}>
             <div>
@@ -603,7 +607,7 @@ function WarmupPhase({ warmup, status, setStatus, onNext, startTimer }) {
   );
 }
 
-// ─── Tasks phase ──────────────────────────────────────────────────────────────
+// ─── Tasks phase — two column layout ─────────────────────────────────────────
 function TasksPhase({ tasks, currentIndex, setCurrentIndex, status, updateStatus, showScript, setShowScript, onNext, onPrev, startTimer, expandedSections, toggleSection }) {
   const task = tasks[currentIndex];
   const taskStat = status[task.id] || { done: false, success: null, notes: '', tags: [] };
@@ -616,146 +620,151 @@ function TasksPhase({ tasks, currentIndex, setCurrentIndex, status, updateStatus
   };
 
   return (
-    <div style={{ maxWidth: 720, margin: '0 auto' }}>
-      <Card style={{ overflow: 'hidden', marginBottom: 80 }}>
+    <div style={{ marginBottom: 80 }}>
+      {/* Two column grid */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: 16, alignItems: 'start' }}>
 
-        {/* Task header */}
-        <div style={{ padding: '18px 24px', borderBottom: `1px solid ${t.strokeLight}` }}>
-          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
-            <div>
-              <div style={{ fontSize: 11, fontWeight: 700, color: t.brand, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 3 }}>
-                Task {task.id}{task.optional && <span style={{ color: t.warning, marginLeft: 8, fontWeight: 500 }}>Optional</span>}
-              </div>
-              <h2 style={{ fontSize: 19, fontWeight: 700, color: t.textHeader }}>{task.name}</h2>
-              {task.subtitle && <p style={{ fontSize: 13, color: t.textDetail, marginTop: 2 }}>{task.subtitle}</p>}
-            </div>
-            <div style={{ fontSize: 22, fontWeight: 700, color: t.textDisabled, flexShrink: 0 }}>{task.timeMinutes}m</div>
-          </div>
-          {task.learnWhy && (
-            <p style={{ fontSize: 12, color: t.textDetail, fontStyle: 'italic', marginTop: 10, lineHeight: 1.5 }}>
-              <Lightbulb size={11} style={{ display: 'inline', marginRight: 4, verticalAlign: 'middle' }} />
-              {task.learnWhy}
-            </p>
-          )}
-        </div>
-
-        {/* Script */}
-        <div style={{ padding: '16px 24px', borderBottom: `1px solid ${t.strokeLight}` }}>
-          <button onClick={() => setShowScript(!showScript)}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.brand, fontSize: 12,
-              display: 'flex', alignItems: 'center', gap: 5, marginBottom: showScript ? 10 : 0 }}>
-            {showScript ? <EyeOff size={12} /> : <Eye size={12} />}{showScript ? 'Hide' : 'Show'} script
-          </button>
-          {showScript && (
-            <div style={{ background: t.hoverBg, borderRadius: 8, padding: '14px 18px', borderLeft: `3px solid ${t.brand}` }}>
-              <p style={{ fontSize: 16, fontStyle: 'italic', color: t.textMain, lineHeight: 1.7 }}>"{task.script}"</p>
-            </div>
-          )}
-        </div>
-
-        {/* Success — collapsible */}
-        <div style={{ borderBottom: `1px solid ${t.strokeLight}` }}>
-          <button onClick={() => toggleSection(`success-${task.id}`)}
-            style={{ width: '100%', padding: '12px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-              background: 'none', border: 'none', cursor: 'pointer' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <Target size={13} style={{ color: t.positive }} />
-              <span style={{ fontSize: 13, fontWeight: 500, color: t.positive }}>Success looks like</span>
-            </div>
-            {expandedSections[`success-${task.id}`]
-              ? <ChevronDown size={14} style={{ color: t.brand }} />
-              : <ChevronRight size={14} style={{ color: t.brand }} />}
-          </button>
-          {expandedSections[`success-${task.id}`] && (
-            <div style={{ padding: '0 24px 14px 44px' }}>
-              <p style={{ fontSize: 13, color: t.textSub, lineHeight: 1.6 }}>{task.success}</p>
-            </div>
-          )}
-        </div>
-
-        {/* Watch for — collapsible */}
-        <div style={{ borderBottom: `1px solid ${t.strokeLight}` }}>
-          <button onClick={() => toggleSection(`watch-${task.id}`)}
-            style={{ width: '100%', padding: '12px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-              background: 'none', border: 'none', cursor: 'pointer' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <Eye size={13} style={{ color: t.textDetail }} />
-              <span style={{ fontSize: 13, fontWeight: 500, color: t.textSub }}>Watch for</span>
-            </div>
-            {expandedSections[`watch-${task.id}`]
-              ? <ChevronDown size={14} style={{ color: t.brand }} />
-              : <ChevronRight size={14} style={{ color: t.brand }} />}
-          </button>
-          {expandedSections[`watch-${task.id}`] && (
-            <ul style={{ padding: '0 24px 14px 46px', display: 'flex', flexDirection: 'column', gap: 6 }}>
-              {task.watchFor.map((item, i) => (
-                <li key={i} style={{ fontSize: 13, color: t.textSub, lineHeight: 1.5 }}>• {item}</li>
-              ))}
-            </ul>
-          )}
-        </div>
-
-        {/* Warning note */}
-        {task.note && (
-          <div style={{ padding: '12px 24px', borderBottom: `1px solid ${t.strokeLight}`,
-            background: task.note.type === 'warning' ? 'rgba(249,196,0,0.07)' : t.subtleBg }}>
-            <div style={{ display: 'flex', gap: 8 }}>
-              <AlertTriangle size={13} style={{ color: task.note.type === 'warning' ? '#92400E' : t.textDetail, flexShrink: 0, marginTop: 1 }} />
+        {/* ── Left column: action card ── */}
+        <Card style={{ overflow: 'hidden' }}>
+          {/* Task header */}
+          <div style={{ padding: '18px 24px', borderBottom: `1px solid ${t.strokeLight}` }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
               <div>
-                <div style={{ fontSize: 12, fontWeight: 600, color: t.textSub, marginBottom: 2 }}>{task.note.title}</div>
-                <p style={{ fontSize: 12, color: t.textDetail, lineHeight: 1.5 }}>{task.note.content}</p>
+                <div style={{ fontSize: 11, fontWeight: 700, color: t.brand, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 3 }}>
+                  Task {task.id}{task.optional && <span style={{ color: t.warning, marginLeft: 8, fontWeight: 500 }}>Optional</span>}
+                </div>
+                <h2 style={{ fontSize: 19, fontWeight: 700, color: t.textHeader }}>{task.name}</h2>
+                {task.subtitle && <p style={{ fontSize: 13, color: t.textDetail, marginTop: 2 }}>{task.subtitle}</p>}
               </div>
+              <div style={{ fontSize: 22, fontWeight: 700, color: t.textDisabled, flexShrink: 0 }}>{task.timeMinutes}m</div>
+            </div>
+            {task.learnWhy && (
+              <p style={{ fontSize: 12, color: t.textDetail, fontStyle: 'italic', marginTop: 10, lineHeight: 1.5 }}>
+                <Lightbulb size={11} style={{ display: 'inline', marginRight: 4, verticalAlign: 'middle' }} />
+                {task.learnWhy}
+              </p>
+            )}
+          </div>
+
+          {/* Script */}
+          <div style={{ padding: '16px 24px', borderBottom: `1px solid ${t.strokeLight}` }}>
+            <button onClick={() => setShowScript(!showScript)}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.brand, fontSize: 12,
+                display: 'flex', alignItems: 'center', gap: 5, marginBottom: showScript ? 10 : 0 }}>
+              {showScript ? <EyeOff size={12} /> : <Eye size={12} />}{showScript ? 'Hide' : 'Show'} script
+            </button>
+            {showScript && (
+              <div style={{ background: t.hoverBg, borderRadius: 8, padding: '14px 18px', borderLeft: `3px solid ${t.brand}` }}>
+                <p style={{ fontSize: 16, fontStyle: 'italic', color: t.textMain, lineHeight: 1.7 }}>"{task.script}"</p>
+              </div>
+            )}
+          </div>
+
+          {/* Tags */}
+          <div style={{ padding: '14px 24px', borderBottom: `1px solid ${t.strokeLight}` }}>
+            <div style={{ fontSize: 11, fontWeight: 600, color: t.textDetail, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>Quick tags</div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+              {TAGS.map(tag => {
+                const active = (taskStat.tags || []).includes(tag.id);
+                return (
+                  <button key={tag.id} onClick={() => toggleTag(tag.id)}
+                    style={{ padding: '5px 12px', borderRadius: 20, fontSize: 12, cursor: 'pointer', fontFamily: 'inherit',
+                      background: active ? tag.bg : 'transparent',
+                      color: active ? tag.color : t.textDetail,
+                      border: `1px solid ${active ? tag.color : t.strokeDefault}`,
+                      fontWeight: active ? 600 : 400 }}>
+                    {tag.label}
+                  </button>
+                );
+              })}
             </div>
           </div>
-        )}
 
-        {/* Tags */}
-        <div style={{ padding: '14px 24px', borderBottom: `1px solid ${t.strokeLight}` }}>
-          <div style={{ fontSize: 11, fontWeight: 600, color: t.textDetail, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>Quick tags</div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-            {TAGS.map(tag => {
-              const active = (taskStat.tags || []).includes(tag.id);
-              return (
-                <button key={tag.id} onClick={() => toggleTag(tag.id)}
-                  style={{ padding: '5px 12px', borderRadius: 20, fontSize: 12, cursor: 'pointer', fontFamily: 'inherit',
-                    background: active ? tag.bg : 'transparent',
-                    color: active ? tag.color : t.textDetail,
-                    border: `1px solid ${active ? tag.color : t.strokeDefault}`,
-                    fontWeight: active ? 600 : 400 }}>
-                  {tag.label}
-                </button>
-              );
-            })}
+          {/* Notes */}
+          <div style={{ padding: '14px 24px' }}>
+            <div style={{ fontSize: 11, fontWeight: 600, color: t.textDetail, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>Observations</div>
+            <Input value={taskStat.notes || ''} onChange={e => updateStatus(task.id, 'notes', e.target.value)} placeholder="What did you notice?" rows={6} />
           </div>
-        </div>
+        </Card>
 
-        {/* Notes */}
-        <div style={{ padding: '14px 24px' }}>
-          <div style={{ fontSize: 11, fontWeight: 600, color: t.textDetail, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>Observations</div>
-          <Input value={taskStat.notes || ''} onChange={e => updateStatus(task.id, 'notes', e.target.value)} placeholder="What did you notice?" rows={5} />
+        {/* ── Right column: reference panel (sticky) ── */}
+        <div style={{ position: 'sticky', top: 140, display: 'flex', flexDirection: 'column', gap: 10 }}>
+
+          {/* Success */}
+          <Card style={{ overflow: 'hidden' }}>
+            <button onClick={() => toggleSection(`success-${task.id}`)}
+              style={{ width: '100%', padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                background: 'none', border: 'none', cursor: 'pointer' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+                <Target size={13} style={{ color: t.positive }} />
+                <span style={{ fontSize: 13, fontWeight: 600, color: t.positive }}>Success looks like</span>
+              </div>
+              {expandedSections[`success-${task.id}`]
+                ? <ChevronDown size={13} style={{ color: t.brand }} />
+                : <ChevronRight size={13} style={{ color: t.brand }} />}
+            </button>
+            {expandedSections[`success-${task.id}`] && (
+              <div style={{ padding: '0 16px 14px' }}>
+                <p style={{ fontSize: 13, color: t.textSub, lineHeight: 1.6 }}>{task.success}</p>
+              </div>
+            )}
+          </Card>
+
+          {/* Watch for */}
+          <Card style={{ overflow: 'hidden' }}>
+            <button onClick={() => toggleSection(`watch-${task.id}`)}
+              style={{ width: '100%', padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                background: 'none', border: 'none', cursor: 'pointer' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+                <Eye size={13} style={{ color: t.brand }} />
+                <span style={{ fontSize: 13, fontWeight: 600, color: t.textSub }}>Watch for</span>
+              </div>
+              {expandedSections[`watch-${task.id}`]
+                ? <ChevronDown size={13} style={{ color: t.brand }} />
+                : <ChevronRight size={13} style={{ color: t.brand }} />}
+            </button>
+            {expandedSections[`watch-${task.id}`] && (
+              <ul style={{ padding: '0 16px 14px 32px', display: 'flex', flexDirection: 'column', gap: 6 }}>
+                {task.watchFor.map((item, i) => (
+                  <li key={i} style={{ fontSize: 13, color: t.textSub, lineHeight: 1.5 }}>• {item}</li>
+                ))}
+              </ul>
+            )}
+          </Card>
+
+          {/* Note / warning */}
+          {task.note && (
+            <Card style={{ padding: '12px 16px', background: task.note.type === 'warning' ? 'rgba(249,196,0,0.07)' : t.subtleBg }}>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <AlertTriangle size={13} style={{ color: task.note.type === 'warning' ? '#92400E' : t.textDetail, flexShrink: 0, marginTop: 1 }} />
+                <div>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: t.textSub, marginBottom: 3 }}>{task.note.title}</div>
+                  <p style={{ fontSize: 12, color: t.textDetail, lineHeight: 1.5 }}>{task.note.content}</p>
+                </div>
+              </div>
+            </Card>
+          )}
         </div>
-      </Card>
+      </div>
 
       {/* ── Sticky bottom action bar ── */}
       <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: t.cardBg,
         borderTop: `1px solid ${t.strokeDefault}`, padding: '10px 32px', zIndex: 40 }}>
-        <div style={{ maxWidth: 720, margin: '0 auto', display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div style={{ maxWidth: 1280, margin: '0 auto', display: 'flex', alignItems: 'center', gap: 8 }}>
           <button onClick={onPrev} disabled={currentIndex === 0}
             style={{ background: 'none', border: `1px solid ${t.strokeDefault}`, borderRadius: 6, padding: '8px 14px',
-              cursor: currentIndex === 0 ? 'not-allowed' : 'pointer', color: currentIndex === 0 ? t.textDisabled : t.brand,
+              cursor: currentIndex === 0 ? 'not-allowed' : 'pointer',
+              color: currentIndex === 0 ? t.textDisabled : t.brand,
               fontSize: 13, fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 4 }}>
             ← Prev
           </button>
-
           <button onClick={() => updateStatus(task.id, 'done', !taskStat.done)}
             style={{ background: 'none', border: `1px solid ${t.strokeDefault}`, borderRadius: 6, padding: '8px 14px',
               cursor: 'pointer', color: taskStat.done ? t.positive : t.textSub,
               fontSize: 13, fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 5 }}>
             {taskStat.done ? <CheckSquare size={14} /> : <Square size={14} />}Done
           </button>
-
           <div style={{ flex: 1 }} />
-
           <button onClick={() => updateStatus(task.id, 'success', taskStat.success === true ? null : true)}
             style={{ padding: '8px 16px', borderRadius: 6, fontSize: 13, fontWeight: 500, cursor: 'pointer',
               display: 'flex', alignItems: 'center', gap: 5, fontFamily: 'inherit',
@@ -764,7 +773,6 @@ function TasksPhase({ tasks, currentIndex, setCurrentIndex, status, updateStatus
               border: `1px solid ${taskStat.success === true ? t.positive : t.strokeDefault}` }}>
             <CheckCircle2 size={14} />Pass
           </button>
-
           <button onClick={() => updateStatus(task.id, 'success', taskStat.success === false ? null : false)}
             style={{ padding: '8px 16px', borderRadius: 6, fontSize: 13, fontWeight: 500, cursor: 'pointer',
               display: 'flex', alignItems: 'center', gap: 5, fontFamily: 'inherit',
@@ -773,7 +781,6 @@ function TasksPhase({ tasks, currentIndex, setCurrentIndex, status, updateStatus
               border: `1px solid ${taskStat.success === false ? t.negative : t.strokeDefault}` }}>
             <AlertTriangle size={14} />Struggled
           </button>
-
           <Btn variant="primary" onClick={() => { updateStatus(task.id, 'done', true); onNext(); }}>
             {currentIndex < tasks.length - 1 ? 'Next Task →' : 'Finish Tasks →'}
           </Btn>
@@ -791,6 +798,29 @@ function WrapupPhase({ wrapup, observerNotes, status, setStatus, sessionNotes, s
         <h2 style={{ fontSize: 18, fontWeight: 700, color: t.textHeader, marginBottom: 4 }}>Wrap-up</h2>
         <p style={{ fontSize: 13, color: t.textSub }}>{wrapup.intro}</p>
       </div>
+
+      {/* Observer reference — at the top, expanded by default */}
+      {observerNotes && observerNotes.length > 0 && (
+        <Card style={{ padding: 20, borderLeft: `3px solid ${t.brand}` }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+            <Users size={14} style={{ color: t.brand }} />
+            <span style={{ fontSize: 13, fontWeight: 600, color: t.textHeader }}>Before you start — behavior reference</span>
+          </div>
+          <p style={{ fontSize: 12, color: t.textDetail, marginBottom: 12, fontStyle: 'italic' }}>
+            Use this to interpret what you observed during tasks. Let it guide your follow-up questions.
+          </p>
+          {observerNotes.map((note, i) => (
+            <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, fontSize: 12,
+              paddingBottom: 8, marginBottom: i < observerNotes.length - 1 ? 8 : 0,
+              borderBottom: i < observerNotes.length - 1 ? `1px solid ${t.strokeLight}` : 'none' }}>
+              <span style={{ color: t.textMain, fontWeight: 500 }}>{note.behavior}</span>
+              <span style={{ color: t.textDetail }}>→ {note.meaning}</span>
+            </div>
+          ))}
+        </Card>
+      )}
+
+      {/* Wrapup questions */}
       {wrapup.questions.map(q => (
         <Card key={q.id} style={{ padding: 20 }}>
           <div style={{ fontSize: 13, fontWeight: 600, color: t.textSub, marginBottom: 4 }}>{q.label}</div>
@@ -798,21 +828,8 @@ function WrapupPhase({ wrapup, observerNotes, status, setStatus, sessionNotes, s
           <Input value={status[q.id]?.notes || ''} onChange={e => setStatus(p => ({ ...p, [q.id]: { notes: e.target.value } }))} placeholder="Their response..." rows={3} />
         </Card>
       ))}
-      {observerNotes && observerNotes.length > 0 && (
-        <Card style={{ padding: 20 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-            <Users size={13} style={{ color: t.textDetail }} />
-            <span style={{ fontSize: 13, fontWeight: 600, color: t.textSub }}>Observer reference</span>
-          </div>
-          {observerNotes.map((note, i) => (
-            <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, fontSize: 12,
-              paddingBottom: 8, marginBottom: 8, borderBottom: i < observerNotes.length - 1 ? `1px solid ${t.strokeLight}` : 'none' }}>
-              <span style={{ color: t.textMain }}>{note.behavior}</span>
-              <span style={{ color: t.textDetail }}>→ {note.meaning}</span>
-            </div>
-          ))}
-        </Card>
-      )}
+
+      {/* General notes */}
       <Card style={{ padding: 20 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
           <FileText size={13} style={{ color: t.textDetail }} />
@@ -820,6 +837,7 @@ function WrapupPhase({ wrapup, observerNotes, status, setStatus, sessionNotes, s
         </div>
         <Input value={sessionNotes} onChange={e => setSessionNotes(e.target.value)} placeholder="Overall impressions, notable quotes..." rows={5} />
       </Card>
+
       <Btn variant="positive" onClick={onFinish} style={{ width: '100%', justifyContent: 'center', padding: '13px 0', fontSize: 15 }}>
         Complete Session →
       </Btn>
