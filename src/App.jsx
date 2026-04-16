@@ -1,26 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Clock, CheckCircle2, Circle, ChevronDown, ChevronRight, Play, Pause, RotateCcw, AlertTriangle, Copy, Download, Eye, EyeOff, MessageSquare, Lightbulb, Target, CheckSquare, Square, Timer, FileText, Users, Mic, FolderOpen, Trash2, Save, Loader2, RefreshCw } from 'lucide-react';
-
-// LocalStorage keys
-const STORAGE_KEYS = {
-  CURRENT_SESSION: 'usability-test-current-session',
-  SAVED_SESSIONS: 'usability-test-saved-sessions',
-  LAST_PROJECT: 'usability-test-last-project',
-};
+import { CheckCircle2, Circle, ChevronDown, ChevronRight, Play, Pause, RotateCcw, AlertTriangle, Copy, Download, Eye, EyeOff, MessageSquare, Lightbulb, Target, CheckSquare, Square, Timer, FileText, Users, Mic, FolderOpen, Trash2, Loader2, RefreshCw } from 'lucide-react';
+import { supabase } from './supabase';
 
 export default function UsabilityTestRunner() {
-  // Config and script loading
   const [config, setConfig] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
-  // Selection state
   const [selectedProject, setSelectedProject] = useState(null);
   const [selectedScriptId, setSelectedScriptId] = useState(null);
   const [script, setScript] = useState(null);
-  
-  // Session state
-  const [currentPhase, setCurrentPhase] = useState('select'); // select, setup, warmup, tasks, wrapup, complete
+  const [currentPhase, setCurrentPhase] = useState('select');
   const [currentTaskIndex, setCurrentTaskIndex] = useState(0);
   const [expandedSections, setExpandedSections] = useState({});
   const [taskStatus, setTaskStatus] = useState({});
@@ -28,22 +17,21 @@ export default function UsabilityTestRunner() {
   const [wrapupStatus, setWrapupStatus] = useState({});
   const [sessionNotes, setSessionNotes] = useState('');
   const [participantId, setParticipantId] = useState('');
+  const [runnerName, setRunnerName] = useState('');
   const [sessionStartTime, setSessionStartTime] = useState(null);
-  
-  // Timer
   const [timer, setTimer] = useState(0);
   const [timerRunning, setTimerRunning] = useState(false);
   const [timerTarget, setTimerTarget] = useState(0);
-  
-  // UI state
   const [showScript, setShowScript] = useState(true);
   const [savedSessions, setSavedSessions] = useState([]);
   const [showSavedSessions, setShowSavedSessions] = useState(false);
+  const [saving, setSaving] = useState(false);
 
-  // Load config on mount
+  useEffect(() => { loadConfig(); }, []);
+
   useEffect(() => {
-    loadConfig();
-  }, []);
+    if (config) loadSavedSessions();
+  }, [config]);
 
   const loadConfig = async () => {
     try {
@@ -52,28 +40,10 @@ export default function UsabilityTestRunner() {
       if (!response.ok) throw new Error('Failed to load config');
       const data = await response.json();
       setConfig(data);
-      
-      // Restore last project selection
-      const lastProject = localStorage.getItem(STORAGE_KEYS.LAST_PROJECT);
+      const lastProject = localStorage.getItem('insightcatcher-last-project');
       if (lastProject && data.projects.find(p => p.id === lastProject)) {
         setSelectedProject(lastProject);
       }
-      
-      // Load saved sessions
-      const saved = localStorage.getItem(STORAGE_KEYS.SAVED_SESSIONS);
-      if (saved) setSavedSessions(JSON.parse(saved));
-      
-      // Check for in-progress session
-      const currentSession = localStorage.getItem(STORAGE_KEYS.CURRENT_SESSION);
-      if (currentSession) {
-        const session = JSON.parse(currentSession);
-        if (confirm(`Resume in-progress session for "${session.participantId || 'Unknown'}"?`)) {
-          await loadSessionFromStorage(session, data);
-        } else {
-          localStorage.removeItem(STORAGE_KEYS.CURRENT_SESSION);
-        }
-      }
-      
       setLoading(false);
     } catch (err) {
       setError(err.message);
@@ -81,26 +51,16 @@ export default function UsabilityTestRunner() {
     }
   };
 
-  const loadSessionFromStorage = async (session, configData) => {
-    const project = (configData || config).projects.find(p => p.id === session.projectId);
-    if (project) {
-      setSelectedProject(session.projectId);
-      const scriptInfo = project.scripts.find(s => s.id === session.scriptId);
-      if (scriptInfo) {
-        const scriptData = await loadScript(session.projectId, scriptInfo.file);
-        if (scriptData) {
-          setScript(scriptData);
-          setSelectedScriptId(session.scriptId);
-          setParticipantId(session.participantId || '');
-          setSessionStartTime(session.sessionStartTime ? new Date(session.sessionStartTime) : null);
-          setCurrentPhase(session.currentPhase || 'setup');
-          setCurrentTaskIndex(session.currentTaskIndex || 0);
-          setTaskStatus(session.taskStatus || {});
-          setWarmupStatus(session.warmupStatus || {});
-          setWrapupStatus(session.wrapupStatus || {});
-          setSessionNotes(session.sessionNotes || '');
-        }
-      }
+  const loadSavedSessions = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('sessions')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      setSavedSessions(data || []);
+    } catch (err) {
+      console.error('Failed to load sessions:', err);
     }
   };
 
@@ -122,7 +82,7 @@ export default function UsabilityTestRunner() {
       setScript(scriptData);
       setSelectedScriptId(scriptInfo.id);
       setSelectedProject(projectId);
-      localStorage.setItem(STORAGE_KEYS.LAST_PROJECT, projectId);
+      localStorage.setItem('insightcatcher-last-project', projectId);
       resetSession();
       setCurrentPhase('setup');
     }
@@ -139,30 +99,8 @@ export default function UsabilityTestRunner() {
     setSessionStartTime(null);
     setTimer(0);
     setTimerRunning(false);
-    localStorage.removeItem(STORAGE_KEYS.CURRENT_SESSION);
   };
 
-  // Auto-save current session
-  useEffect(() => {
-    if (script && currentPhase !== 'select' && currentPhase !== 'complete') {
-      const sessionData = {
-        projectId: selectedProject,
-        scriptId: selectedScriptId,
-        participantId,
-        sessionStartTime,
-        currentPhase,
-        currentTaskIndex,
-        taskStatus,
-        warmupStatus,
-        wrapupStatus,
-        sessionNotes,
-        lastSaved: new Date().toISOString(),
-      };
-      localStorage.setItem(STORAGE_KEYS.CURRENT_SESSION, JSON.stringify(sessionData));
-    }
-  }, [currentPhase, currentTaskIndex, taskStatus, warmupStatus, wrapupStatus, sessionNotes, participantId]);
-
-  // Timer logic
   useEffect(() => {
     let interval;
     if (timerRunning) {
@@ -207,36 +145,46 @@ export default function UsabilityTestRunner() {
       setCurrentPhase('wrapup');
     } else if (currentPhase === 'wrapup') {
       setCurrentPhase('complete');
-      localStorage.removeItem(STORAGE_KEYS.CURRENT_SESSION);
       saveCompletedSession();
     }
   };
 
-  const saveCompletedSession = () => {
-    const sessionData = {
-      id: `${participantId || 'unknown'}-${Date.now()}`,
-      projectId: selectedProject,
-      projectName: config?.projects.find(p => p.id === selectedProject)?.name,
-      scriptId: selectedScriptId,
-      scriptTitle: script.title,
-      participantId,
-      sessionStartTime,
-      sessionEndTime: new Date().toISOString(),
-      taskStatus,
-      warmupStatus,
-      wrapupStatus,
-      sessionNotes,
-    };
-    
-    const updated = [...savedSessions, sessionData];
-    setSavedSessions(updated);
-    localStorage.setItem(STORAGE_KEYS.SAVED_SESSIONS, JSON.stringify(updated));
+  const saveCompletedSession = async () => {
+    setSaving(true);
+    try {
+      const sessionData = {
+        project_id: selectedProject,
+        project_name: config?.projects.find(p => p.id === selectedProject)?.name,
+        script_id: selectedScriptId,
+        script_title: script.title,
+        script_type: script.type || 'usability',
+        participant_id: participantId,
+        runner_name: runnerName,
+        session_start_time: sessionStartTime,
+        session_end_time: new Date(),
+        task_status: taskStatus,
+        warmup_status: warmupStatus,
+        wrapup_status: wrapupStatus,
+        session_notes: sessionNotes,
+        tags: {},
+      };
+      const { error } = await supabase.from('sessions').insert([sessionData]);
+      if (error) throw error;
+      await loadSavedSessions();
+    } catch (err) {
+      console.error('Failed to save session:', err);
+    }
+    setSaving(false);
   };
 
-  const deleteSession = (sessionId) => {
-    const updated = savedSessions.filter(s => s.id !== sessionId);
-    setSavedSessions(updated);
-    localStorage.setItem(STORAGE_KEYS.SAVED_SESSIONS, JSON.stringify(updated));
+  const deleteSession = async (sessionId) => {
+    try {
+      const { error } = await supabase.from('sessions').delete().eq('id', sessionId);
+      if (error) throw error;
+      setSavedSessions(prev => prev.filter(s => s.id !== sessionId));
+    } catch (err) {
+      console.error('Failed to delete session:', err);
+    }
   };
 
   const nextTask = () => {
@@ -263,6 +211,7 @@ export default function UsabilityTestRunner() {
       scriptId: script.id,
       scriptVersion: script.version,
       participantId,
+      runnerName,
       sessionStartTime,
       sessionEndTime: new Date(),
       warmupNotes: warmupStatus,
@@ -291,9 +240,10 @@ export default function UsabilityTestRunner() {
       const status = taskStatus[t.id] || {};
       return `${t.id}. ${t.name}: ${status.done ? (status.success ? '✓ Pass' : status.success === false ? '✗ Struggled' : '— Done') : '○ Not done'}${status.notes ? `\n   Notes: ${status.notes}` : ''}`;
     }).join('\n');
-    
+
     const summary = `# Session Summary
 Participant: ${participantId || 'Unknown'}
+Runner: ${runnerName || 'Unknown'}
 Date: ${sessionStartTime?.toLocaleDateString() || 'N/A'}
 Script: ${script.title} v${script.version}
 
@@ -306,7 +256,50 @@ ${sessionNotes || 'None'}
     navigator.clipboard.writeText(summary);
   };
 
-  // Loading state
+  const exportMarkdown = () => {
+    if (!script) return;
+    const tasks = script.tasks.map(t => {
+      const status = taskStatus[t.id] || {};
+      const result = status.success === true ? '✓ Pass' : status.success === false ? '✗ Struggled' : '— Not scored';
+      return `### Task ${t.id}: ${t.name}\n**Result:** ${result}\n**Notes:** ${status.notes || 'None'}`;
+    }).join('\n\n');
+
+    const wrapupAnswers = script.wrapup?.questions?.map(q => {
+      return `**${q.label}:** ${wrapupStatus[q.id]?.notes || 'No response'}`;
+    }).join('\n\n') || '';
+
+    const md = `# Usability Test Report
+**Script:** ${script.title}
+**Participant:** ${participantId || 'Unknown'}
+**Run by:** ${runnerName || 'Unknown'}
+**Date:** ${sessionStartTime?.toLocaleDateString() || 'N/A'}
+
+---
+
+## Task Results
+
+${tasks}
+
+---
+
+## Wrap-up Responses
+
+${wrapupAnswers}
+
+---
+
+## General Notes
+
+${sessionNotes || 'None'}
+`;
+    const blob = new Blob([md], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `report-${participantId || 'unknown'}-${new Date().toISOString().split('T')[0]}.md`;
+    a.click();
+  };
+
   if (loading && !config) {
     return (
       <div className="min-h-screen bg-slate-950 flex items-center justify-center">
@@ -318,7 +311,6 @@ ${sessionNotes || 'None'}
     );
   }
 
-  // Error state
   if (error) {
     return (
       <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4">
@@ -327,32 +319,26 @@ ${sessionNotes || 'None'}
           <h2 className="text-red-300 font-semibold mb-2">Error Loading</h2>
           <p className="text-slate-400 mb-4">{error}</p>
           <button onClick={loadConfig} className="px-4 py-2 bg-red-600 hover:bg-red-500 rounded-lg flex items-center gap-2 mx-auto">
-            <RefreshCw size={16} />
-            Retry
+            <RefreshCw size={16} />Retry
           </button>
         </div>
       </div>
     );
   }
 
-  // Calculate progress
   const completedTasks = script ? Object.values(taskStatus).filter(t => t?.done).length : 0;
   const totalTasks = script?.tasks?.length || 0;
   const progress = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">
-      {/* Header */}
       <header className="sticky top-0 z-50 bg-slate-900/95 backdrop-blur border-b border-slate-800">
         <div className="max-w-5xl mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
             <div>
               {script ? (
                 <div>
-                  <button 
-                    onClick={() => setCurrentPhase('select')}
-                    className="text-sm text-slate-500 hover:text-slate-300 mb-1"
-                  >
+                  <button onClick={() => setCurrentPhase('select')} className="text-sm text-slate-500 hover:text-slate-300 mb-1">
                     ← Change test
                   </button>
                   <h1 className="text-lg font-semibold text-white">{script.title}</h1>
@@ -365,14 +351,11 @@ ${sessionNotes || 'None'}
                 </div>
               )}
             </div>
-            
+
             <div className="flex items-center gap-4">
               {script && currentPhase !== 'select' && (
                 <>
-                  {/* Timer */}
-                  <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg font-mono text-lg ${
-                    timerTarget && timer > timerTarget ? 'bg-red-500/20 text-red-400' : 'bg-slate-800 text-slate-200'
-                  }`}>
+                  <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg font-mono text-lg ${timerTarget && timer > timerTarget ? 'bg-red-500/20 text-red-400' : 'bg-slate-800 text-slate-200'}`}>
                     <Timer size={18} />
                     <span>{formatTime(timer)}</span>
                     {timerTarget > 0 && <span className="text-slate-500">/ {formatTime(timerTarget)}</span>}
@@ -385,8 +368,6 @@ ${sessionNotes || 'None'}
                       <RotateCcw size={18} />
                     </button>
                   </div>
-                  
-                  {/* Progress */}
                   <div className="flex items-center gap-2">
                     <div className="w-24 h-2 bg-slate-800 rounded-full overflow-hidden">
                       <div className="h-full bg-emerald-500 transition-all duration-300" style={{ width: `${progress}%` }} />
@@ -395,9 +376,7 @@ ${sessionNotes || 'None'}
                   </div>
                 </>
               )}
-              
-              {/* Saved sessions button */}
-              <button 
+              <button
                 onClick={() => setShowSavedSessions(true)}
                 className="p-2 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white relative"
               >
@@ -414,9 +393,8 @@ ${sessionNotes || 'None'}
       </header>
 
       <main className="max-w-5xl mx-auto px-4 py-6">
-        {/* Project/Script Selection */}
         {currentPhase === 'select' && (
-          <SelectPhase 
+          <SelectPhase
             config={config}
             selectedProject={selectedProject}
             setSelectedProject={setSelectedProject}
@@ -424,20 +402,18 @@ ${sessionNotes || 'None'}
             loading={loading}
           />
         )}
-
-        {/* Setup Phase */}
         {currentPhase === 'setup' && script && (
-          <SetupPhase 
-            script={script} 
+          <SetupPhase
+            script={script}
             participantId={participantId}
             setParticipantId={setParticipantId}
+            runnerName={runnerName}
+            setRunnerName={setRunnerName}
             onStart={startSession}
           />
         )}
-
-        {/* Warmup Phase */}
         {currentPhase === 'warmup' && script && (
-          <WarmupPhase 
+          <WarmupPhase
             warmup={script.warmup}
             status={warmupStatus}
             setStatus={setWarmupStatus}
@@ -445,8 +421,6 @@ ${sessionNotes || 'None'}
             startTimer={startTimer}
           />
         )}
-
-        {/* Tasks Phase */}
         {currentPhase === 'tasks' && script && (
           <TasksPhase
             tasks={script.tasks}
@@ -463,8 +437,6 @@ ${sessionNotes || 'None'}
             toggleSection={toggleSection}
           />
         )}
-
-        {/* Wrapup Phase */}
         {currentPhase === 'wrapup' && script && (
           <WrapupPhase
             wrapup={script.wrapup}
@@ -476,26 +448,22 @@ ${sessionNotes || 'None'}
             onFinish={nextPhase}
           />
         )}
-
-        {/* Complete Phase */}
         {currentPhase === 'complete' && script && (
           <CompletePhase
             script={script}
             taskStatus={taskStatus}
             participantId={participantId}
             sessionStartTime={sessionStartTime}
+            saving={saving}
             onExport={exportSession}
+            onExportMarkdown={exportMarkdown}
             onCopy={copySessionSummary}
-            onNewSession={() => {
-              resetSession();
-              setCurrentPhase('setup');
-            }}
+            onNewSession={() => { resetSession(); setCurrentPhase('setup'); }}
             onChangeTest={() => setCurrentPhase('select')}
           />
         )}
       </main>
 
-      {/* Phase Navigation (only show during active session) */}
       {script && currentPhase !== 'select' && (
         <nav className="fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur border-t border-slate-800">
           <div className="max-w-5xl mx-auto px-4 py-2">
@@ -504,11 +472,7 @@ ${sessionNotes || 'None'}
                 <button
                   key={phase}
                   onClick={() => setCurrentPhase(phase)}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    currentPhase === phase 
-                      ? 'bg-blue-600 text-white' 
-                      : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
-                  }`}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${currentPhase === phase ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'}`}
                 >
                   {phase.charAt(0).toUpperCase() + phase.slice(1)}
                 </button>
@@ -518,7 +482,6 @@ ${sessionNotes || 'None'}
         </nav>
       )}
 
-      {/* Saved Sessions Modal */}
       {showSavedSessions && (
         <SavedSessionsModal
           sessions={savedSessions}
@@ -531,7 +494,6 @@ ${sessionNotes || 'None'}
   );
 }
 
-// Select Phase Component
 function SelectPhase({ config, selectedProject, setSelectedProject, onSelectScript, loading }) {
   return (
     <div className="space-y-6 pb-20">
@@ -539,25 +501,17 @@ function SelectPhase({ config, selectedProject, setSelectedProject, onSelectScri
         <h2 className="text-2xl font-bold text-white mb-2">Select a Test</h2>
         <p className="text-slate-400">Choose a project, then select a test script to run</p>
       </div>
-
-      {/* Project tabs */}
       <div className="flex gap-2 overflow-x-auto pb-2">
         {config?.projects.map(project => (
           <button
             key={project.id}
             onClick={() => setSelectedProject(project.id)}
-            className={`shrink-0 px-4 py-2 rounded-lg font-medium transition-colors ${
-              selectedProject === project.id
-                ? 'bg-blue-600 text-white'
-                : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
-            }`}
+            className={`shrink-0 px-4 py-2 rounded-lg font-medium transition-colors ${selectedProject === project.id ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'}`}
           >
             {project.name}
           </button>
         ))}
       </div>
-
-      {/* Scripts for selected project */}
       {selectedProject && (
         <div className="grid gap-4">
           {config?.projects.find(p => p.id === selectedProject)?.scripts.map(scriptInfo => (
@@ -578,8 +532,6 @@ function SelectPhase({ config, selectedProject, setSelectedProject, onSelectScri
           ))}
         </div>
       )}
-
-      {/* Help text */}
       <div className="bg-slate-900/50 rounded-xl p-6 border border-slate-800">
         <h3 className="font-medium text-slate-300 mb-2">How to add a new test</h3>
         <ol className="text-sm text-slate-500 space-y-2">
@@ -592,26 +544,37 @@ function SelectPhase({ config, selectedProject, setSelectedProject, onSelectScri
   );
 }
 
-// Setup Phase Component
-function SetupPhase({ script, participantId, setParticipantId, onStart }) {
+function SetupPhase({ script, participantId, setParticipantId, runnerName, setRunnerName, onStart }) {
   return (
     <div className="space-y-6 pb-20">
-      <div className="bg-slate-900 rounded-xl p-6 border border-slate-800">
-        <label className="block text-sm font-medium text-slate-300 mb-2">Participant ID</label>
-        <input
-          type="text"
-          value={participantId}
-          onChange={(e) => setParticipantId(e.target.value)}
-          placeholder="e.g., P01, SLL-Jane, etc."
-          className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
+      <div className="bg-slate-900 rounded-xl p-6 border border-slate-800 space-y-4">
+        <div>
+          <label className="block text-sm font-medium text-slate-300 mb-2">Participant ID</label>
+          <input
+            type="text"
+            value={participantId}
+            onChange={(e) => setParticipantId(e.target.value)}
+            placeholder="e.g., P01, SLL-Jane"
+            className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-slate-300 mb-2">Your name (who is running this test)</label>
+          <input
+            type="text"
+            value={runnerName}
+            onChange={(e) => setRunnerName(e.target.value)}
+            placeholder="e.g., Iryna, John"
+            className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
       </div>
-{script.description && (
-  <div className="bg-slate-900 rounded-xl p-6 border border-slate-800">
-    <h2 className="text-lg font-semibold text-white mb-3">About this test</h2>
-    <p className="text-slate-300 leading-relaxed">{script.description}</p>
-  </div>
-)}
+      {script.description && (
+        <div className="bg-slate-900 rounded-xl p-6 border border-slate-800">
+          <h2 className="text-lg font-semibold text-white mb-3">About this test</h2>
+          <p className="text-slate-300 leading-relaxed">{script.description}</p>
+        </div>
+      )}
       <div className="bg-blue-950/50 rounded-xl p-6 border border-blue-900">
         <div className="flex items-center gap-2 mb-4">
           <Mic className="text-blue-400" size={20} />
@@ -626,7 +589,6 @@ function SetupPhase({ script, participantId, setParticipantId, onStart }) {
           ))}
         </ul>
       </div>
-
       <div className="bg-red-950/30 rounded-xl p-6 border border-red-900/50">
         <div className="flex items-center gap-2 mb-3">
           <AlertTriangle className="text-red-400" size={20} />
@@ -634,24 +596,18 @@ function SetupPhase({ script, participantId, setParticipantId, onStart }) {
         </div>
         <p className="text-slate-300">{script.setup.noHelpPolicy}</p>
       </div>
-
       <button
         onClick={onStart}
         className="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-xl transition-colors flex items-center justify-center gap-2"
       >
-        <Play size={20} />
-        Start Session
+        <Play size={20} />Start Session
       </button>
     </div>
   );
 }
 
-// Warmup Phase Component
 function WarmupPhase({ warmup, status, setStatus, onNext, startTimer }) {
-  useEffect(() => {
-    startTimer(warmup.timeMinutes);
-  }, []);
-
+  useEffect(() => { startTimer(warmup.timeMinutes); }, []);
   return (
     <div className="space-y-6 pb-20">
       <div className="bg-slate-900 rounded-xl p-6 border border-slate-800">
@@ -667,13 +623,10 @@ function WarmupPhase({ warmup, status, setStatus, onNext, startTimer }) {
           <p className="text-sm text-purple-300"><Lightbulb className="inline mr-2" size={14} />{warmup.why}</p>
         </div>
       </div>
-
       {warmup.questions.map((q, i) => (
         <div key={q.id} className="bg-slate-900 rounded-xl p-6 border border-slate-800">
           <div className="flex items-start gap-4">
-            <div className="w-8 h-8 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center font-semibold text-sm shrink-0">
-              {i + 1}
-            </div>
+            <div className="w-8 h-8 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center font-semibold text-sm shrink-0">{i + 1}</div>
             <div className="flex-1">
               <h3 className="font-medium text-amber-300 mb-2">{q.label}</h3>
               <p className="text-slate-200 italic mb-4">"{q.question}"</p>
@@ -689,29 +642,38 @@ function WarmupPhase({ warmup, status, setStatus, onNext, startTimer }) {
           </div>
         </div>
       ))}
-
-      <button
-        onClick={onNext}
-        className="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl transition-colors"
-      >
+      <button onClick={onNext} className="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl transition-colors">
         Continue to Tasks →
       </button>
     </div>
   );
 }
 
-// Tasks Phase Component
+const TAGS = [
+  { id: 'confused', label: '😕 Confused', color: 'bg-red-500/20 text-red-300 border-red-700' },
+  { id: 'missed', label: '👻 Missed it', color: 'bg-orange-500/20 text-orange-300 border-orange-700' },
+  { id: 'workaround', label: '🔧 Workaround', color: 'bg-yellow-500/20 text-yellow-300 border-yellow-700' },
+  { id: 'surprised', label: '😮 Surprised', color: 'bg-blue-500/20 text-blue-300 border-blue-700' },
+  { id: 'strong', label: '💬 Strong reaction', color: 'bg-purple-500/20 text-purple-300 border-purple-700' },
+  { id: 'quit', label: '🛑 Gave up', color: 'bg-slate-500/20 text-slate-300 border-slate-600' },
+];
+
 function TasksPhase({ tasks, currentIndex, setCurrentIndex, status, updateStatus, showScript, setShowScript, onNext, onPrev, startTimer, expandedSections, toggleSection }) {
   const task = tasks[currentIndex];
-  const taskStat = status[task.id] || { done: false, success: null, notes: '' };
+  const taskStat = status[task.id] || { done: false, success: null, notes: '', tags: [] };
 
-  useEffect(() => {
-    startTimer(task.timeMinutes);
-  }, [currentIndex]);
+  useEffect(() => { startTimer(task.timeMinutes); }, [currentIndex]);
+
+  const toggleTag = (tagId) => {
+    const currentTags = taskStat.tags || [];
+    const updated = currentTags.includes(tagId)
+      ? currentTags.filter(t => t !== tagId)
+      : [...currentTags, tagId];
+    updateStatus(task.id, 'tags', updated);
+  };
 
   return (
     <div className="space-y-4 pb-20">
-      {/* Task selector */}
       <div className="flex gap-2 overflow-x-auto pb-2">
         {tasks.map((t, i) => {
           const s = status[t.id] || {};
@@ -719,13 +681,7 @@ function TasksPhase({ tasks, currentIndex, setCurrentIndex, status, updateStatus
             <button
               key={t.id}
               onClick={() => setCurrentIndex(i)}
-              className={`shrink-0 px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${
-                i === currentIndex 
-                  ? 'bg-blue-600 text-white' 
-                  : s.done 
-                    ? 'bg-emerald-900/50 text-emerald-300 border border-emerald-800' 
-                    : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
-              }`}
+              className={`shrink-0 px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${i === currentIndex ? 'bg-blue-600 text-white' : s.done ? 'bg-emerald-900/50 text-emerald-300 border border-emerald-800' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'}`}
             >
               {s.done ? <CheckCircle2 size={14} /> : <Circle size={14} />}
               {t.id}
@@ -734,7 +690,6 @@ function TasksPhase({ tasks, currentIndex, setCurrentIndex, status, updateStatus
         })}
       </div>
 
-      {/* Current task card */}
       <div className="bg-slate-900 rounded-xl border border-slate-800 overflow-hidden">
         <div className="bg-blue-950/50 px-6 py-4 border-b border-slate-800">
           <div className="flex items-center justify-between">
@@ -750,12 +705,8 @@ function TasksPhase({ tasks, currentIndex, setCurrentIndex, status, updateStatus
           </div>
         </div>
 
-        {/* Script */}
         <div className="px-6 py-4 border-b border-slate-800">
-          <button 
-            onClick={() => setShowScript(!showScript)}
-            className="flex items-center gap-2 text-sm text-slate-400 hover:text-slate-200 mb-3"
-          >
+          <button onClick={() => setShowScript(!showScript)} className="flex items-center gap-2 text-sm text-slate-400 hover:text-slate-200 mb-3">
             {showScript ? <EyeOff size={14} /> : <Eye size={14} />}
             {showScript ? 'Hide' : 'Show'} script
           </button>
@@ -766,7 +717,6 @@ function TasksPhase({ tasks, currentIndex, setCurrentIndex, status, updateStatus
           )}
         </div>
 
-        {/* Success */}
         <div className="px-6 py-4 border-b border-slate-800 bg-emerald-950/20">
           <div className="flex items-start gap-3">
             <Target className="text-emerald-400 mt-0.5 shrink-0" size={18} />
@@ -777,7 +727,6 @@ function TasksPhase({ tasks, currentIndex, setCurrentIndex, status, updateStatus
           </div>
         </div>
 
-        {/* Watch for */}
         <div className="px-6 py-4 border-b border-slate-800">
           <button onClick={() => toggleSection(`watch-${task.id}`)} className="flex items-center justify-between w-full text-left">
             <div className="flex items-center gap-2">
@@ -789,15 +738,12 @@ function TasksPhase({ tasks, currentIndex, setCurrentIndex, status, updateStatus
           {expandedSections[`watch-${task.id}`] && (
             <ul className="mt-3 space-y-2 pl-6">
               {task.watchFor.map((item, i) => (
-                <li key={i} className="text-slate-400 flex gap-2">
-                  <span className="text-slate-600">•</span>{item}
-                </li>
+                <li key={i} className="text-slate-400 flex gap-2"><span className="text-slate-600">•</span>{item}</li>
               ))}
             </ul>
           )}
         </div>
 
-        {/* Why */}
         <div className="px-6 py-4 border-b border-slate-800 bg-purple-950/20">
           <div className="flex items-start gap-3">
             <Lightbulb className="text-purple-400 mt-0.5 shrink-0" size={18} />
@@ -808,7 +754,6 @@ function TasksPhase({ tasks, currentIndex, setCurrentIndex, status, updateStatus
           </div>
         </div>
 
-        {/* Note */}
         {task.note && (
           <div className={`px-6 py-4 border-b border-slate-800 ${task.note.type === 'warning' ? 'bg-amber-950/30' : 'bg-slate-800'}`}>
             <div className="flex items-start gap-3">
@@ -821,31 +766,40 @@ function TasksPhase({ tasks, currentIndex, setCurrentIndex, status, updateStatus
           </div>
         )}
 
-        {/* Notes + actions */}
+        <div className="px-6 py-4 border-b border-slate-800">
+          <h3 className="text-sm font-medium text-slate-400 mb-3">Quick tags</h3>
+          <div className="flex flex-wrap gap-2">
+            {TAGS.map(tag => (
+              <button
+                key={tag.id}
+                onClick={() => toggleTag(tag.id)}
+                className={`px-3 py-1.5 rounded-full text-sm border transition-all ${(taskStat.tags || []).includes(tag.id) ? tag.color + ' ring-2 ring-offset-1 ring-offset-slate-900 ring-current' : 'bg-slate-800 text-slate-500 border-slate-700 hover:border-slate-500'}`}
+              >
+                {tag.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
         <div className="px-6 py-4">
           <textarea
-            value={taskStat.notes}
+            value={taskStat.notes || ''}
             onChange={(e) => updateStatus(task.id, 'notes', e.target.value)}
             placeholder="Your observations..."
             rows={3}
             className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none mb-4"
           />
-          
           <div className="flex items-center justify-between">
             <div className="flex gap-3">
               <button
                 onClick={() => updateStatus(task.id, 'success', taskStat.success === true ? null : true)}
-                className={`px-4 py-2 rounded-lg flex items-center gap-2 transition-colors ${
-                  taskStat.success === true ? 'bg-emerald-600 text-white' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
-                }`}
+                className={`px-4 py-2 rounded-lg flex items-center gap-2 transition-colors ${taskStat.success === true ? 'bg-emerald-600 text-white' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'}`}
               >
                 <CheckCircle2 size={16} />Pass
               </button>
               <button
                 onClick={() => updateStatus(task.id, 'success', taskStat.success === false ? null : false)}
-                className={`px-4 py-2 rounded-lg flex items-center gap-2 transition-colors ${
-                  taskStat.success === false ? 'bg-red-600 text-white' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
-                }`}
+                className={`px-4 py-2 rounded-lg flex items-center gap-2 transition-colors ${taskStat.success === false ? 'bg-red-600 text-white' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'}`}
               >
                 <AlertTriangle size={16} />Struggled
               </button>
@@ -872,7 +826,6 @@ function TasksPhase({ tasks, currentIndex, setCurrentIndex, status, updateStatus
   );
 }
 
-// Wrapup Phase Component
 function WrapupPhase({ wrapup, observerNotes, status, setStatus, sessionNotes, setSessionNotes, onFinish }) {
   return (
     <div className="space-y-6 pb-20">
@@ -883,7 +836,6 @@ function WrapupPhase({ wrapup, observerNotes, status, setStatus, sessionNotes, s
         </div>
         <p className="text-slate-400">{wrapup.intro}</p>
       </div>
-
       {wrapup.questions.map((q) => (
         <div key={q.id} className="bg-slate-900 rounded-xl p-6 border border-slate-800">
           <h3 className="font-medium text-emerald-300 mb-2">{q.label}</h3>
@@ -897,22 +849,22 @@ function WrapupPhase({ wrapup, observerNotes, status, setStatus, sessionNotes, s
           />
         </div>
       ))}
-
-      <div className="bg-slate-900 rounded-xl p-6 border border-slate-800">
-        <div className="flex items-center gap-2 mb-4">
-          <Users className="text-slate-400" size={20} />
-          <h2 className="text-lg font-semibold">Observer Reference</h2>
+      {observerNotes && (
+        <div className="bg-slate-900 rounded-xl p-6 border border-slate-800">
+          <div className="flex items-center gap-2 mb-4">
+            <Users className="text-slate-400" size={20} />
+            <h2 className="text-lg font-semibold">Observer Reference</h2>
+          </div>
+          <div className="space-y-3">
+            {observerNotes.map((note, i) => (
+              <div key={i} className="flex gap-4 text-sm">
+                <span className="text-slate-300 w-1/2">{note.behavior}</span>
+                <span className="text-slate-500 w-1/2">→ {note.meaning}</span>
+              </div>
+            ))}
+          </div>
         </div>
-        <div className="space-y-3">
-          {observerNotes?.map((note, i) => (
-            <div key={i} className="flex gap-4 text-sm">
-              <span className="text-slate-300 w-1/2">{note.behavior}</span>
-              <span className="text-slate-500 w-1/2">→ {note.meaning}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
+      )}
       <div className="bg-slate-900 rounded-xl p-6 border border-slate-800">
         <div className="flex items-center gap-2 mb-4">
           <FileText className="text-slate-400" size={20} />
@@ -926,7 +878,6 @@ function WrapupPhase({ wrapup, observerNotes, status, setStatus, sessionNotes, s
           className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
         />
       </div>
-
       <button onClick={onFinish} className="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-xl transition-colors">
         Complete Session →
       </button>
@@ -934,8 +885,7 @@ function WrapupPhase({ wrapup, observerNotes, status, setStatus, sessionNotes, s
   );
 }
 
-// Complete Phase Component
-function CompletePhase({ script, taskStatus, participantId, sessionStartTime, onExport, onCopy, onNewSession, onChangeTest }) {
+function CompletePhase({ script, taskStatus, participantId, sessionStartTime, saving, onExport, onExportMarkdown, onCopy, onNewSession, onChangeTest }) {
   const passed = Object.values(taskStatus).filter(t => t?.success === true).length;
   const struggled = Object.values(taskStatus).filter(t => t?.success === false).length;
   const done = Object.values(taskStatus).filter(t => t?.done).length;
@@ -943,9 +893,19 @@ function CompletePhase({ script, taskStatus, participantId, sessionStartTime, on
   return (
     <div className="space-y-6 pb-20">
       <div className="bg-emerald-950/30 rounded-xl p-8 border border-emerald-900 text-center">
-        <CheckCircle2 className="mx-auto text-emerald-400 mb-4" size={48} />
-        <h2 className="text-2xl font-bold text-emerald-300 mb-2">Session Complete</h2>
-        <p className="text-slate-400">Participant: {participantId || 'Unknown'}</p>
+        {saving ? (
+          <>
+            <Loader2 className="mx-auto text-emerald-400 mb-4 animate-spin" size={48} />
+            <h2 className="text-2xl font-bold text-emerald-300 mb-2">Saving session...</h2>
+          </>
+        ) : (
+          <>
+            <CheckCircle2 className="mx-auto text-emerald-400 mb-4" size={48} />
+            <h2 className="text-2xl font-bold text-emerald-300 mb-2">Session Complete</h2>
+            <p className="text-slate-400">Saved to central database ✓</p>
+          </>
+        )}
+        <p className="text-slate-400 mt-1">Participant: {participantId || 'Unknown'}</p>
       </div>
 
       <div className="grid grid-cols-3 gap-4">
@@ -969,25 +929,36 @@ function CompletePhase({ script, taskStatus, participantId, sessionStartTime, on
           {script.tasks.map(t => {
             const s = taskStatus[t.id] || {};
             return (
-              <div key={t.id} className="flex items-center justify-between py-2 border-b border-slate-800 last:border-0">
+              <div key={t.id} className="flex items-start justify-between py-2 border-b border-slate-800 last:border-0">
                 <div className="flex items-center gap-3">
-                  {s.success === true ? <CheckCircle2 className="text-emerald-400" size={16} /> : 
-                   s.success === false ? <AlertTriangle className="text-red-400" size={16} /> : 
-                   <Circle className="text-slate-600" size={16} />}
+                  {s.success === true ? <CheckCircle2 className="text-emerald-400 shrink-0" size={16} /> :
+                    s.success === false ? <AlertTriangle className="text-red-400 shrink-0" size={16} /> :
+                      <Circle className="text-slate-600 shrink-0" size={16} />}
                   <span className="text-slate-300">{t.id}. {t.name}</span>
                 </div>
+                {s.tags && s.tags.length > 0 && (
+                  <div className="flex gap-1 flex-wrap justify-end ml-4">
+                    {s.tags.map(tagId => {
+                      const tag = TAGS.find(t => t.id === tagId);
+                      return tag ? <span key={tagId} className={`px-2 py-0.5 rounded-full text-xs border ${tag.color}`}>{tag.label}</span> : null;
+                    })}
+                  </div>
+                )}
               </div>
             );
           })}
         </div>
       </div>
 
-      <div className="flex gap-4">
-        <button onClick={onCopy} className="flex-1 py-4 bg-slate-800 hover:bg-slate-700 text-white font-medium rounded-xl flex items-center justify-center gap-2">
-          <Copy size={18} />Copy Summary
+      <div className="grid grid-cols-3 gap-3">
+        <button onClick={onCopy} className="py-4 bg-slate-800 hover:bg-slate-700 text-white font-medium rounded-xl flex items-center justify-center gap-2">
+          <Copy size={18} />Copy
         </button>
-        <button onClick={onExport} className="flex-1 py-4 bg-blue-600 hover:bg-blue-500 text-white font-medium rounded-xl flex items-center justify-center gap-2">
-          <Download size={18} />Export JSON
+        <button onClick={onExport} className="py-4 bg-slate-800 hover:bg-slate-700 text-white font-medium rounded-xl flex items-center justify-center gap-2">
+          <Download size={18} />JSON
+        </button>
+        <button onClick={onExportMarkdown} className="py-4 bg-blue-600 hover:bg-blue-500 text-white font-medium rounded-xl flex items-center justify-center gap-2">
+          <FileText size={18} />Markdown
         </button>
       </div>
 
@@ -1003,27 +974,27 @@ function CompletePhase({ script, taskStatus, participantId, sessionStartTime, on
   );
 }
 
-// Saved Sessions Modal
 function SavedSessionsModal({ sessions, onClose, onDelete, onExportAll }) {
   return (
     <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
       <div className="bg-slate-900 rounded-xl border border-slate-700 w-full max-w-2xl max-h-[80vh] overflow-hidden">
         <div className="flex items-center justify-between p-4 border-b border-slate-700">
-          <h2 className="text-lg font-semibold">Saved Sessions ({sessions.length})</h2>
+          <h2 className="text-lg font-semibold">All Sessions ({sessions.length})</h2>
           <button onClick={onClose} className="text-slate-400 hover:text-white text-xl">×</button>
         </div>
         <div className="p-4 overflow-y-auto max-h-[60vh]">
           {sessions.length === 0 ? (
-            <p className="text-slate-500 text-center py-8">No saved sessions yet</p>
+            <p className="text-slate-500 text-center py-8">No sessions yet</p>
           ) : (
             <div className="space-y-3">
               {sessions.map(session => (
                 <div key={session.id} className="bg-slate-800 rounded-lg p-4 flex items-center justify-between">
                   <div>
-                    <p className="font-medium text-white">{session.participantId || 'Unknown'}</p>
-                    <p className="text-sm text-slate-400">{session.scriptTitle}</p>
+                    <p className="font-medium text-white">{session.participant_id || 'Unknown participant'}</p>
+                    <p className="text-sm text-slate-400">{session.script_title}</p>
                     <p className="text-xs text-slate-500">
-                      {new Date(session.sessionStartTime).toLocaleDateString()} • {session.projectName}
+                      {session.runner_name && `Run by ${session.runner_name} • `}
+                      {new Date(session.created_at).toLocaleDateString()} • {session.project_name}
                     </p>
                   </div>
                   <button onClick={() => onDelete(session.id)} className="p-2 text-red-400 hover:bg-red-500/20 rounded-lg">
