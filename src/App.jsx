@@ -69,7 +69,7 @@ const Btn = ({ onClick, disabled, children, variant = 'default', style }) => {
   return (
     <button onClick={onClick} disabled={disabled}
       style={{ ...styles[variant], borderRadius: 6, padding: '9px 18px', fontSize: 14, fontWeight: 500,
-        cursor: disabled ? 'not-allowed', opacity: disabled ? 0.4 : 1, display: 'inline-flex',
+        cursor: disabled ? 'not-allowed' : 'pointer', opacity: disabled ? 0.4 : 1,
         alignItems: 'center', gap: 6, whiteSpace: 'nowrap', fontFamily: 'inherit', ...style }}>
       {children}
     </button>
