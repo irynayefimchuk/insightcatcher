@@ -243,6 +243,7 @@ export default function InsightCatcher() {
   const nextTask = () => {
     if (currentTaskIndex < script.tasks.length - 1) {
       setCurrentTaskIndex(i => i + 1); setTimer(0); setTimerRunning(false);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } else nextPhase();
   };
 
@@ -307,7 +308,7 @@ export default function InsightCatcher() {
           <button onClick={() => { setCurrentPhase('select'); setScript(null); }}
             style={{ display: 'flex', alignItems: 'center', gap: 6, color: t.brand, fontWeight: 700, fontSize: 15,
               background: 'none', border: 'none', cursor: 'pointer', padding: 0, whiteSpace: 'nowrap' }}>
-            <Home size={15} />InsightsCatcher
+            <Home size={15} />InsightCatcher
           </button>
           {script && currentPhase !== 'select' && (
             <>
@@ -671,12 +672,12 @@ function WarmupPhase({ warmup, status, setStatus, onNext, startTimer }) {
           ))}
         </div>
 
-        {/* Right: Mom's Test reference (sticky) */}
-        <div style={{ position: 'sticky', top: 130 }}>
+        {/* Right: Mom's Test reference (fixed) */}
+        <div style={{ position: 'fixed', top: 130, right: 'max(32px, calc((100vw - 1280px) / 2 + 32px))', width: 300, zIndex: 30 }}>
           <Card style={{ overflow: 'hidden' }}>
             <div style={{ padding: '14px 16px', borderBottom: `1px solid ${t.strokeLight}`, background: t.hoverBg }}>
               <div style={{ fontSize: 12, fontWeight: 700, color: t.brand, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Interview guide</div>
-              <div style={{ fontSize: 11, color: t.textSub, marginTop: 2 }}>Based on best practices</div>
+              <div style={{ fontSize: 11, color: t.textSub, marginTop: 2 }}>Based on The Mom's Test</div>
             </div>
             <div style={{ padding: '14px 16px', borderBottom: `1px solid ${t.strokeLight}` }}>
               <div style={{ fontSize: 12, fontWeight: 700, color: t.positive, marginBottom: 8, display: 'flex', alignItems: 'center', gap: 5 }}>
@@ -725,7 +726,12 @@ function TasksPhase({ tasks, currentIndex, setCurrentIndex, status, updateStatus
   const task = tasks[currentIndex];
   const taskStat = status[task.id] || { done: false, success: null, notes: '', tags: [] };
 
-  useEffect(() => { startTimer(task.timeMinutes); }, [currentIndex]);
+  useEffect(() => {
+    startTimer(task.timeMinutes);
+    // Auto-expand success and watch for on every task
+    toggleSection(`success-${task.id}`);
+    toggleSection(`watch-${task.id}`);
+  }, [currentIndex]);
 
   const toggleTag = (tagId) => {
     const cur = taskStat.tags || [];
@@ -793,8 +799,8 @@ function TasksPhase({ tasks, currentIndex, setCurrentIndex, status, updateStatus
           </div>
         </Card>
 
-        {/* Right: reference panel (sticky) */}
-        <div style={{ position: 'sticky', top: 150, display: 'flex', flexDirection: 'column', gap: 10 }}>
+        {/* Right: reference panel (fixed) */}
+        <div style={{ position: 'fixed', top: 150, right: 'max(32px, calc((100vw - 1280px) / 2 + 32px))', width: 340, display: 'flex', flexDirection: 'column', gap: 10, zIndex: 30 }}>
           <Card style={{ overflow: 'hidden' }}>
             <button onClick={() => toggleSection(`success-${task.id}`)}
               style={{ width: '100%', padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'none', border: 'none', cursor: 'pointer' }}>
@@ -919,7 +925,7 @@ function WrapupPhase({ wrapup, observerNotes, status, setStatus, sessionNotes, s
 
         {/* Right: observer reference (sticky) */}
         {observerNotes && observerNotes.length > 0 && (
-          <div style={{ position: 'sticky', top: 130 }}>
+          <div style={{ position: 'fixed', top: 130, right: 'max(32px, calc((100vw - 1280px) / 2 + 32px))', width: 300, zIndex: 30 }}>
             <Card style={{ padding: 20, borderLeft: `3px solid ${t.brand}` }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
                 <Users size={14} style={{ color: t.brand }} />
