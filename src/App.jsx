@@ -872,7 +872,7 @@ function TasksPhase({ tasks, currentIndex, setCurrentIndex, status, updateStatus
           {[
             { value: 'completed', label: '✅ Completed', bg: t.nearPositive, color: t.positive, border: t.positive },
             { value: 'partial',   label: '⚠️ Partially',  bg: '#FEF3C7',      color: '#92400E', border: '#F59E0B' },
-            { value: 'failed',    label: '❌ Couldn't do it', bg: t.nearNegative, color: t.negative, border: t.negative },
+            { value: 'failed',    label: "❌ Couldn't do it", bg: t.nearNegative, color: t.negative, border: t.negative },
           ].map(({ value, label, bg, color, border }) => (
             <button key={value}
               onClick={() => updateStatus(task.id, 'completion', taskStat.completion === value ? null : value)}
