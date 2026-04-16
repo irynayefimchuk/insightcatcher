@@ -5,7 +5,7 @@
   "subtitle": "Understanding where research fits in our org",
   "version": "1.0",
   "totalTimeMinutes": 45,
-  "description": "A Mom's Test-style discovery conversation with the Product Director or Head of Product. Goal: understand where the current process breaks down before pitching any solution. Do NOT mention InsightCatcher or any specific tool. Listen for pain, don't create it.",
+  "description": " Goal: understand where the current process breaks down before pitching any solution. Do NOT mention InsightCatcher or any specific tool. Listen for pain, don't create it.",
 
   "setup": {
     "rules": [
