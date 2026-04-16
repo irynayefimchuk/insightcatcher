@@ -1,24 +1,32 @@
 {
   "projects": [
     {
-      "id": "cci",
-      "name": "CCI (Clinical Cost Intelligence)",
+      "id": "discovery",
+      "name": "Discovery Interviews",
       "scripts": [
         {
-          "id": "snapshot-test",
-          "name": "Snapshot Tab Usability Test",
-          "file": "cci-snapshot-test.json"
+          "id": "ux-discovery-stakeholder",
+          "name": "UX Discovery: Product Development Process",
+          "file": "ux-discovery-stakeholder.json",
+          "type": "discovery"
         }
       ]
     },
     {
-      "id": "example",
-      "name": "Example Project",
+      "id": "usability",
+      "name": "Usability Tests",
       "scripts": [
+        {
+          "id": "snapshot-test",
+          "name": "Snapshot Tab Usability Test",
+          "file": "cci-snapshot-test.json",
+          "type": "usability"
+        },
         {
           "id": "example-test",
           "name": "Example Test Template",
-          "file": "example-test.json"
+          "file": "example-test.json",
+          "type": "usability"
         }
       ]
     }
