@@ -676,7 +676,7 @@ function WarmupPhase({ warmup, status, setStatus, onNext, startTimer }) {
           <Card style={{ overflow: 'hidden' }}>
             <div style={{ padding: '14px 16px', borderBottom: `1px solid ${t.strokeLight}`, background: t.hoverBg }}>
               <div style={{ fontSize: 12, fontWeight: 700, color: t.brand, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Interview guide</div>
-              <div style={{ fontSize: 11, color: t.textSub, marginTop: 2 }}>Based on The Mom's Test</div>
+              <div style={{ fontSize: 11, color: t.textSub, marginTop: 2 }}>Based on best practices</div>
             </div>
             <div style={{ padding: '14px 16px', borderBottom: `1px solid ${t.strokeLight}` }}>
               <div style={{ fontSize: 12, fontWeight: 700, color: t.positive, marginBottom: 8, display: 'flex', alignItems: 'center', gap: 5 }}>
@@ -885,54 +885,73 @@ function TasksPhase({ tasks, currentIndex, setCurrentIndex, status, updateStatus
   );
 }
 
-// ─── Wrapup phase ─────────────────────────────────────────────────────────────
+// ─── Wrapup phase — two columns ───────────────────────────────────────────────
 function WrapupPhase({ wrapup, observerNotes, status, setStatus, sessionNotes, setSessionNotes, onFinish }) {
+  const notedCount = Object.keys(status).filter(k => status[k]?.notes?.trim()).length;
+
   return (
-    <div style={{ maxWidth: 720, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 14 }}>
-      <div style={{ padding: '16px 0 8px' }}>
+    <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+      <div style={{ padding: '16px 0 16px' }}>
         <h2 style={{ fontSize: 22, fontWeight: 700, color: t.textHeader, marginBottom: 4 }}>Wrap-up</h2>
         <p style={{ fontSize: 14, color: t.textSub }}>{wrapup.intro}</p>
       </div>
 
-      {observerNotes && observerNotes.length > 0 && (
-        <Card style={{ padding: 20, borderLeft: `3px solid ${t.brand}` }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-            <Users size={14} style={{ color: t.brand }} />
-            <span style={{ fontSize: 13, fontWeight: 600, color: t.textHeader }}>Before you start — behavior reference</span>
-          </div>
-          <p style={{ fontSize: 12, color: t.textDetail, marginBottom: 12, fontStyle: 'italic' }}>
-            Use this to interpret what you observed. Let it guide your follow-up questions.
-          </p>
-          {observerNotes.map((note, i) => (
-            <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, fontSize: 12,
-              paddingBottom: 8, marginBottom: i < observerNotes.length - 1 ? 8 : 0,
-              borderBottom: i < observerNotes.length - 1 ? `1px solid ${t.strokeLight}` : 'none' }}>
-              <span style={{ color: t.textMain, fontWeight: 500 }}>{note.behavior}</span>
-              <span style={{ color: t.textDetail }}>→ {note.meaning}</span>
-            </div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: 16, alignItems: 'start', marginBottom: 80 }}>
+
+        {/* Left: questions + general notes */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {wrapup.questions.map(q => (
+            <Card key={q.id} style={{ padding: 20 }}>
+              <div style={{ fontSize: 13, fontWeight: 600, color: t.textSub, marginBottom: 4 }}>{q.label}</div>
+              <p style={{ fontSize: 15, fontStyle: 'italic', color: t.textMain, marginBottom: 12 }}>"{q.question}"</p>
+              <Input value={status[q.id]?.notes || ''} onChange={e => setStatus(p => ({ ...p, [q.id]: { notes: e.target.value } }))} placeholder="Their response..." rows={3} />
+            </Card>
           ))}
-        </Card>
-      )}
 
-      {wrapup.questions.map(q => (
-        <Card key={q.id} style={{ padding: 20 }}>
-          <div style={{ fontSize: 13, fontWeight: 600, color: t.textSub, marginBottom: 4 }}>{q.label}</div>
-          <p style={{ fontSize: 15, fontStyle: 'italic', color: t.textMain, marginBottom: 12 }}>"{q.question}"</p>
-          <Input value={status[q.id]?.notes || ''} onChange={e => setStatus(p => ({ ...p, [q.id]: { notes: e.target.value } }))} placeholder="Their response..." rows={3} />
-        </Card>
-      ))}
-
-      <Card style={{ padding: 20 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-          <FileText size={13} style={{ color: t.textDetail }} />
-          <span style={{ fontSize: 13, fontWeight: 600, color: t.textSub }}>General notes</span>
+          <Card style={{ padding: 20 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+              <FileText size={13} style={{ color: t.textDetail }} />
+              <span style={{ fontSize: 13, fontWeight: 600, color: t.textSub }}>General notes</span>
+            </div>
+            <Input value={sessionNotes} onChange={e => setSessionNotes(e.target.value)} placeholder="Overall impressions, notable quotes..." rows={5} />
+          </Card>
         </div>
-        <Input value={sessionNotes} onChange={e => setSessionNotes(e.target.value)} placeholder="Overall impressions, notable quotes..." rows={5} />
-      </Card>
 
-      <Btn variant="cta" onClick={onFinish} style={{ width: '100%', justifyContent: 'center', padding: '13px 0', fontSize: 15 }}>
-        Complete Session →
-      </Btn>
+        {/* Right: observer reference (sticky) */}
+        {observerNotes && observerNotes.length > 0 && (
+          <div style={{ position: 'sticky', top: 130 }}>
+            <Card style={{ padding: 20, borderLeft: `3px solid ${t.brand}` }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                <Users size={14} style={{ color: t.brand }} />
+                <span style={{ fontSize: 13, fontWeight: 600, color: t.textHeader }}>Behavior reference</span>
+              </div>
+              <p style={{ fontSize: 12, color: t.textDetail, marginBottom: 12, fontStyle: 'italic' }}>
+                Use this to interpret what you observed. Let it guide your follow-up questions.
+              </p>
+              {observerNotes.map((note, i) => (
+                <div key={i} style={{ fontSize: 12, paddingBottom: 8, marginBottom: i < observerNotes.length - 1 ? 8 : 0,
+                  borderBottom: i < observerNotes.length - 1 ? `1px solid ${t.strokeLight}` : 'none' }}>
+                  <div style={{ color: t.textMain, fontWeight: 500, marginBottom: 2 }}>{note.behavior}</div>
+                  <div style={{ color: t.textDetail }}>→ {note.meaning}</div>
+                </div>
+              ))}
+            </Card>
+          </div>
+        )}
+      </div>
+
+      {/* Sticky bottom CTA */}
+      <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: t.cardBg,
+        borderTop: `1px solid ${t.strokeDefault}`, padding: '12px 32px', zIndex: 40 }}>
+        <div style={{ maxWidth: 1280, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <span style={{ fontSize: 13, color: t.textDetail }}>
+            {notedCount} of {wrapup.questions.length} questions noted
+          </span>
+          <Btn variant="cta" onClick={onFinish} style={{ padding: '11px 32px', fontSize: 15 }}>
+            Complete Session →
+          </Btn>
+        </div>
+      </div>
     </div>
   );
 }
