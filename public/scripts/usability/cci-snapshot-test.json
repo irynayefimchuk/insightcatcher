@@ -1,0 +1,251 @@
+{
+  "id": "cci-snapshot-2026-04",
+  "title": "CCI Snapshot Usability Test",
+  "subtitle": "Snapshot tab + Opportunity Cards",
+  "version": "1.0",
+  "totalTimeMinutes": 40,
+  "id": "cci-snapshot-2026-04",
+  "title": "CCI Snapshot Usability Test",
+  "subtitle": "Snapshot tab + Opportunity Cards",
+  "version": "1.0",
+  "totalTimeMinutes": 40,
+  "description": "We're testing whether the Snapshot tab helps users quickly find where to focus and navigate to opportunity cards. We want to learn: (1) Does Snapshot work at all? Can users orient themselves? (2) What's missing or confusing? (3) Can users understand and compare Supply vs Routine Services cards?",
+  "setup": {
+    "rules": [
+      "We're testing the product, not you. There are no wrong answers.",
+      "Please think out loud — tell me what you're looking at and what you're thinking.",
+      "If you get stuck, tell me what you expected to happen.",
+      "I may stay quiet so I don't bias you."
+    ],
+    "noHelpPolicy": "Give 10 seconds of silence before prompting. If stuck, ask: \"What would you do next if I wasn't here?\" Do NOT point to UI elements or explain what things do."
+  },
+  "warmup": {
+    "timeMinutes": 5,
+    "intro": "Ask these BEFORE showing the prototype. We want to understand their current mental model.",
+    "why": "These questions establish what 'priority' means to this user and what evidence they need to act. This helps us interpret their reactions to Snapshot.",
+    "questions": [
+      {
+        "id": "w1",
+        "label": "Current process",
+        "question": "When you're trying to find cost reduction opportunities in a service line — how do you typically start? What are the top 2–3 things you look for?",
+        "listenFor": "What data do they need? What makes something a priority?"
+      },
+      {
+        "id": "w2",
+        "label": "Recent example",
+        "question": "Tell me about the last cost initiative you moved forward. What made you confident it was worth pursuing?",
+        "listenFor": "What evidence do they need? Who do they involve?"
+      }
+    ]
+  },
+  "tasks": [
+    {
+      "id": "1a",
+      "name": "First look — exploration",
+      "subtitle": "No clicking yet",
+      "timeMinutes": 3,
+      "script": "You have 2 minutes. Without clicking anything, look at this screen and tell me: What is this page showing you? Where would you focus first, and why? Point to something you would NOT focus on and tell me why.",
+      "success": "User can articulate what the page is for. Names a specific focus area with a reason tied to data (e.g., 'Supplies has the most money in New'). Can explain why they'd deprioritize something.",
+      "watchFor": [
+        "Do they understand the page purpose without explanation?",
+        "What catches their eye first — left panel, right panel, AI banner, KPIs?",
+        "Do they notice the category breakdown (Supplies, Routine, Ancillary)?",
+        "Do they understand New / Active / Dismissed without explanation?",
+        "What do they expect to happen when they click things?"
+      ],
+      "learnWhy": "This tests basic comprehension before any interaction."
+    },
+    {
+      "id": "1b",
+      "name": "First click — natural entry point",
+      "subtitle": "Where do they go first?",
+      "timeMinutes": 2,
+      "script": "Now click on the first thing you'd click to go deeper. Talk me through what you're doing and what you expect to see.",
+      "success": "User clicks something purposefully (not randomly). Can explain why they chose that entry point. Describes what they expect before seeing the result.",
+      "watchFor": [
+        "What's their instinctive entry point — left panel category? Right panel card? AI banner link?",
+        "Do they use the left panel to filter, or go straight to the right panel?",
+        "Does their expectation match what actually happens?",
+        "If they're surprised, what did they expect instead?"
+      ],
+      "learnWhy": "This reveals their natural navigation pattern."
+    },
+    {
+      "id": "2a",
+      "name": "Filter to a specific priority",
+      "subtitle": "Test filtering mechanics",
+      "timeMinutes": 3,
+      "script": "Your VP asks you to focus only on knee replacement opportunities with the highest savings. Show me how you'd find those.",
+      "success": "User applies filters (category and/or procedure). Can explain what changed on the right side. Can undo or adjust filters without getting stuck.",
+      "watchFor": [
+        "Do they find the filter controls easily?",
+        "Do they understand that the left side controls the right side?",
+        "Can they combine multiple filters (category + procedure)?",
+        "Do they get lost or confused about the current filter state?",
+        "Do they notice the 'Selected' indicator showing current filters?"
+      ],
+      "learnWhy": "This tests whether filtering is discoverable and predictable."
+    },
+    {
+      "id": "2b",
+      "name": "Discover the sorting tabs",
+      "subtitle": "Annual Savings / Volume / Overlap",
+      "timeMinutes": 2,
+      "script": "You want to see which opportunities affect the most providers across the organization. How would you find that?",
+      "success": "User discovers the 'Overlap' tab or another sorting option. Can explain what the different tabs show.",
+      "watchFor": [
+        "Do they notice the tabs at all?",
+        "Do they understand what each tab does?",
+        "If they don't find the tabs, what do they try instead?",
+        "Is 'Overlap' a meaningful concept to them, or confusing?"
+      ],
+      "learnWhy": "This tests whether the tabs (Annual Savings / Volume / Savings/Case / Overlap) are discoverable."
+    },
+    {
+      "id": "2c",
+      "name": "Customize the view",
+      "subtitle": "View dropdown with checkboxes",
+      "timeMinutes": 2,
+      "optional": true,
+      "script": "Now you only want to see Procedures and Providers — not Opportunities or Cost Drivers. How would you do that?",
+      "success": "User finds the View dropdown and uses checkboxes to show/hide columns.",
+      "watchFor": [
+        "Do they find the View dropdown?",
+        "Do they understand the checkbox pattern (multi-select)?",
+        "Is this feature useful to them, or unnecessary complexity?",
+        "If they can't find it, what do they try?"
+      ],
+      "learnWhy": "This tests whether the multi-select dropdown is understandable. Skip if running long."
+    },
+    {
+      "id": "3",
+      "name": "View All — see the full list",
+      "subtitle": "Modal with bar chart and table",
+      "timeMinutes": 3,
+      "script": "You want to see the full list of opportunities, not just the top 3. How would you do that? Once you're there, which opportunity would you investigate first?",
+      "success": "User clicks 'View All' and sees the modal. Can switch between bar chart and table view. Can identify which opportunity they'd investigate first.",
+      "watchFor": [
+        "Do they find the 'View All' link?",
+        "Do they understand the bar chart view?",
+        "Do they notice and use the table toggle?",
+        "Which view do they prefer and why?",
+        "Can they explain how to get from the list to a specific card?"
+      ],
+      "learnWhy": "This tests the View All modal and whether the two display modes make sense."
+    },
+    {
+      "id": "4",
+      "name": "Open and interpret a Supply card",
+      "subtitle": "Navigate + comprehend",
+      "timeMinutes": 4,
+      "script": "Using this screen, find and open one Supply opportunity card. Then tell me: If you had to explain this opportunity to your VP in one sentence, what would you say?",
+      "success": "User navigates from Snapshot to a card without wrong turns. Can describe: who's high cost, what the gap is, and at least one driver (use-driven or price-driven).",
+      "watchFor": [
+        "Can they get from Snapshot to a specific card without help?",
+        "Do they understand high-cost vs low-cost provider comparison?",
+        "Do they understand the cost drivers (use-driven vs price-driven)?",
+        "Do they trust the comparison enough to act on it?",
+        "What information do they look at first on the card?"
+      ],
+      "learnWhy": "This tests navigation + card comprehension for Supply opportunities."
+    },
+    {
+      "id": "5",
+      "name": "Interpret a Routine Services card",
+      "subtitle": "First draft — exploratory",
+      "timeMinutes": 4,
+      "script": "Now look at this card. It's a different type of opportunity — Routine Services instead of Supplies. Tell me what it's showing you. What do the numbers mean?",
+      "success": "User can describe the LOS gap and the dollar translation in their own words. Notes what makes sense and what doesn't.",
+      "watchFor": [
+        "Do they understand the 'length of stay → dollars' story?",
+        "Do they understand the benchmark (CMS GMLOS)?",
+        "Does the LOS breakdown by department make sense?",
+        "What's confusing or missing?",
+        "Do they trust the dollar estimate? Would they act on it?",
+        "Who do they think should own this type of opportunity?"
+      ],
+      "learnWhy": "This is exploratory — we're testing a first draft. We want impressions, not pass/fail.",
+      "note": {
+        "type": "warning",
+        "title": "Note on Routine Services",
+        "content": "This card is a first draft. We're not testing whether it 'works' — we're testing whether the concept, structure, and information make sense. Probe with: 'What would you need to see to trust this number?' / 'Who would you bring this to?' / 'What's missing?'"
+      }
+    },
+    {
+      "id": "6",
+      "name": "Decide and compare across card types",
+      "subtitle": "Prioritization + next steps",
+      "timeMinutes": 3,
+      "script": "You're looking at both a supply card and a routine services card. Which would you pursue first, and why? What would you do next outside the app?",
+      "success": "User can compare across card types using dollars. Names a specific next step (meeting, committee, conversation) and who they'd involve.",
+      "watchFor": [
+        "Can they compare supply vs routine using a common metric (dollars)?",
+        "What criteria do they use to prioritize?",
+        "Do they understand the different actions for each card type?",
+        "Who would they involve for each type?",
+        "Do they feel confident enough to act, or do they need more information?"
+      ],
+      "learnWhy": "This tests whether users can prioritize across different opportunity types."
+    }
+  ],
+  "wrapup": {
+    "timeMinutes": 3,
+    "intro": "Ask these after all tasks are complete.",
+    "questions": [
+      {
+        "id": "wrapup1",
+        "label": "Overall impression",
+        "question": "Now that you've seen the whole flow — what worked well? What was frustrating or confusing?"
+      },
+      {
+        "id": "wrapup2",
+        "label": "Missing information",
+        "question": "Was there anything you expected to see that wasn't there?"
+      },
+      {
+        "id": "wrapup3",
+        "label": "Trust",
+        "question": "Would you trust this tool to guide a conversation with a physician or your VP? Why or why not?"
+      },
+      {
+        "id": "wrapup4",
+        "label": "Preference",
+        "question": "On the main Snapshot screen — did you prefer seeing opportunities by category, or would you rather see one unified list ranked by savings?"
+      }
+    ]
+  },
+  "observerNotes": [
+    {
+      "behavior": "Ignores AI banner",
+      "meaning": "Banner isn't prominent enough, or users don't trust AI summaries"
+    },
+    {
+      "behavior": "Ignores tabs (Annual Savings, Volume, etc.)",
+      "meaning": "Tabs aren't discoverable, or default view is sufficient"
+    },
+    {
+      "behavior": "Clicks left panel but expects different result",
+      "meaning": "Mental model mismatch — they don't understand left filters right"
+    },
+    {
+      "behavior": "Can't find View All",
+      "meaning": "Link isn't prominent enough, or they don't need more than top 3"
+    },
+    {
+      "behavior": "Confused by View dropdown checkboxes",
+      "meaning": "Multi-select pattern is unexpected — consider simplifying"
+    },
+    {
+      "behavior": "Can explain Supply card but not Routine Services",
+      "meaning": "LOS → dollars translation needs work, or structure is unclear"
+    },
+    {
+      "behavior": "Says 'I'd need to talk to someone' for Routine Services",
+      "meaning": "Card doesn't give enough info to act — probe for what's missing"
+    },
+    {
+      "behavior": "Prefers table over bar chart (or vice versa)",
+      "meaning": "Consider defaulting to preferred view, or removing the other"
+    }
+  ]
+}
