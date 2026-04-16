@@ -432,7 +432,7 @@ export default function InsightCatcher() {
                       ['Duration', sessionDuration()],
                       ['Completed', `${Object.values(taskStatus).filter(t => t?.completion === 'completed').length} / ${script.tasks.length}`],
                       ['Partial', `${Object.values(taskStatus).filter(t => t?.completion === 'partial').length} tasks`],
-                      ['Couldn't do it', `${Object.values(taskStatus).filter(t => t?.completion === 'failed').length} tasks`],
+                      ["Couldn't do it", `${Object.values(taskStatus).filter(t => t?.completion === 'failed').length} tasks`],
                     ].map(([label, val]) => (
                       <div key={label}>
                         <div style={{ color: t.textDetail, fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 2 }}>{label}</div>
