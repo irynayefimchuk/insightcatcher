@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { CheckCircle2, Circle, ChevronDown, ChevronRight, Play, Pause, RotateCcw, AlertTriangle, Copy, Download, Eye, EyeOff, MessageSquare, Lightbulb, Target, CheckSquare, Square, Timer, FileText, Users, Mic, FolderOpen, Trash2, Loader2, RefreshCw, Home, FlaskConical, Search, X, Info } from 'lucide-react';
+import { CheckCircle2, Play, Pause, RotateCcw, AlertTriangle, Copy, Download, Eye, EyeOff, MessageSquare, Lightbulb, Target, CheckSquare, Square, Timer, FileText, Users, Mic, FolderOpen, Trash2, Loader2, RefreshCw, Home, FlaskConical, Search, X, Info, ChevronDown, ChevronRight } from 'lucide-react';
 import { supabase } from './supabase';
 
 const t = {
@@ -33,6 +33,27 @@ const TAGS = [
   { id: 'quit',       label: '🛑 Gave up',         bg: '#F1F3F5', color: '#5E676F' },
 ];
 
+const MOMS_TEST_DOS = [
+  '"Tell me more about that..."',
+  '"Walk me through how you do that today."',
+  '"When was the last time you did this?"',
+  '"What did you expect to happen?"',
+  'Listen — silence is okay, let them fill it',
+  'Ask about the past, not the future',
+];
+
+const MOMS_TEST_DONTS = [
+  '"Would you use this?" — hypothetical',
+  '"Did you like it?" — approval-seeking',
+  '"What if we added X?" — pitching',
+  '"Don\'t you think Y would help?" — leading',
+  'Explaining what things do',
+  'Defending your design choices',
+];
+
+const PHASES = ['setup', 'warmup', 'tasks', 'wrapup'];
+const PHASE_LABELS = { setup: 'Setup', warmup: 'Warm-up', tasks: 'Tasks', wrapup: 'Wrap-up' };
+
 const Card = ({ children, style }) => (
   <div style={{ background: t.cardBg, border: `1px solid ${t.strokeDefault}`, borderRadius: 10, ...style }}>
     {children}
@@ -52,21 +73,53 @@ const Input = ({ value, onChange, placeholder, rows }) => (
 
 const Btn = ({ onClick, disabled, children, variant = 'default', style }) => {
   const styles = {
-    primary:  { background: t.brand,    color: '#fff', border: 'none' },
-    positive: { background: t.positive, color: '#fff', border: 'none' },
-    ghost:    { background: 'transparent', color: t.textSub, border: `1px solid ${t.strokeDefault}` },
-    danger:   { background: 'transparent', color: t.negative, border: `1px solid ${t.nearNegative}` },
-    default:  { background: t.subtleBg, color: t.textMain, border: `1px solid ${t.strokeDefault}` },
+    primary: { background: t.brand,    color: '#fff', border: 'none' },
+    cta:     { background: t.positive, color: '#fff', border: 'none' },
+    ghost:   { background: 'transparent', color: t.textSub, border: `1px solid ${t.strokeDefault}` },
+    default: { background: t.subtleBg, color: t.textMain, border: `1px solid ${t.strokeDefault}` },
   };
   return (
     <button onClick={onClick} disabled={disabled}
       style={{ ...styles[variant], borderRadius: 6, padding: '9px 18px', fontSize: 14, fontWeight: 500,
-        cursor: disabled ? 'not-allowed' : 'pointer', opacity: disabled ? 0.4 : 1, display: 'inline-flex',
-        alignItems: 'center', gap: 6, whiteSpace: 'nowrap', fontFamily: 'inherit', ...style }}>
+        cursor: disabled ? 'not-allowed' : 'pointer', opacity: disabled ? 0.4 : 1,
+        display: 'inline-flex', alignItems: 'center', gap: 6, whiteSpace: 'nowrap', fontFamily: 'inherit', ...style }}>
       {children}
     </button>
   );
 };
+
+function Stepper({ currentPhase, onPhaseClick }) {
+  const currentIdx = PHASES.indexOf(currentPhase);
+  return (
+    <div style={{ display: 'flex', alignItems: 'center' }}>
+      {PHASES.map((phase, i) => {
+        const isDone = i < currentIdx;
+        const isActive = i === currentIdx;
+        const isLast = i === PHASES.length - 1;
+        return (
+          <React.Fragment key={phase}>
+            <button onClick={() => onPhaseClick(phase)}
+              style={{ display: 'flex', alignItems: 'center', gap: 7, background: isActive ? t.hoverBg : 'transparent',
+                border: 'none', cursor: 'pointer', padding: '4px 10px', borderRadius: 6, fontFamily: 'inherit' }}>
+              <div style={{ width: 22, height: 22, borderRadius: '50%', display: 'flex', alignItems: 'center',
+                justifyContent: 'center', fontSize: 10, fontWeight: 700, flexShrink: 0,
+                background: isDone ? t.positive : isActive ? t.brand : 'transparent',
+                color: isDone || isActive ? '#fff' : t.textDisabled,
+                border: isDone || isActive ? 'none' : `2px solid ${t.strokeStrong}` }}>
+                {isDone ? '✓' : i + 1}
+              </div>
+              <span style={{ fontSize: 13, fontWeight: isActive ? 600 : 400,
+                color: isDone ? t.positive : isActive ? t.brand : t.textDetail, whiteSpace: 'nowrap' }}>
+                {PHASE_LABELS[phase]}
+              </span>
+            </button>
+            {!isLast && <div style={{ width: 20, height: 2, background: isDone ? t.positive : t.strokeDefault, flexShrink: 0 }} />}
+          </React.Fragment>
+        );
+      })}
+    </div>
+  );
+}
 
 export default function InsightCatcher() {
   const [config, setConfig] = useState(null);
@@ -151,6 +204,7 @@ export default function InsightCatcher() {
 
   const formatTime = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
   const startTimer = (mins) => { setTimer(0); setTimerTarget(mins * 60); setTimerRunning(true); };
+  const stopTimer = () => setTimerRunning(false);
   const toggleSection = (id) => setExpandedSections(p => ({ ...p, [id]: !p[id] }));
   const updateTaskStatus = (taskId, field, value) =>
     setTaskStatus(p => ({ ...p, [taskId]: { ...p[taskId], [field]: value } }));
@@ -163,6 +217,7 @@ export default function InsightCatcher() {
   };
 
   const saveCompletedSession = async () => {
+    stopTimer();
     setSaving(true); setCurrentPhase('complete'); setShowCompleteModal(true);
     try {
       await supabase.from('sessions').insert([{
@@ -250,17 +305,18 @@ export default function InsightCatcher() {
       <header style={{ position: 'sticky', top: 0, zIndex: 50, background: t.cardBg, borderBottom: `1px solid ${t.strokeDefault}` }}>
         <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 32px', display: 'flex', alignItems: 'center', gap: 16, height: 52 }}>
           <button onClick={() => { setCurrentPhase('select'); setScript(null); }}
-            style={{ display: 'flex', alignItems: 'center', gap: 6, color: t.brand, fontWeight: 700, fontSize: 15, background: 'none', border: 'none', cursor: 'pointer', padding: 0, whiteSpace: 'nowrap' }}>
-            <Home size={15} style={{ color: t.brand }} />InsightCatcher
+            style={{ display: 'flex', alignItems: 'center', gap: 6, color: t.brand, fontWeight: 700, fontSize: 15,
+              background: 'none', border: 'none', cursor: 'pointer', padding: 0, whiteSpace: 'nowrap' }}>
+            <Home size={15} />InsightCatcher
           </button>
           {script && currentPhase !== 'select' && (
             <>
               <ChevronRight size={14} style={{ color: t.strokeStrong, flexShrink: 0 }} />
-              <span style={{ color: t.textSub, fontSize: 13, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 240 }}>{script.title}</span>
+              <span style={{ color: t.textSub, fontSize: 13, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 220 }}>{script.title}</span>
             </>
           )}
           <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 12 }}>
-            {script && currentPhase !== 'select' && (
+            {script && currentPhase !== 'select' && currentPhase !== 'complete' && (
               <>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontFamily: 'monospace', fontSize: 13,
                   color: timerTarget && timer > timerTarget ? t.negative : t.textSub }}>
@@ -294,25 +350,18 @@ export default function InsightCatcher() {
           </div>
         </div>
 
-        {/* Phase nav */}
-        {script && currentPhase !== 'select' && (
+        {/* Stepper row */}
+        {script && currentPhase !== 'select' && currentPhase !== 'complete' && (
           <div style={{ borderTop: `1px solid ${t.strokeLight}`, background: t.cardBg }}>
-            <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 32px', display: 'flex', alignItems: 'center', gap: 4, height: 40 }}>
-              {['setup', 'warmup', 'tasks', 'wrapup'].map(phase => (
-                <button key={phase} onClick={() => setCurrentPhase(phase)}
-                  style={{ padding: '4px 14px', borderRadius: 6, fontSize: 13, fontWeight: currentPhase === phase ? 600 : 400,
-                    cursor: 'pointer', border: 'none', background: currentPhase === phase ? t.hoverBg : 'transparent',
-                    color: currentPhase === phase ? t.brand : t.textSub }}>
-                  {phase.charAt(0).toUpperCase() + phase.slice(1)}
-                </button>
-              ))}
-              <div style={{ marginLeft: 'auto', display: 'flex', gap: 6 }}>
+            <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 44 }}>
+              <Stepper currentPhase={currentPhase} onPhaseClick={setCurrentPhase} />
+              <div style={{ display: 'flex', gap: 6 }}>
                 <Btn variant="ghost" style={{ padding: '3px 12px', fontSize: 12 }}
                   onClick={() => { if (confirm('Restart? All notes will be lost.')) { resetSession(); setCurrentPhase('setup'); } }}>
                   Restart
                 </Btn>
                 <Btn variant="ghost" style={{ padding: '3px 12px', fontSize: 12 }}
-                  onClick={() => { if (confirm('Exit to home? Session will not be saved.')) { resetSession(); setCurrentPhase('select'); setScript(null); } }}>
+                  onClick={() => { if (confirm('Exit? Session will not be saved.')) { resetSession(); setCurrentPhase('select'); setScript(null); } }}>
                   Exit
                 </Btn>
               </div>
@@ -329,7 +378,8 @@ export default function InsightCatcher() {
                 const isCurrent = i === currentTaskIndex;
                 return (
                   <button key={task.id} onClick={() => setCurrentTaskIndex(i)}
-                    style={{ padding: '4px 12px', borderRadius: 20, fontSize: 12, fontWeight: 500, cursor: 'pointer', whiteSpace: 'nowrap', fontFamily: 'inherit',
+                    style={{ padding: '4px 12px', borderRadius: 20, fontSize: 12, fontWeight: 500, cursor: 'pointer',
+                      whiteSpace: 'nowrap', fontFamily: 'inherit',
                       background: isCurrent ? t.brand : s.done ? t.nearPositive : t.cardBg,
                       color: isCurrent ? '#fff' : s.done ? t.positive : t.textSub,
                       border: `1px solid ${isCurrent ? t.brand : s.done ? t.positive : t.strokeDefault}` }}>
@@ -342,16 +392,16 @@ export default function InsightCatcher() {
         )}
       </header>
 
-      <main style={{ maxWidth: 1280, margin: '0 auto', padding: '24px 32px 120px' }}>
+      <main style={{ maxWidth: 1280, margin: '0 auto', padding: '16px 32px 120px' }}>
         {currentPhase === 'select' && <SelectPhase config={config} selectedProject={selectedProject} setSelectedProject={setSelectedProject} onSelectScript={selectScript} loading={loading} scriptTypeFilter={scriptTypeFilter} setScriptTypeFilter={setScriptTypeFilter} />}
         {currentPhase === 'setup' && script && <SetupPhase script={script} participantId={participantId} setParticipantId={setParticipantId} runnerName={runnerName} setRunnerName={setRunnerName} onStart={startSession} />}
         {currentPhase === 'warmup' && script && <WarmupPhase warmup={script.warmup} status={warmupStatus} setStatus={setWarmupStatus} onNext={nextPhase} startTimer={startTimer} />}
         {currentPhase === 'tasks' && script && <TasksPhase tasks={script.tasks} currentIndex={currentTaskIndex} setCurrentIndex={setCurrentTaskIndex} status={taskStatus} updateStatus={updateTaskStatus} showScript={showScript} setShowScript={setShowScript} onNext={nextTask} onPrev={prevTask} startTimer={startTimer} expandedSections={expandedSections} toggleSection={toggleSection} />}
         {currentPhase === 'wrapup' && script && <WrapupPhase wrapup={script.wrapup} observerNotes={script.observerNotes} status={wrapupStatus} setStatus={setWrapupStatus} sessionNotes={sessionNotes} setSessionNotes={setSessionNotes} onFinish={nextPhase} />}
-        {currentPhase === 'complete' && script && !showCompleteModal && (
+        {currentPhase === 'complete' && !showCompleteModal && (
           <div style={{ textAlign: 'center', padding: 48 }}>
             <CheckCircle2 style={{ color: t.positive, margin: '0 auto 16px' }} size={40} />
-            <p style={{ color: t.textSub }}>Session saved.</p>
+            <p style={{ color: t.textSub }}>Session saved — great work!</p>
           </div>
         )}
       </main>
@@ -365,9 +415,9 @@ export default function InsightCatcher() {
                 ? <Loader2 size={36} style={{ color: t.brand, margin: '0 auto 12px', animation: 'spin 1s linear infinite' }} />
                 : <CheckCircle2 size={36} style={{ color: t.positive, margin: '0 auto 12px' }} />}
               <h2 style={{ fontSize: 20, fontWeight: 700, color: t.textHeader, marginBottom: 4 }}>
-                {saving ? 'Saving...' : 'Session complete'}
+                {saving ? 'Saving your session...' : 'That\'s a wrap! 🎉'}
               </h2>
-              {!saving && <p style={{ color: t.textSub, fontSize: 13 }}>Saved to central database ✓</p>}
+              {!saving && <p style={{ color: t.textSub, fontSize: 13 }}>Session saved to your central database.</p>}
             </div>
             {!saving && (
               <>
@@ -422,7 +472,7 @@ export default function InsightCatcher() {
             </div>
             <div style={{ overflowY: 'auto', flex: 1, padding: 16 }}>
               {savedSessions.length === 0
-                ? <p style={{ color: t.textDetail, textAlign: 'center', padding: 32 }}>No sessions yet</p>
+                ? <p style={{ color: t.textDetail, textAlign: 'center', padding: 32 }}>No sessions recorded yet — run your first one to see it here.</p>
                 : savedSessions.map(s => (
                   <div key={s.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 12px', borderRadius: 8, marginBottom: 6, background: t.subtleBg }}>
                     <div>
@@ -458,7 +508,7 @@ function SelectPhase({ config, selectedProject, setSelectedProject, onSelectScri
 
   return (
     <div style={{ maxWidth: 720, margin: '0 auto' }}>
-      <div style={{ padding: '32px 0 20px', display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
+      <div style={{ padding: '24px 0 20px', display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
         <div>
           <h2 style={{ fontSize: 22, fontWeight: 700, color: t.textHeader, marginBottom: 4 }}>Select a test</h2>
           <p style={{ color: t.textSub, fontSize: 14 }}>Choose a script to run your session</p>
@@ -481,11 +531,7 @@ function SelectPhase({ config, selectedProject, setSelectedProject, onSelectScri
       </div>
 
       <div style={{ display: 'flex', gap: 2, marginBottom: 16, background: t.subtleBg, borderRadius: 8, padding: 3, width: 'fit-content' }}>
-        {[
-          { id: 'all', label: 'All' },
-          { id: 'discovery', label: 'Discovery', icon: <Search size={12} /> },
-          { id: 'usability', label: 'Usability', icon: <FlaskConical size={12} /> },
-        ].map(tab => (
+        {[{ id: 'all', label: 'All' }, { id: 'discovery', label: 'Discovery', icon: <Search size={12} /> }, { id: 'usability', label: 'Usability', icon: <FlaskConical size={12} /> }].map(tab => (
           <button key={tab.id} onClick={() => setScriptTypeFilter(tab.id)}
             style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 14px', borderRadius: 6, fontSize: 13,
               fontWeight: scriptTypeFilter === tab.id ? 600 : 400, cursor: 'pointer', border: 'none',
@@ -498,116 +544,183 @@ function SelectPhase({ config, selectedProject, setSelectedProject, onSelectScri
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        {filtered.map(scriptInfo => (
-          <button key={`${scriptInfo.projectId}-${scriptInfo.id}`}
-            onClick={() => onSelectScript(scriptInfo.projectId, scriptInfo)}
-            disabled={loading}
-            style={{ background: t.cardBg, border: `1px solid ${t.strokeDefault}`, borderRadius: 10, padding: '16px 20px',
-              textAlign: 'left', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontFamily: 'inherit' }}
-            onMouseEnter={e => e.currentTarget.style.borderColor = t.brand}
-            onMouseLeave={e => e.currentTarget.style.borderColor = t.strokeDefault}>
-            <div>
-              <div style={{ fontWeight: 600, color: t.textMain, marginBottom: 4, fontSize: 15 }}>{scriptInfo.name}</div>
-              <div style={{ fontSize: 12, color: t.textDetail, display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span>{scriptInfo.projectName}</span>
-                <span style={{ padding: '2px 8px', borderRadius: 20, fontSize: 11, fontWeight: 500,
-                  background: (scriptInfo.type || 'usability') === 'discovery' ? t.hoverBg : t.nearPositive,
-                  color: (scriptInfo.type || 'usability') === 'discovery' ? t.brand : t.positive }}>
-                  {(scriptInfo.type || 'usability') === 'discovery' ? 'Discovery' : 'Usability'}
-                </span>
+        {filtered.length === 0
+          ? <p style={{ color: t.textDetail, textAlign: 'center', padding: 40, fontSize: 14 }}>Nothing here yet — scripts will appear once they're added.</p>
+          : filtered.map(scriptInfo => (
+            <button key={`${scriptInfo.projectId}-${scriptInfo.id}`}
+              onClick={() => onSelectScript(scriptInfo.projectId, scriptInfo)} disabled={loading}
+              style={{ background: t.cardBg, border: `1px solid ${t.strokeDefault}`, borderRadius: 10, padding: '16px 20px',
+                textAlign: 'left', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontFamily: 'inherit' }}
+              onMouseEnter={e => e.currentTarget.style.borderColor = t.brand}
+              onMouseLeave={e => e.currentTarget.style.borderColor = t.strokeDefault}>
+              <div>
+                <div style={{ fontWeight: 600, color: t.textMain, marginBottom: 4, fontSize: 15 }}>{scriptInfo.name}</div>
+                <div style={{ fontSize: 12, color: t.textDetail, display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span>{scriptInfo.projectName}</span>
+                  <span style={{ padding: '2px 8px', borderRadius: 20, fontSize: 11, fontWeight: 500,
+                    background: (scriptInfo.type || 'usability') === 'discovery' ? t.hoverBg : t.nearPositive,
+                    color: (scriptInfo.type || 'usability') === 'discovery' ? t.brand : t.positive }}>
+                    {(scriptInfo.type || 'usability') === 'discovery' ? 'Discovery' : 'Usability'}
+                  </span>
+                </div>
               </div>
-            </div>
-            <ChevronRight size={18} style={{ color: t.brand, flexShrink: 0 }} />
-          </button>
-        ))}
-        {filtered.length === 0 && <p style={{ color: t.textDetail, textAlign: 'center', padding: 32 }}>No scripts found</p>}
+              <ChevronRight size={18} style={{ color: t.brand, flexShrink: 0 }} />
+            </button>
+          ))
+        }
       </div>
     </div>
   );
 }
 
-// ─── Setup phase ──────────────────────────────────────────────────────────────
+// ─── Setup phase — two columns ────────────────────────────────────────────────
 function SetupPhase({ script, participantId, setParticipantId, runnerName, setRunnerName, onStart }) {
   return (
-    <div style={{ maxWidth: 720, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 16 }}>
-      <div style={{ padding: '24px 0 8px' }}>
-        <h2 style={{ fontSize: 20, fontWeight: 700, color: t.textHeader, marginBottom: 4 }}>{script.title}</h2>
+    <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+      <div style={{ padding: '16px 0 16px' }}>
+        <h2 style={{ fontSize: 22, fontWeight: 700, color: t.textHeader, marginBottom: 4 }}>{script.title}</h2>
         {script.description && <p style={{ color: t.textSub, fontSize: 14, lineHeight: 1.6 }}>{script.description}</p>}
       </div>
-      <Card style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 14 }}>
-        <div>
-          <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: t.textSub, marginBottom: 6 }}>Participant ID</label>
-          <Input value={participantId} onChange={e => setParticipantId(e.target.value)} placeholder="e.g. P01, SLL-Jane" />
-        </div>
-        <div>
-          <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: t.textSub, marginBottom: 6 }}>Your name</label>
-          <Input value={runnerName} onChange={e => setRunnerName(e.target.value)} placeholder="e.g. Iryna, John" />
-        </div>
-      </Card>
-      <Card style={{ padding: 20, borderLeft: `3px solid ${t.brand}` }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-          <Mic size={14} style={{ color: t.brand }} />
-          <span style={{ fontSize: 13, fontWeight: 600, color: t.textHeader }}>Say this at the start</span>
-        </div>
-        <ul style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {script.setup.rules.map((rule, i) => (
-            <li key={i} style={{ display: 'flex', gap: 10, fontSize: 14, color: t.textSub }}>
-              <span style={{ color: t.brand, flexShrink: 0 }}>→</span>
-              <span style={{ fontStyle: 'italic' }}>"{rule}"</span>
-            </li>
-          ))}
-        </ul>
-      </Card>
-      <Card style={{ padding: 20, borderLeft: `3px solid ${t.negative}` }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-          <AlertTriangle size={14} style={{ color: t.negative }} />
-          <span style={{ fontSize: 13, fontWeight: 600, color: t.negative }}>No-help policy</span>
-        </div>
-        <p style={{ fontSize: 13, color: t.textSub, lineHeight: 1.6 }}>{script.setup.noHelpPolicy}</p>
-      </Card>
-      <Btn variant="positive" onClick={onStart} style={{ width: '100%', justifyContent: 'center', padding: '13px 0', fontSize: 15 }}>
-        <Play size={16} />Start Session
-      </Btn>
-    </div>
-  );
-}
 
-// ─── Warmup phase ─────────────────────────────────────────────────────────────
-function WarmupPhase({ warmup, status, setStatus, onNext, startTimer }) {
-  useEffect(() => { startTimer(warmup.timeMinutes); }, []);
-  return (
-    <div style={{ maxWidth: 720, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 14 }}>
-      <div style={{ padding: '24px 0 8px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-          <MessageSquare size={14} style={{ color: t.brand }} />
-          <h2 style={{ fontSize: 18, fontWeight: 700, color: t.textHeader }}>Warm-up</h2>
-          <span style={{ fontSize: 12, color: t.textDetail }}>{warmup.timeMinutes} min</span>
-        </div>
-        <p style={{ fontSize: 13, color: t.textSub }}>{warmup.intro}</p>
-        {warmup.why && <p style={{ fontSize: 12, color: t.textDetail, fontStyle: 'italic', marginTop: 6 }}>{warmup.why}</p>}
-      </div>
-      {warmup.questions.map((q, i) => (
-        <Card key={q.id} style={{ padding: 20 }}>
-          <div style={{ display: 'flex', gap: 12 }}>
-            <div style={{ width: 26, height: 26, borderRadius: '50%', background: t.hoverBg, color: t.brand,
-              display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700, flexShrink: 0 }}>{i + 1}</div>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 13, fontWeight: 600, color: t.textSub, marginBottom: 4 }}>{q.label}</div>
-              <p style={{ fontSize: 15, fontStyle: 'italic', color: t.textMain, marginBottom: 8 }}>"{q.question}"</p>
-              {q.listenFor && <p style={{ fontSize: 12, color: t.textDetail, marginBottom: 12 }}>Listen for: {q.listenFor}</p>}
-              <Input value={status[q.id]?.notes || ''} onChange={e => setStatus(p => ({ ...p, [q.id]: { notes: e.target.value } }))} placeholder="Notes..." rows={3} />
-            </div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, alignItems: 'start' }}>
+        {/* Left: participant fields */}
+        <Card style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <h3 style={{ fontSize: 15, fontWeight: 600, color: t.textHeader, marginBottom: 4 }}>Session details</h3>
+          <div>
+            <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: t.textSub, marginBottom: 6 }}>Participant ID</label>
+            <Input value={participantId} onChange={e => setParticipantId(e.target.value)} placeholder="e.g. P01, SLL-Jane" />
+          </div>
+          <div>
+            <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: t.textSub, marginBottom: 6 }}>Your name (running the session)</label>
+            <Input value={runnerName} onChange={e => setRunnerName(e.target.value)} placeholder="e.g. Iryna, John" />
           </div>
         </Card>
-      ))}
-      <Btn variant="primary" onClick={onNext} style={{ width: '100%', justifyContent: 'center', padding: '12px 0' }}>
-        Continue to Tasks →
-      </Btn>
+
+        {/* Right: say this + no help */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <Card style={{ padding: 20, borderLeft: `3px solid ${t.brand}` }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+              <Mic size={14} style={{ color: t.brand }} />
+              <span style={{ fontSize: 13, fontWeight: 600, color: t.textHeader }}>Say this at the start</span>
+            </div>
+            <ul style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {script.setup.rules.map((rule, i) => (
+                <li key={i} style={{ display: 'flex', gap: 10, fontSize: 14, color: t.textSub }}>
+                  <span style={{ color: t.brand, flexShrink: 0 }}>→</span>
+                  <span style={{ fontStyle: 'italic' }}>"{rule}"</span>
+                </li>
+              ))}
+            </ul>
+          </Card>
+          <Card style={{ padding: 20, borderLeft: `3px solid ${t.negative}` }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+              <AlertTriangle size={14} style={{ color: t.negative }} />
+              <span style={{ fontSize: 13, fontWeight: 600, color: t.negative }}>No-help policy</span>
+            </div>
+            <p style={{ fontSize: 13, color: t.textSub, lineHeight: 1.6 }}>{script.setup.noHelpPolicy}</p>
+          </Card>
+        </div>
+      </div>
+
+      {/* Sticky bottom CTA */}
+      <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: t.cardBg,
+        borderTop: `1px solid ${t.strokeDefault}`, padding: '12px 32px', zIndex: 40 }}>
+        <div style={{ maxWidth: 1280, margin: '0 auto', display: 'flex', justifyContent: 'flex-end' }}>
+          <Btn variant="cta" onClick={onStart} style={{ padding: '11px 32px', fontSize: 15 }}>
+            <Play size={16} />Start Session
+          </Btn>
+        </div>
+      </div>
     </div>
   );
 }
 
-// ─── Tasks phase — two column layout ─────────────────────────────────────────
+// ─── Warmup phase — two columns ───────────────────────────────────────────────
+function WarmupPhase({ warmup, status, setStatus, onNext, startTimer }) {
+  useEffect(() => { startTimer(warmup.timeMinutes); }, []);
+  const notedCount = Object.keys(status).filter(k => status[k]?.notes?.trim()).length;
+
+  return (
+    <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+      <div style={{ padding: '16px 0 16px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
+          <MessageSquare size={18} style={{ color: t.brand }} />
+          <h2 style={{ fontSize: 22, fontWeight: 700, color: t.textHeader }}>Warm-up</h2>
+          <span style={{ fontSize: 13, color: t.textDetail, marginLeft: 4 }}>{warmup.timeMinutes} min</span>
+        </div>
+        <p style={{ fontSize: 14, color: t.textSub, marginBottom: 4 }}>{warmup.intro}</p>
+        {warmup.why && <p style={{ fontSize: 13, color: t.textSub, lineHeight: 1.6 }}>{warmup.why}</p>}
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: 16, alignItems: 'start' }}>
+        {/* Left: questions */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {warmup.questions.map((q, i) => (
+            <Card key={q.id} style={{ padding: 20 }}>
+              <div style={{ display: 'flex', gap: 12 }}>
+                <div style={{ width: 26, height: 26, borderRadius: '50%', background: t.hoverBg, color: t.brand,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700, flexShrink: 0 }}>{i + 1}</div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: t.textSub, marginBottom: 4 }}>{q.label}</div>
+                  <p style={{ fontSize: 15, fontStyle: 'italic', color: t.textMain, marginBottom: 8 }}>"{q.question}"</p>
+                  {q.listenFor && <p style={{ fontSize: 12, color: t.textDetail, marginBottom: 12 }}>Listen for: {q.listenFor}</p>}
+                  <Input value={status[q.id]?.notes || ''} onChange={e => setStatus(p => ({ ...p, [q.id]: { notes: e.target.value } }))} placeholder="What did they say? Note anything interesting..." rows={3} />
+                </div>
+              </div>
+            </Card>
+          ))}
+        </div>
+
+        {/* Right: Mom's Test reference (sticky) */}
+        <div style={{ position: 'sticky', top: 130 }}>
+          <Card style={{ overflow: 'hidden' }}>
+            <div style={{ padding: '14px 16px', borderBottom: `1px solid ${t.strokeLight}`, background: t.hoverBg }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: t.brand, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Interview guide</div>
+              <div style={{ fontSize: 11, color: t.textSub, marginTop: 2 }}>Based on The Mom's Test</div>
+            </div>
+            <div style={{ padding: '14px 16px', borderBottom: `1px solid ${t.strokeLight}` }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: t.positive, marginBottom: 8, display: 'flex', alignItems: 'center', gap: 5 }}>
+                ✓ DO
+              </div>
+              <ul style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                {MOMS_TEST_DOS.map((item, i) => (
+                  <li key={i} style={{ fontSize: 12, color: t.textSub, lineHeight: 1.5, display: 'flex', gap: 6 }}>
+                    <span style={{ color: t.positive, flexShrink: 0 }}>·</span>{item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div style={{ padding: '14px 16px' }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: t.negative, marginBottom: 8 }}>✗ DON'T</div>
+              <ul style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                {MOMS_TEST_DONTS.map((item, i) => (
+                  <li key={i} style={{ fontSize: 12, color: t.textSub, lineHeight: 1.5, display: 'flex', gap: 6 }}>
+                    <span style={{ color: t.negative, flexShrink: 0 }}>·</span>{item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </Card>
+        </div>
+      </div>
+
+      {/* Sticky bottom CTA */}
+      <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: t.cardBg,
+        borderTop: `1px solid ${t.strokeDefault}`, padding: '12px 32px', zIndex: 40 }}>
+        <div style={{ maxWidth: 1280, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <span style={{ fontSize: 13, color: t.textDetail }}>
+            {notedCount} of {warmup.questions.length} questions noted
+          </span>
+          <Btn variant="cta" onClick={onNext} style={{ padding: '11px 32px', fontSize: 15 }}>
+            Continue to Tasks →
+          </Btn>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Tasks phase — two columns ────────────────────────────────────────────────
 function TasksPhase({ tasks, currentIndex, setCurrentIndex, status, updateStatus, showScript, setShowScript, onNext, onPrev, startTimer, expandedSections, toggleSection }) {
   const task = tasks[currentIndex];
   const taskStat = status[task.id] || { done: false, success: null, notes: '', tags: [] };
@@ -621,12 +734,10 @@ function TasksPhase({ tasks, currentIndex, setCurrentIndex, status, updateStatus
 
   return (
     <div style={{ marginBottom: 80 }}>
-      {/* Two column grid */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: 16, alignItems: 'start' }}>
 
-        {/* ── Left column: action card ── */}
+        {/* Left: action card */}
         <Card style={{ overflow: 'hidden' }}>
-          {/* Task header */}
           <div style={{ padding: '18px 24px', borderBottom: `1px solid ${t.strokeLight}` }}>
             <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
               <div>
@@ -646,7 +757,6 @@ function TasksPhase({ tasks, currentIndex, setCurrentIndex, status, updateStatus
             )}
           </div>
 
-          {/* Script */}
           <div style={{ padding: '16px 24px', borderBottom: `1px solid ${t.strokeLight}` }}>
             <button onClick={() => setShowScript(!showScript)}
               style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.brand, fontSize: 12,
@@ -660,7 +770,6 @@ function TasksPhase({ tasks, currentIndex, setCurrentIndex, status, updateStatus
             )}
           </div>
 
-          {/* Tags */}
           <div style={{ padding: '14px 24px', borderBottom: `1px solid ${t.strokeLight}` }}>
             <div style={{ fontSize: 11, fontWeight: 600, color: t.textDetail, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>Quick tags</div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
@@ -669,10 +778,8 @@ function TasksPhase({ tasks, currentIndex, setCurrentIndex, status, updateStatus
                 return (
                   <button key={tag.id} onClick={() => toggleTag(tag.id)}
                     style={{ padding: '5px 12px', borderRadius: 20, fontSize: 12, cursor: 'pointer', fontFamily: 'inherit',
-                      background: active ? tag.bg : 'transparent',
-                      color: active ? tag.color : t.textDetail,
-                      border: `1px solid ${active ? tag.color : t.strokeDefault}`,
-                      fontWeight: active ? 600 : 400 }}>
+                      background: active ? tag.bg : 'transparent', color: active ? tag.color : t.textDetail,
+                      border: `1px solid ${active ? tag.color : t.strokeDefault}`, fontWeight: active ? 600 : 400 }}>
                     {tag.label}
                   </button>
                 );
@@ -680,28 +787,22 @@ function TasksPhase({ tasks, currentIndex, setCurrentIndex, status, updateStatus
             </div>
           </div>
 
-          {/* Notes */}
           <div style={{ padding: '14px 24px' }}>
             <div style={{ fontSize: 11, fontWeight: 600, color: t.textDetail, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>Observations</div>
-            <Input value={taskStat.notes || ''} onChange={e => updateStatus(task.id, 'notes', e.target.value)} placeholder="What did you notice?" rows={6} />
+            <Input value={taskStat.notes || ''} onChange={e => updateStatus(task.id, 'notes', e.target.value)} placeholder="What did you notice? Quotes, hesitations, surprises..." rows={6} />
           </div>
         </Card>
 
-        {/* ── Right column: reference panel (sticky) ── */}
-        <div style={{ position: 'sticky', top: 140, display: 'flex', flexDirection: 'column', gap: 10 }}>
-
-          {/* Success */}
+        {/* Right: reference panel (sticky) */}
+        <div style={{ position: 'sticky', top: 150, display: 'flex', flexDirection: 'column', gap: 10 }}>
           <Card style={{ overflow: 'hidden' }}>
             <button onClick={() => toggleSection(`success-${task.id}`)}
-              style={{ width: '100%', padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                background: 'none', border: 'none', cursor: 'pointer' }}>
+              style={{ width: '100%', padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'none', border: 'none', cursor: 'pointer' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
                 <Target size={13} style={{ color: t.positive }} />
                 <span style={{ fontSize: 13, fontWeight: 600, color: t.positive }}>Success looks like</span>
               </div>
-              {expandedSections[`success-${task.id}`]
-                ? <ChevronDown size={13} style={{ color: t.brand }} />
-                : <ChevronRight size={13} style={{ color: t.brand }} />}
+              {expandedSections[`success-${task.id}`] ? <ChevronDown size={13} style={{ color: t.brand }} /> : <ChevronRight size={13} style={{ color: t.brand }} />}
             </button>
             {expandedSections[`success-${task.id}`] && (
               <div style={{ padding: '0 16px 14px' }}>
@@ -710,21 +811,17 @@ function TasksPhase({ tasks, currentIndex, setCurrentIndex, status, updateStatus
             )}
           </Card>
 
-          {/* Watch for */}
           <Card style={{ overflow: 'hidden' }}>
             <button onClick={() => toggleSection(`watch-${task.id}`)}
-              style={{ width: '100%', padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                background: 'none', border: 'none', cursor: 'pointer' }}>
+              style={{ width: '100%', padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'none', border: 'none', cursor: 'pointer' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
                 <Eye size={13} style={{ color: t.brand }} />
                 <span style={{ fontSize: 13, fontWeight: 600, color: t.textSub }}>Watch for</span>
               </div>
-              {expandedSections[`watch-${task.id}`]
-                ? <ChevronDown size={13} style={{ color: t.brand }} />
-                : <ChevronRight size={13} style={{ color: t.brand }} />}
+              {expandedSections[`watch-${task.id}`] ? <ChevronDown size={13} style={{ color: t.brand }} /> : <ChevronRight size={13} style={{ color: t.brand }} />}
             </button>
             {expandedSections[`watch-${task.id}`] && (
-              <ul style={{ padding: '0 16px 14px 32px', display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <ul style={{ padding: '0 16px 14px 30px', display: 'flex', flexDirection: 'column', gap: 6 }}>
                 {task.watchFor.map((item, i) => (
                   <li key={i} style={{ fontSize: 13, color: t.textSub, lineHeight: 1.5 }}>• {item}</li>
                 ))}
@@ -732,7 +829,6 @@ function TasksPhase({ tasks, currentIndex, setCurrentIndex, status, updateStatus
             )}
           </Card>
 
-          {/* Note / warning */}
           {task.note && (
             <Card style={{ padding: '12px 16px', background: task.note.type === 'warning' ? 'rgba(249,196,0,0.07)' : t.subtleBg }}>
               <div style={{ display: 'flex', gap: 8 }}>
@@ -747,14 +843,13 @@ function TasksPhase({ tasks, currentIndex, setCurrentIndex, status, updateStatus
         </div>
       </div>
 
-      {/* ── Sticky bottom action bar ── */}
+      {/* Sticky bottom action bar */}
       <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: t.cardBg,
         borderTop: `1px solid ${t.strokeDefault}`, padding: '10px 32px', zIndex: 40 }}>
         <div style={{ maxWidth: 1280, margin: '0 auto', display: 'flex', alignItems: 'center', gap: 8 }}>
           <button onClick={onPrev} disabled={currentIndex === 0}
             style={{ background: 'none', border: `1px solid ${t.strokeDefault}`, borderRadius: 6, padding: '8px 14px',
-              cursor: currentIndex === 0 ? 'not-allowed' : 'pointer',
-              color: currentIndex === 0 ? t.textDisabled : t.brand,
+              cursor: currentIndex === 0 ? 'not-allowed' : 'pointer', color: currentIndex === 0 ? t.textDisabled : t.brand,
               fontSize: 13, fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 4 }}>
             ← Prev
           </button>
@@ -781,7 +876,7 @@ function TasksPhase({ tasks, currentIndex, setCurrentIndex, status, updateStatus
               border: `1px solid ${taskStat.success === false ? t.negative : t.strokeDefault}` }}>
             <AlertTriangle size={14} />Struggled
           </button>
-          <Btn variant="primary" onClick={() => { updateStatus(task.id, 'done', true); onNext(); }}>
+          <Btn variant="cta" onClick={() => { updateStatus(task.id, 'done', true); onNext(); }}>
             {currentIndex < tasks.length - 1 ? 'Next Task →' : 'Finish Tasks →'}
           </Btn>
         </div>
@@ -794,20 +889,19 @@ function TasksPhase({ tasks, currentIndex, setCurrentIndex, status, updateStatus
 function WrapupPhase({ wrapup, observerNotes, status, setStatus, sessionNotes, setSessionNotes, onFinish }) {
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 14 }}>
-      <div style={{ padding: '24px 0 8px' }}>
-        <h2 style={{ fontSize: 18, fontWeight: 700, color: t.textHeader, marginBottom: 4 }}>Wrap-up</h2>
-        <p style={{ fontSize: 13, color: t.textSub }}>{wrapup.intro}</p>
+      <div style={{ padding: '16px 0 8px' }}>
+        <h2 style={{ fontSize: 22, fontWeight: 700, color: t.textHeader, marginBottom: 4 }}>Wrap-up</h2>
+        <p style={{ fontSize: 14, color: t.textSub }}>{wrapup.intro}</p>
       </div>
 
-      {/* Observer reference — at the top, expanded by default */}
       {observerNotes && observerNotes.length > 0 && (
         <Card style={{ padding: 20, borderLeft: `3px solid ${t.brand}` }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
             <Users size={14} style={{ color: t.brand }} />
             <span style={{ fontSize: 13, fontWeight: 600, color: t.textHeader }}>Before you start — behavior reference</span>
           </div>
           <p style={{ fontSize: 12, color: t.textDetail, marginBottom: 12, fontStyle: 'italic' }}>
-            Use this to interpret what you observed during tasks. Let it guide your follow-up questions.
+            Use this to interpret what you observed. Let it guide your follow-up questions.
           </p>
           {observerNotes.map((note, i) => (
             <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, fontSize: 12,
@@ -820,7 +914,6 @@ function WrapupPhase({ wrapup, observerNotes, status, setStatus, sessionNotes, s
         </Card>
       )}
 
-      {/* Wrapup questions */}
       {wrapup.questions.map(q => (
         <Card key={q.id} style={{ padding: 20 }}>
           <div style={{ fontSize: 13, fontWeight: 600, color: t.textSub, marginBottom: 4 }}>{q.label}</div>
@@ -829,7 +922,6 @@ function WrapupPhase({ wrapup, observerNotes, status, setStatus, sessionNotes, s
         </Card>
       ))}
 
-      {/* General notes */}
       <Card style={{ padding: 20 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
           <FileText size={13} style={{ color: t.textDetail }} />
@@ -838,7 +930,7 @@ function WrapupPhase({ wrapup, observerNotes, status, setStatus, sessionNotes, s
         <Input value={sessionNotes} onChange={e => setSessionNotes(e.target.value)} placeholder="Overall impressions, notable quotes..." rows={5} />
       </Card>
 
-      <Btn variant="positive" onClick={onFinish} style={{ width: '100%', justifyContent: 'center', padding: '13px 0', fontSize: 15 }}>
+      <Btn variant="cta" onClick={onFinish} style={{ width: '100%', justifyContent: 'center', padding: '13px 0', fontSize: 15 }}>
         Complete Session →
       </Btn>
     </div>
