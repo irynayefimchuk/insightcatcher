@@ -1,0 +1,225 @@
+{
+  "id": "cci-snapshot-discovery-2026-04",
+  "title": "CCI Snapshot — Discovery Test",
+  "subtitle": "Snapshot tab + Opportunity Cards",
+  "version": "2.0",
+  "totalTimeMinutes": 40,
+  "description": "Test whether the Snapshot tab helps users find where to focus and navigate to opportunity cards. Learn what they use, what they ignore, and what is missing — particularly on the left panel and the sorting tabs.",
+  "setup": {
+    "rules": [
+      "We are testing the product, not you. There are no wrong answers.",
+      "Please think out loud — tell me what you are looking at and what you are thinking.",
+      "If you get stuck, tell me what you expected to happen.",
+      "I may stay quiet so I do not bias you."
+    ],
+    "noHelpPolicy": "Give 10 seconds of silence before prompting. If stuck, ask: 'What would you do next if I wasn't here?' Do NOT point to UI elements or explain what things do. If they ask 'is this right?' say: 'What do you think?'"
+  },
+  "warmup": {
+    "timeMinutes": 5,
+    "intro": "Ask these before showing the prototype. Goal: understand their current mental model before the product shapes it.",
+    "questions": [
+      {
+        "id": "w1",
+        "label": "Current process",
+        "question": "When you are identifying cost reduction opportunities — where do you typically start? What are the top 2–3 things you look for?",
+        "listenFor": "What data matters to them? What makes something worth pursuing?"
+      },
+      {
+        "id": "w2",
+        "label": "Recent example",
+        "question": "Think of the last cost initiative you moved forward. What made you confident it was worth pursuing?",
+        "listenFor": "What evidence do they need? Who else was involved?"
+      }
+    ]
+  },
+  "tasks": [
+    {
+      "id": "1",
+      "name": "First impressions",
+      "subtitle": "Observe before they click anything",
+      "timeMinutes": 3,
+      "optional": false,
+      "script": "Take a moment to look at this page without clicking anything. Tell me what you are looking at. What is this page showing you, and where would you focus first?",
+      "watchFor": [
+        "What catches their eye first — left panel, right panel, summary cards at top, or the AI banner?",
+        "Do they read the left panel as a filter, a summary, or something else entirely?",
+        "Do they notice New / Active / Dismissed without being told what they mean?",
+        "Do they understand the category breakdown (Supplies, Routine, Ancillary)?",
+        "Do they understand the page purpose without any explanation?"
+      ],
+      "success": "User can describe what the page is for in their own words. Points to a specific area and gives a reason tied to what they see — not just 'that looks important'.",
+      "learnWhy": "Pure orientation. Tests basic comprehension before any interaction biases them. Also tells you whether the left/right split reads as two connected things or two unrelated panels."
+    },
+    {
+      "id": "2",
+      "name": "Natural first click",
+      "subtitle": "Where do they go first?",
+      "timeMinutes": 2,
+      "optional": false,
+      "script": "Now go ahead and click on the first thing you would want to explore. Tell me what you are expecting to see before you click.",
+      "watchFor": [
+        "Is their instinctive entry point the left panel, right panel, or the AI banner link?",
+        "Do they click a category row on the left, or go straight to a card on the right?",
+        "Does their expectation match what actually happens when they click?",
+        "If the result surprises them — what did they expect instead?",
+        "Do they understand that clicking the left panel filters the right panel?"
+      ],
+      "success": "User clicks something with a stated reason. Can describe what they expected before seeing the result. Reaction to the result is not confusion.",
+      "learnWhy": "Reveals natural navigation pattern. Whether they use the left panel as a filter or skip it entirely is one of the most important things we need to learn."
+    },
+    {
+      "id": "3",
+      "name": "Find the biggest opportunity",
+      "subtitle": "Test left panel and sorting tabs together",
+      "timeMinutes": 4,
+      "optional": false,
+      "script": "Looking at this page — where is the single biggest cost savings opportunity right now? Walk me through how you figure that out.",
+      "watchFor": [
+        "Do they use the left panel to narrow down, or rely only on the right panel?",
+        "Do they notice the Show tabs (Annual Savings / Volume / Recurring)?",
+        "Do they understand that tabs re-rank the same opportunities differently — not show different content?",
+        "Do they look at the AI banner for the answer instead of exploring themselves?",
+        "After finding an answer — do they feel confident, or uncertain?"
+      ],
+      "success": "User lands on a specific opportunity and can state why it is the biggest. Uses at least one tab or filter to support their answer — not just reads the first item on the default view.",
+      "learnWhy": "This is the core Snapshot job-to-be-done. Tests whether tabs are noticed and understood — specifically whether users understand Annual Savings vs Volume as two different lenses on the same data.",
+      "followUpProbe": "If they stop at Annual Savings without exploring other tabs, ask: 'Did you consider looking at this any other way?'"
+    },
+    {
+      "id": "4",
+      "name": "Explore the Recurring tab",
+      "subtitle": "Discoverability and comprehension",
+      "timeMinutes": 3,
+      "optional": false,
+      "script": "Is there anything on this page that could help you find where one action might have the broadest impact — across multiple procedures or providers? See if you can find it.",
+      "watchFor": [
+        "Do they find the Recurring tab without being directed to it?",
+        "Once on Recurring — do they understand what the three sections show (Procedures / Providers / Supplies)?",
+        "Do they understand what the numbers mean — for example '3 high-cost providers'?",
+        "Is 'Recurring' a meaningful label to them, or does it need more explanation?",
+        "Which section do they look at first — Procedures, Providers, or Supplies?",
+        "Do they find the hover tooltips, and do they help?"
+      ],
+      "success": "User finds the Recurring tab. Can explain in their own words what at least one of the three sections is showing. Can identify at least one item they would act on and why.",
+      "learnWhy": "Tests discoverability of the tab and comprehension of the concept. Which section they reach for first tells us which lens matters most to this user type."
+    },
+    {
+      "id": "5",
+      "name": "View All and navigate to a card",
+      "subtitle": "Modal and jump to Opportunity Hub",
+      "timeMinutes": 3,
+      "optional": false,
+      "script": "You want to see everything — not just the top 3. Find the full list and pick one opportunity you would want to look into.",
+      "watchFor": [
+        "Do they find the View All link without prompting?",
+        "Once in the modal — do they feel oriented, or overwhelmed?",
+        "Do they use the bar chart or switch to the table? Which do they prefer?",
+        "Can they find the icon that jumps to the opportunity card?",
+        "Does the modal feel like a natural extension of the page, or a separate tool?"
+      ],
+      "success": "User opens View All, browses the list, and successfully navigates to an opportunity card. Does not get lost or confused about where they are.",
+      "learnWhy": "Tests the View All modal and the path from Snapshot to Opportunity Hub. If users feel the modal is a full analytics tool rather than a simple list, that is a signal it is still too complex."
+    },
+    {
+      "id": "6",
+      "name": "Read and interpret a Supply card",
+      "subtitle": "Comprehension and trust",
+      "timeMinutes": 4,
+      "optional": false,
+      "script": "Take a look at this opportunity. Tell me what it is showing you. If you needed to decide whether this is worth pursuing — what would you look at, and what would you need to feel confident?",
+      "watchFor": [
+        "What do they read first — savings amount, provider comparison, or cost drivers?",
+        "Do they understand the high-cost vs low-cost provider comparison?",
+        "Do they understand use-driven vs price-driven without explanation?",
+        "Do they trust the savings estimate, or question how it was calculated?",
+        "Do they expand the card to see more detail, or stay in collapsed view?",
+        "What would make them confident enough to bring this to a physician conversation?"
+      ],
+      "success": "User can describe: what the cost gap is, who the high-cost provider is, and at least one driver. Can state whether they would act on it and why.",
+      "learnWhy": "Tests card comprehension and trust for Supply opportunities. The trust question is critical — if they understand but do not trust it, that is a different problem than not understanding."
+    },
+    {
+      "id": "7",
+      "name": "Read a Routine Services card",
+      "subtitle": "First draft — exploratory only",
+      "timeMinutes": 4,
+      "optional": false,
+      "script": "Now look at this one. It is a different type of opportunity. Tell me what it is showing you and what the numbers mean to you.",
+      "watchFor": [
+        "Do they connect length of stay to the dollar figure without explanation?",
+        "Do they understand what the CMS benchmark means and why it matters?",
+        "Does the LOS gap concept make sense, or does it need a plain-language explanation?",
+        "Who do they think should own this type of opportunity?",
+        "What is confusing, missing, or surprising?",
+        "Would they act on this card, or do they need more information first?"
+      ],
+      "success": "User can describe the LOS gap and the dollar implication in their own words. Notes what makes sense and what does not. States who they would bring this to.",
+      "learnWhy": "Exploratory only — this is a first draft. We want impressions and gaps, not pass/fail. The most valuable output is what they say is missing or confusing.",
+      "facilitatorNote": {
+        "type": "warning",
+        "title": "Routine Services card — first draft",
+        "content": "Do not guide or explain. After they have explored, probe with: 'What would you need to see to trust this number?' / 'Who would you bring this to?' / 'What is missing here for you?'"
+      }
+    }
+  ],
+  "wrapup": {
+    "timeMinutes": 5,
+    "intro": "Ask after all tasks. These are discussion questions — not tasks. Let them talk.",
+    "questions": [
+      {
+        "id": "c1",
+        "label": "Overall",
+        "question": "Now that you have seen the whole flow — what worked? What was frustrating or unclear?"
+      },
+      {
+        "id": "c2",
+        "label": "Missing information",
+        "question": "Was there anything you expected to see that was not there?"
+      },
+      {
+        "id": "c3",
+        "label": "Trust",
+        "question": "Would you use this to prepare for a conversation with a physician or a finance review? Why or why not?"
+      },
+      {
+        "id": "c4",
+        "label": "Left panel",
+        "question": "On the main screen — did you find the left side useful? Would you use it, or would you go straight to the cards?"
+      }
+    ]
+  },
+  "observerNotes": [
+    {
+      "behavior": "Skips left panel entirely",
+      "meaning": "Left panel may not communicate its filtering role — test whether a label or affordance change helps"
+    },
+    {
+      "behavior": "Does not notice Show tabs",
+      "meaning": "Tabs are not prominent enough, or Annual Savings default is sufficient and others are not needed"
+    },
+    {
+      "behavior": "Thinks tabs show different content rather than different sorting",
+      "meaning": "Tab labels need clearer differentiation — consider adding a one-line description under each"
+    },
+    {
+      "behavior": "Does not find Recurring tab or is confused by it",
+      "meaning": "Tab label or content needs work — probe: 'What would you call this?'"
+    },
+    {
+      "behavior": "Feels View All modal is overwhelming",
+      "meaning": "Modal is still too complex — consider stripping to list only with no internal tabs"
+    },
+    {
+      "behavior": "Cannot get from Snapshot to a card",
+      "meaning": "Navigation path is broken — the jump icon or View All link is not clear enough"
+    },
+    {
+      "behavior": "Understands Supply card but does not trust it",
+      "meaning": "Trust problem, not comprehension problem — probe what would increase confidence"
+    },
+    {
+      "behavior": "Cannot connect LOS to dollars on Routine card",
+      "meaning": "The translation needs a plain-language bridge — 'X extra days = $Y per case' may need to be explicit"
+    },
+    {
+      "behavior": "Says 'I would need to talk to someone' for Routine card",
