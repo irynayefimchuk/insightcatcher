@@ -25,7 +25,7 @@
         {
           "id": "snapshot-test-v2",
           "name": "Snapshot Discovery Test",
-          "file": "cci-snapshot-test-v2",
+          "file": "cci-snapshot-test-v2.json",
           "type": "usability"
         },
         {
