@@ -91,7 +91,7 @@
       "subtitle": "Discoverability and comprehension",
       "timeMinutes": 3,
       "optional": false,
-      "script": "Is there anything on this page that could help you find where one action might have the broadest impact - across multiple procedures or providers? See if you can find it.",
+      "script": "“Do you ever look for patterns that repeat — like the same procedures or providers showing up across multiple cost saving opportunities?” “If yes, where would you look on this page to find that?”",
       "watchFor": [
         "Do they find the Recurring tab without being directed to it?",
         "Once on Recurring - do they understand what the three sections show (Procedures / Providers / Supplies)?",
