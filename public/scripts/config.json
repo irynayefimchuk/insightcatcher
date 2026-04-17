@@ -6,7 +6,7 @@
       "scripts": [
         {
           "id": "ux-discovery-stakeholder",
-          "name": "Product Development Process - Discovery Interview",
+          "name": "Product Development Process Interview",
           "file": "ux-discovery-stakeholder.json",
           "type": "discovery"
         }
@@ -14,7 +14,7 @@
     },
         {
           "id": "snapshot-test-v2",
-          "name": "Snapshot Tab - Usability Test",
+          "name": "CCI Snapshot Test",
           "file": "cci-snapshot-test-v2.json",
           "type": "usability"
         },
