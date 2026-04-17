@@ -23,6 +23,12 @@
           "type": "usability"
         },
         {
+          "id": "snapshot-test-v2",
+          "name": "Snapshot Discovery Test",
+          "file": "cci-snapshot-test-v2",
+          "type": "usability"
+        },
+        {
           "id": "example-test",
           "name": "Example Test Template",
           "file": "example-test.json",
