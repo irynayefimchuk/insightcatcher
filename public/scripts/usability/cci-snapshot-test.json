@@ -27,7 +27,7 @@
       {
         "id": "w1",
         "label": "Current process",
-        "question": "When you're trying to find cost reduction opportunities in a service line — how do you typically start? What are the top 2–3 things you look for?",
+        "question": "When you're trying to find cost reduction opportunities — how and were do you typically start? What are the top 2–3 things you look for?",
         "listenFor": "What data do they need? What makes something a priority?"
       },
       {
@@ -75,7 +75,7 @@
       "name": "Filter to a specific priority",
       "subtitle": "Test filtering mechanics",
       "timeMinutes": 3,
-      "script": "Your VP asks you to focus only on knee replacement opportunities with the highest savings. Show me how you'd find those.",
+      "script": "Let's say you want to focus only on knee replacement opportunities with the highest savings. Show me how you'd find those.",
       "success": "User applies filters (category and/or procedure). Can explain what changed on the right side. Can undo or adjust filters without getting stuck.",
       "watchFor": [
         "Do they find the filter controls easily?",
@@ -107,7 +107,7 @@
       "subtitle": "View dropdown with checkboxes",
       "timeMinutes": 2,
       "optional": true,
-      "script": "Now you only want to see Procedures and Providers — not Opportunities or Cost Drivers. How would you do that?",
+      "script": "Let's say the interface is a bit too busy while you areNow you only want to see Procedures and Providers — not Opportunities or Cost Drivers. How would you do that?",
       "success": "User finds the View dropdown and uses checkboxes to show/hide columns.",
       "watchFor": [
         "Do they find the View dropdown?",
