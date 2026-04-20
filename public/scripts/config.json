@@ -12,6 +12,10 @@
         }
       ]
     },
+    {
+      "id": "cci",
+      "name": "CCI (Clinical Cost Intelligence)",
+      "scripts": [
         {
           "id": "snapshot-test-v2",
           "name": "CCI Snapshot Test",
