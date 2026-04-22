@@ -772,8 +772,22 @@ function TasksPhase({ tasks, currentIndex, setCurrentIndex, status, updateStatus
               {showScript ? <EyeOff size={12} /> : <Eye size={12} />}{showScript ? 'Hide' : 'Show'} script
             </button>
             {showScript && (
-              <div style={{ background: t.hoverBg, borderRadius: 8, padding: '14px 18px', borderLeft: `3px solid ${t.brand}` }}>
-                <p style={{ fontSize: 16, fontStyle: 'italic', color: t.textMain, lineHeight: 1.7 }}>"{task.script}"</p>
+              <div>
+                <div style={{ background: t.hoverBg, borderRadius: 8, padding: '14px 18px', borderLeft: `3px solid ${t.brand}`, marginBottom: task.steps ? 12 : 0 }}>
+                  <p style={{ fontSize: 16, fontStyle: 'italic', color: t.textMain, lineHeight: 1.7 }}>"{task.script}"</p>
+                </div>
+                {task.steps && task.steps.length > 0 && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    {task.steps.map((step, idx) => (
+                      <div key={step.id} style={{ background: t.subtleBg, borderRadius: 8, padding: '12px 16px', borderLeft: `3px solid ${t.textDetail}` }}>
+                        <div style={{ fontSize: 12, fontWeight: 600, color: t.textDetail, marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                          Step {String.fromCharCode(97 + idx).toUpperCase()}
+                        </div>
+                        <p style={{ fontSize: 15, fontStyle: 'italic', color: t.textMain, lineHeight: 1.6 }}>"{step.prompt}"</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </div>
