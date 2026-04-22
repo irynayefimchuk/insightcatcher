@@ -91,35 +91,33 @@
       "subtitle": "Discoverability and comprehension",
       "timeMinutes": 3,
       "optional": false,
-      "script": "“Do you ever look for patterns that repeat — like the same procedures or providers showing up across multiple cost saving opportunities?” “If yes, where would you look on this page to find that?”",
-      "watchFor": [
-        "Do they find the Recurring tab without being directed to it?",
-        "Once on Recurring - do they understand what the three sections show (Procedures / Providers / Supplies)?",
-        "Do they understand what the numbers mean - for example 3 high-cost providers?",
-        "Is Recurring a meaningful label to them, or does it need more explanation?",
-        "Which section do they look at first - Procedures, Providers, or Supplies?",
-        "Do they find the hover tooltips, and do they help?"
+      "script": "Do you look for what repeats across savings opportunities? If yes, where would you look on this page?",
+"watchFor": [
+  "Do they find Recurring on their own? (Missed it / Workaround / Gave up)",
+  "Do they understand what Recurring shows? (Confused / Surprised)",
+  "Which section do they look at first: Procedures, Providers?",
+  "Do they understand the values & buttons?",
       ],
-      "success": "User finds the Recurring tab. Can explain in their own words what at least one of the three sections is showing. Can identify at least one item they would act on and why.",
-      "learnWhy": "Tests discoverability of the tab and comprehension of the concept. Which section they reach for first tells us which lens matters most to this user type."
+      "success": "Finds Recurring and correctly explains what one section shows. Points to one item they’d follow up on (and why).",
+      "learnWhy": "Checks if Recurring is discoverable, understandable, and useful. First section they use shows their preferred lens."
     },
     {
-      "id": "5",
-      "name": "View All and navigate to a card",
-      "subtitle": "Modal and jump to Opportunity Hub",
-      "timeMinutes": 3,
-      "optional": false,
-      "script": "You want to see everything - not just the top 3. Find the full list and pick one opportunity you would want to look into.",
-      "watchFor": [
-        "Do they find the View All link without prompting?",
-        "Once in the modal - do they feel oriented, or overwhelmed?",
-        "Do they use the bar chart or switch to the table? Which do they prefer?",
-        "Can they find the icon that jumps to the opportunity card?",
-        "Does the modal feel like a natural extension of the page, or a separate tool?"
-      ],
-      "success": "User opens View All, browses the list, and successfully navigates to an opportunity card. Does not get lost or confused about where they are.",
-      "learnWhy": "Tests the View All modal and the path from Snapshot to Opportunity Hub. If users feel the modal is a full analytics tool rather than a simple list, that is a signal it is still too complex."
-    },
+  "id": "5",
+  "name": "View All and navigate to a card",
+  "subtitle": "Modal + jump to Opportunity Hub",
+  "timeMinutes": 3,
+  "optional": false,
+  "script": "You want the full list, not just the top 3. Find it and open one opportunity you’d want to review.",
+  "watchFor": [
+    "Do they find View All on their own?",
+    "In the modal: oriented or overwhelmed?",
+    "Do they prefer bars or table?",
+    "Do they find the jump-to-card icon?",
+    "Do they understand where they are (Snapshot vs modal vs card)?"
+  ],
+  "success": "Finds View All and opens an opportunity card without getting lost.",
+  "learnWhy": "Tests whether View All feels like a simple list and whether the Snapshot → card path is obvious."
+},
     {
       "id": "6",
       "name": "Read and interpret a Supply card",
