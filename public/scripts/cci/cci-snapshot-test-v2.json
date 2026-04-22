@@ -56,7 +56,7 @@
       "subtitle": "Where do they go first?",
       "timeMinutes": 2,
       "optional": false,
-      "script": "Now, click the first thing you’d explore on this page. As you do, tell me what you expect will happen",
+      "script": "Now, click the first thing you\u2019d explore on this page. As you do, tell me what you expect will happen",
       "watchFor": [
         "Where do they click first: left panel, right panel, or AI banner?",
         "Do they start by selecting a category on the left or a card on the right?",
@@ -75,15 +75,15 @@
       "optional": false,
       "script": "How would you use this page to find the biggest cost-savings opportunity right now? Walk me through your steps.",
       "watchFor": [
-  "First path: left panel filter or right-side list?",
-  "Do they notice/use the Show tabs?",
-  "Do they realize tabs change ranking (same items)?",
-  "Do they rely on the AI banner vs exploring?",
-  "End state: confident choice or hesitation?"
+        "First path: left panel filter or right-side list?",
+        "Do they notice/use the Show tabs?",
+        "Do they realize tabs change ranking (same items)?",
+        "Do they rely on the AI banner vs exploring?",
+        "End state: confident choice or hesitation?"
       ],
       "success": "Picks one top opportunity, explains why, and uses a tab or filter to confirm (not just the default top row).",
-      "learnWhy": "Tests Snapshot’s core value: can users triage fast and understand Show tabs as re-ranking the same items.",
-      "followUpProbe": "If they stop at Annual Savings without exploring other tabs, ask: Did you consider looking at this any other way?"
+      "learnWhy": "Tests Snapshot\u2019s core value: can users triage fast and understand Show tabs as re-ranking the same items.",
+      "followUpProbe": "Before committing, what else would you check?"
     },
     {
       "id": "4",
@@ -92,32 +92,41 @@
       "timeMinutes": 3,
       "optional": false,
       "script": "Do you look for what repeats across savings opportunities? If yes, where would you look on this page?",
-"watchFor": [
-  "Do they find Recurring on their own? (Missed it / Workaround / Gave up)",
-  "Do they understand what Recurring shows? (Confused / Surprised)",
-  "Which section do they look at first: Procedures, Providers?",
-  "Do they understand the values & buttons?",
+      "watchFor": [
+        "Do they find Recurring on their own? (Missed it / Workaround / Gave up)",
+        "Do they understand what Recurring shows? (Confused / Surprised)",
+        "Which section do they look at first: Procedures, Providers?",
+        "Do they understand the values & buttons?"
       ],
-      "success": "Finds Recurring and correctly explains what one section shows. Points to one item they’d follow up on (and why).",
+      "success": "Finds Recurring and correctly explains what one section shows. Points to one item they\u2019d follow up on (and why).",
       "learnWhy": "Checks if Recurring is discoverable, understandable, and useful. First section they use shows their preferred lens."
     },
     {
-  "id": "5",
-  "name": "View All and navigate to a card",
-  "subtitle": "Modal + jump to Opportunity Hub",
-  "timeMinutes": 3,
-  "optional": false,
-  "script": "You want the full list, not just the top 3. Find it and open one opportunity you’d want to review.",
-  "watchFor": [
-    "Do they find View All on their own?",
-    "In the modal: oriented or overwhelmed?",
-    "Do they prefer bars or table?",
-    "Do they find the jump-to-card icon?",
-    "Do they understand where they are (Snapshot vs modal vs card)?"
-  ],
-  "success": "Finds View All and opens an opportunity card without getting lost.",
-  "learnWhy": "Tests whether View All feels like a simple list and whether the Snapshot → card path is obvious."
-},
+      "id": "5",
+      "name": "View All and navigate to a card",
+      "subtitle": "Modal + jump to Opportunity Hub",
+      "timeMinutes": 3,
+      "optional": false,
+      "script": "You want the full list, not just the top 3. Find it and open one opportunity you\u2019d want to review.",
+      "watchFor": [
+        "Do they find View All on their own?",
+        "In the modal: oriented or overwhelmed?",
+        "Do they prefer bars or table?",
+        "Do they find the jump-to-card icon?",
+        "Do they understand where they are (Snapshot vs modal vs card)?"
+      ],
+      "success": "Finds View All and opens an opportunity card without getting lost.",
+      "learnWhy": "Tests whether View All feels like a simple list and whether the Snapshot \u2192 card path is obvious.",
+      "followUpQuestions": [
+        "Which view felt easier to work with, and why?",
+        "Which view did you trust more, and why?"
+      ],
+      "facilitatorNote": {
+        "type": "note",
+        "title": "Compare table vs bars (neutral)",
+        "content": "After they open one item, ask the two follow-up questions above. Do not suggest one view should be better."
+      }
+    },
     {
       "id": "6",
       "name": "Read and interpret a Supply card",
@@ -161,28 +170,23 @@
     }
   ],
   "wrapup": {
-    "timeMinutes": 5,
-    "intro": "Ask after all tasks. These are discussion questions - not tasks. Let them talk.",
+    "timeMinutes": 4,
+    "intro": "Quick wrap-up. Keep answers specific.",
     "questions": [
       {
         "id": "c1",
-        "label": "Overall",
-        "question": "Now that you have seen the whole flow - what worked? What was frustrating or unclear?"
+        "label": "Missing for trust",
+        "question": "What\u2019s missing here for you to trust the numbers enough to take action?"
       },
       {
         "id": "c2",
-        "label": "Missing information",
-        "question": "Was there anything you expected to see that was not there?"
+        "label": "Hard to find",
+        "question": "What was hard to find or took too long to figure out?"
       },
       {
         "id": "c3",
-        "label": "Trust",
-        "question": "Would you use this to prepare for a conversation with a physician or a finance review? Why or why not?"
-      },
-      {
-        "id": "c4",
-        "label": "Left panel",
-        "question": "On the main screen - did you find the left side useful? Would you use it, or would you go straight to the cards?"
+        "label": "One change",
+        "question": "What\u2019s the one change you would make to this page?"
       }
     ]
   },
