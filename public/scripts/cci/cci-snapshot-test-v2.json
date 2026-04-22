@@ -21,7 +21,7 @@
       {
         "id": "w1",
         "label": "Current process",
-        "question": "When you are identifying cost reduction opportunities - where do you typically start? What are the top 2-3 things you look for?",
+        "question": "When you are identifying cost saving opportunities - where do you typically start? What are the top 2-3 things you look for?",
         "listenFor": "What data matters to them? What makes something worth pursuing?"
       },
       {
@@ -47,7 +47,7 @@
         "Do they understand the category breakdown (Supplies, Routine, Ancillary)?",
         "Do they understand the page purpose without any explanation?"
       ],
-      "success": "User can describe what the page is for in their own words. Points to a specific area and gives a reason tied to what they see - not just that looks important.",
+      "success": "User can describe what the page is for in their own words. Points to a specific area and gives a reason tied to what they see.",
       "learnWhy": "Pure orientation. Tests basic comprehension before any interaction biases them. Also tells you whether the left/right split reads as two connected things or two unrelated panels."
     },
     {
@@ -56,16 +56,16 @@
       "subtitle": "Where do they go first?",
       "timeMinutes": 2,
       "optional": false,
-      "script": "Now go ahead and click on the first thing you would want to explore. Tell me what you are expecting to see before you click.",
+      "script": "Now, click the first thing you’d explore on this page. As you do, tell me what you expect will happen",
       "watchFor": [
-        "Is their instinctive entry point the left panel, right panel, or the AI banner link?",
-        "Do they click a category row on the left, or go straight to a card on the right?",
-        "Does their expectation match what actually happens when they click?",
-        "If the result surprises them - what did they expect instead?",
-        "Do they understand that clicking the left panel filters the right panel?"
+        "Where do they click first: left panel, right panel, or AI banner?",
+        "Do they start by selecting a category on the left or a card on the right?",
+        "Do they understand left-side selections filter the right side?",
+        "Does the click outcome match their expectation? If not, what did they expect?",
+        "Do they understand the panels' filtering logic?"
       ],
-      "success": "User clicks something with a stated reason. Can describe what they expected before seeing the result. Reaction to the result is not confusion.",
-      "learnWhy": "Reveals natural navigation pattern. Whether they use the left panel as a filter or skip it entirely is one of the most important things we need to learn."
+      "success": "User clicks first with a clear reason, states what they expect to happen. The outcome makes sense to them (no major confusion).",
+      "learnWhy": "Shows natural entry path and whether they use left-side filtering or skip it."
     },
     {
       "id": "3",
@@ -73,16 +73,16 @@
       "subtitle": "Test left panel and sorting tabs together",
       "timeMinutes": 4,
       "optional": false,
-      "script": "Looking at this page - where is the single biggest cost savings opportunity right now? Walk me through how you figure that out.",
+      "script": "How would you use this page to find the biggest cost-savings opportunity right now? Walk me through your steps.",
       "watchFor": [
-        "Do they use the left panel to narrow down, or rely only on the right panel?",
-        "Do they notice the Show tabs (Annual Savings / Volume / Recurring)?",
-        "Do they understand that tabs re-rank the same opportunities differently - not show different content?",
-        "Do they look at the AI banner for the answer instead of exploring themselves?",
-        "After finding an answer - do they feel confident, or uncertain?"
+  "First path: left panel filter or right-side list?",
+  "Do they notice/use the Show tabs?",
+  "Do they realize tabs change ranking (same items)?",
+  "Do they rely on the AI banner vs exploring?",
+  "End state: confident choice or hesitation?"
       ],
-      "success": "User lands on a specific opportunity and can state why it is the biggest. Uses at least one tab or filter to support their answer - not just reads the first item on the default view.",
-      "learnWhy": "This is the core Snapshot job-to-be-done. Tests whether tabs are noticed and understood - specifically whether users understand Annual Savings vs Volume as two different lenses on the same data.",
+      "success": "Picks one top opportunity, explains why, and uses a tab or filter to confirm (not just the default top row).",
+      "learnWhy": "Tests Snapshot’s core value: can users triage fast and understand Show tabs as re-ranking the same items.",
       "followUpProbe": "If they stop at Annual Savings without exploring other tabs, ask: Did you consider looking at this any other way?"
     },
     {
