@@ -21,7 +21,7 @@
       {
         "id": "w1",
         "label": "Current process",
-        "question": "When you are identifying cost saving opportunities - where do you typically start? What are the top 2-3 things you look for?",
+        "question": "Walk me through how you usually decide which cost opportunities to pursue first, how do you narrow down where to focus?",
         "listenFor": "What data matters to them? What makes something worth pursuing?"
       },
       {
@@ -39,7 +39,7 @@
       "subtitle": "Observe before they click anything",
       "timeMinutes": 3,
       "optional": false,
-      "script": "Take a moment to look at this page without clicking anything. Tell me what you are looking at. What is this page showing you, and where would you focus first?",
+      "script": "Take a few moments to look at this page without clicking. What do you think this page is for, and where would you start?",
       "watchFor": [
         "What catches their eye first - left panel, right panel, summary cards at top, or the AI banner?",
         "Do they read the left panel as a filter, a summary, or something else entirely?",
