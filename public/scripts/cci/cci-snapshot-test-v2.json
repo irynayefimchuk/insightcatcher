@@ -2,8 +2,8 @@
   "id": "cci-snapshot-discovery-2026-04",
   "title": "CCI Snapshot - Discovery Test",
   "subtitle": "Snapshot tab + Opportunity Cards",
-  "version": "2.0",
-  "totalTimeMinutes": 40,
+  "version": "2.1",
+  "totalTimeMinutes": 33,
   "description": "Test whether the Snapshot tab helps users find where to focus and navigate to opportunity cards. Learn what they use, what they ignore, and what is missing - particularly on the left panel and the sorting tabs.",
   "setup": {
     "rules": [
@@ -21,7 +21,7 @@
       {
         "id": "w1",
         "label": "Current process",
-        "question": "Walk me through how you usually decide which cost opportunities to pursue first, how do you narrow down where to focus?",
+        "question": "Walk me through how you usually decide which cost opportunities to pursue first. How do you narrow down where to focus?",
         "listenFor": "What data matters to them? What makes something worth pursuing?"
       },
       {
@@ -56,7 +56,7 @@
       "subtitle": "Where do they go first?",
       "timeMinutes": 2,
       "optional": false,
-      "script": "Now, click the first thing you\u2019d explore on this page. As you do, tell me what you expect will happen",
+      "script": "Now, click the first thing you’d explore on this page. As you do, tell me what you expect will happen.",
       "watchFor": [
         "Where do they click first: left panel, right panel, or AI banner?",
         "Do they start by selecting a category on the left or a card on the right?",
@@ -69,21 +69,44 @@
     },
     {
       "id": "3",
-      "name": "Find the biggest opportunity",
-      "subtitle": "Test left panel and sorting tabs together",
-      "timeMinutes": 4,
+      "name": "Use both views to find the biggest opportunity",
+      "subtitle": "Visual vs Table + picking a focus",
+      "timeMinutes": 6,
       "optional": false,
-      "script": "How would you use this page to find the biggest cost-savings opportunity right now? Walk me through your steps.",
-      "watchFor": [
-        "First path: left panel filter or right-side list?",
-        "Do they notice/use the Show tabs?",
-        "Do they realize tabs change ranking (same items)?",
-        "Do they rely on the AI banner vs exploring?",
-        "End state: confident choice or hesitation?"
+      "script": "Let’s say you’re looking for the biggest opportunities and where to focus first. This page has two ways to view the same information: a visual view and a table view.",
+      "steps": [
+        {
+          "id": "3a",
+          "prompt": "Start with Explore Visual. Use it to find the biggest opportunity you’d want to focus on. Talk out loud about what you’re looking at and how you’re deciding."
+        },
+        {
+          "id": "3b",
+          "prompt": "Now switch the toggle to View as Table. Do the same thing - find the biggest opportunity you’d want to focus on. Talk out loud again as you decide."
+        },
+        {
+          "id": "3c",
+          "prompt": "Now choose whichever view works best for you. Using that view, pick the single biggest opportunity you’d focus on right now and tell me why."
+        }
       ],
-      "success": "Picks one top opportunity, explains why, and uses a tab or filter to confirm (not just the default top row).",
-      "learnWhy": "Tests Snapshot\u2019s core value: can users triage fast and understand Show tabs as re-ranking the same items.",
-      "followUpProbe": "Before committing, what else would you check?"
+      "watchFor": [
+        "Do they notice the toggle and understand it’s the same data in two views?",
+        "In visual: do they use left filters or Show tabs to validate their pick?",
+        "In table: do they sort, scan columns, or use grouping/filters?",
+        "Do they pick the same opportunity in both views or change their pick? Why?",
+        "Do they stay oriented (what is being ranked and why), or sound uncertain?"
+      ],
+      "success": "User can find and name a single biggest opportunity, explain why, and show how they arrived there using either view (not just reading the first default item).",
+      "learnWhy": "Core Snapshot test: can users quickly find a focus and understand the two viewing modes. Also reveals whether visual is easier and table is more trustworthy (or the reverse).",
+      "followUpQuestions": [
+        "Which view felt easier to work with, and why?",
+        "Which view felt more trustworthy, and why?",
+        "Before committing to your top pick, what else would you check?"
+      ],
+      "facilitatorNote": {
+        "type": "note",
+        "title": "Stay neutral",
+        "content": "Do not suggest one view should be better. Let them choose. If they only use one view, prompt them to try the other before asking ease/trust."
+      }
     },
     {
       "id": "4",
@@ -91,81 +114,53 @@
       "subtitle": "Discoverability and comprehension",
       "timeMinutes": 3,
       "optional": false,
-      "script": "Do you look for what repeats across savings opportunities? If yes, where would you look on this page?",
+      "script": "Imagine you’re reviewing opportunities. Is it useful to see which procedures or providers come up repeatedly? If yes, where would you look on this page?",
       "watchFor": [
         "Do they find Recurring on their own? (Missed it / Workaround / Gave up)",
         "Do they understand what Recurring shows? (Confused / Surprised)",
-        "Which section do they look at first: Procedures, Providers?",
-        "Do they understand the values & buttons?"
+        "Which section do they look at first: Procedures, Providers, Supplies?",
+        "Do they understand what the counts represent (e.g., providers involved, opportunities linked)?",
+        "Do they find hover tooltips, and do those help?"
       ],
-      "success": "Finds Recurring and correctly explains what one section shows. Points to one item they\u2019d follow up on (and why).",
+      "success": "Finds Recurring and correctly explains what one section shows. Points to one item they’d follow up on (and why).",
       "learnWhy": "Checks if Recurring is discoverable, understandable, and useful. First section they use shows their preferred lens."
     },
     {
       "id": "5",
-      "name": "View All and navigate to a card",
-      "subtitle": "Modal + jump to Opportunity Hub",
-      "timeMinutes": 3,
-      "optional": false,
-      "script": "You want the full list, not just the top 3. Find it and open one opportunity you\u2019d want to review.",
-      "watchFor": [
-        "Do they find View All on their own?",
-        "In the modal: oriented or overwhelmed?",
-        "Do they prefer bars or table?",
-        "Do they find the jump-to-card icon?",
-        "Do they understand where they are (Snapshot vs modal vs card)?"
-      ],
-      "success": "Finds View All and opens an opportunity card without getting lost.",
-      "learnWhy": "Tests whether View All feels like a simple list and whether the Snapshot \u2192 card path is obvious.",
-      "followUpQuestions": [
-        "Which view felt easier to work with, and why?",
-        "Which view did you trust more, and why?"
-      ],
-      "facilitatorNote": {
-        "type": "note",
-        "title": "Compare table vs bars (neutral)",
-        "content": "After they open one item, ask the two follow-up questions above. Do not suggest one view should be better."
-      }
-    },
-    {
-      "id": "6",
       "name": "Read and interpret a Supply card",
       "subtitle": "Comprehension and trust",
-      "timeMinutes": 4,
+      "timeMinutes": 5,
       "optional": false,
-      "script": "Take a look at this opportunity. Tell me what it is showing you. If you needed to decide whether this is worth pursuing - what would you look at, and what would you need to feel confident?",
+      "script": "Open the Supply opportunity you picked. Tell me what it is showing you. What do you look at to decide whether it’s worth pursuing, and what would you need to trust it?",
       "watchFor": [
         "What do they read first - savings amount, provider comparison, or cost drivers?",
         "Do they understand the high-cost vs low-cost provider comparison?",
         "Do they understand use-driven vs price-driven without explanation?",
-        "Do they trust the savings estimate, or question how it was calculated?",
-        "Do they expand the card to see more detail, or stay in collapsed view?",
-        "What would make them confident enough to bring this to a physician conversation?"
+        "Do they question how savings were calculated or whether the comparison is fair?",
+        "Do they look for risk/severity context or trend over time?"
       ],
-      "success": "User can describe: what the cost gap is, who the high-cost provider is, and at least one driver. Can state whether they would act on it and why.",
-      "learnWhy": "Tests card comprehension and trust for Supply opportunities. The trust question is critical - if they understand but do not trust it, that is a different problem than not understanding."
+      "success": "User can describe: what the cost gap is, who/what is being compared, and at least one driver. Can name what they would need to trust it.",
+      "learnWhy": "Tests comprehension and trust. If they understand but don’t trust, that’s a different problem than not understanding."
     },
     {
-      "id": "7",
+      "id": "6",
       "name": "Read a Routine Services card",
-      "subtitle": "First draft - exploratory only",
-      "timeMinutes": 4,
+      "subtitle": "Compare clarity across card types",
+      "timeMinutes": 5,
       "optional": false,
-      "script": "Now look at this one. It is a different type of opportunity. Tell me what it is showing you and what the numbers mean to you.",
+      "script": "Now open a Routine Services opportunity. Tell me what it is showing you and what the numbers mean to you.",
       "watchFor": [
-        "Do they connect length of stay to the dollar figure without explanation?",
-        "Do they understand what the CMS benchmark means and why it matters?",
-        "Does the LOS gap concept make sense, or does it need a plain-language explanation?",
+        "Do they connect the routine metric (e.g., LOS/utilization) to the dollar figure without explanation?",
+        "Do they understand what the benchmark means and why it matters?",
         "Who do they think should own this type of opportunity?",
-        "What is confusing, missing, or surprising?",
-        "Would they act on this card, or do they need more information first?"
+        "What is confusing, missing, or surprising - compared to the Supply card?"
       ],
-      "success": "User can describe the LOS gap and the dollar implication in their own words. Notes what makes sense and what does not. States who they would bring this to.",
-      "learnWhy": "Exploratory only - this is a first draft. We want impressions and gaps, not pass/fail. The most valuable output is what they say is missing or confusing.",
+      "success": "User can explain the main gap and the dollar implication in their own words. Can say what’s missing to trust or act on it.",
+      "learnWhy": "Checks whether Routine Services is understandable and comparable to Supply opportunities, and what extra context is needed.",
       "facilitatorNote": {
         "type": "warning",
         "title": "Routine Services card - first draft",
-        "content": "Do not guide or explain. After they have explored, probe with: What would you need to see to trust this number? / Who would you bring this to? / What is missing here for you?"
+        "content": "Do not guide or explain. After they explore, probe with: What would you need to see to trust this number? / Who would you bring this to? / What is missing here for you?"
       }
     }
   ],
@@ -176,7 +171,7 @@
       {
         "id": "c1",
         "label": "Missing for trust",
-        "question": "What\u2019s missing here for you to trust the numbers enough to take action?"
+        "question": "What’s missing here for you to trust the numbers enough to take action?"
       },
       {
         "id": "c2",
@@ -186,7 +181,7 @@
       {
         "id": "c3",
         "label": "One change",
-        "question": "What\u2019s the one change you would make to this page?"
+        "question": "What’s the one change you would make to this page?"
       }
     ]
   },
@@ -208,24 +203,12 @@
       "meaning": "Tab label or content needs work - probe: What would you call this?"
     },
     {
-      "behavior": "Feels View All modal is overwhelming",
-      "meaning": "Modal is still too complex - consider stripping to list only with no internal tabs"
-    },
-    {
-      "behavior": "Cannot get from Snapshot to a card",
-      "meaning": "Navigation path is broken - the jump icon or View All link is not clear enough"
-    },
-    {
       "behavior": "Understands Supply card but does not trust it",
       "meaning": "Trust problem, not comprehension problem - probe what would increase confidence"
     },
     {
-      "behavior": "Cannot connect LOS to dollars on Routine card",
-      "meaning": "The translation needs a plain-language bridge - X extra days = Y dollars per case may need to be explicit"
-    },
-    {
-      "behavior": "Says I would need to talk to someone for Routine card",
-      "meaning": "Card does not give enough to act - probe exactly what is missing"
+      "behavior": "Cannot connect routine metric to dollars",
+      "meaning": "Translation needs a plain-language bridge (e.g., X extra days = Y dollars per case)"
     }
   ]
 }
