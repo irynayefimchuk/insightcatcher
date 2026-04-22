@@ -149,7 +149,7 @@ export default function InsightCatcher() {
   const [showCompleteModal, setShowCompleteModal] = useState(false);
 
   useEffect(() => { loadConfig(); }, []);
-  useEffect(() => { if (config) loadSavedSessions(); }, [config]);
+  // useEffect(() => { if (config) loadSavedSessions(); }, [config]);
 
   const loadConfig = async () => {
     try {
@@ -219,19 +219,20 @@ export default function InsightCatcher() {
   const saveCompletedSession = async () => {
     stopTimer();
     setSaving(true); setCurrentPhase('complete'); setShowCompleteModal(true);
-    try {
-      await supabase.from('sessions').insert([{
-        project_id: selectedProject,
-        project_name: config?.projects.find(p => p.id === selectedProject)?.name,
-        script_id: selectedScriptId, script_title: script.title,
-        script_type: script.type || 'usability',
-        participant_id: participantId, runner_name: runnerName,
-        session_start_time: sessionStartTime, session_end_time: new Date(),
-        task_status: taskStatus, warmup_status: warmupStatus,
-        wrapup_status: wrapupStatus, session_notes: sessionNotes, tags: {},
-      }]);
-      await loadSavedSessions();
-    } catch (err) { console.error(err); }
+    // Supabase session saving disabled - no auth configured
+    // try {
+    //   await supabase.from('sessions').insert([{
+    //     project_id: selectedProject,
+    //     project_name: config?.projects.find(p => p.id === selectedProject)?.name,
+    //     script_id: selectedScriptId, script_title: script.title,
+    //     script_type: script.type || 'usability',
+    //     participant_id: participantId, runner_name: runnerName,
+    //     session_start_time: sessionStartTime, session_end_time: new Date(),
+    //     task_status: taskStatus, warmup_status: warmupStatus,
+    //     wrapup_status: wrapupStatus, session_notes: sessionNotes, tags: {},
+    //   }]);
+    //   await loadSavedSessions();
+    // } catch (err) { console.error(err); }
     setSaving(false);
   };
 
