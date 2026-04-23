@@ -258,20 +258,37 @@ export default function InsightCatcher() {
         wrapup_status: wrapupStatus, session_notes: sessionNotes, tags: {},
       };
       
-      // Save to SharePoint via serverless function
-      const response = await fetch('/api/save-session', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ session: sessionData }),
-      });
+      let savedSuccessfully = false;
+      let saveLocation = '';
+      
+      // Try SharePoint first
+      try {
+        const response = await fetch('/api/save-session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ session: sessionData }),
+        });
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to save session');
+        if (response.ok) {
+          console.log('Session saved to SharePoint');
+          savedSuccessfully = true;
+          saveLocation = 'SharePoint';
+        } else {
+          throw new Error('SharePoint save failed');
+        }
+      } catch (err) {
+        console.warn('SharePoint save failed, falling back to Supabase:', err.message);
+        // Fall back to Supabase
+        await supabase.from('sessions').insert([sessionData]);
+        console.log('Session saved to Supabase (fallback)');
+        savedSuccessfully = true;
+        saveLocation = 'Supabase';
       }
-
-      console.log('Session saved to SharePoint');
-      // Note: loadSavedSessions() can be re-enabled later with a SharePoint read endpoint
+      
+      if (savedSuccessfully) {
+        console.log(`Session successfully saved to ${saveLocation}`);
+        await loadSavedSessions();
+      }
     } catch (err) { console.error('Error saving session:', err); alert('Failed to save session: ' + err.message); }
     setSaving(false);
   };
