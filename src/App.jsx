@@ -246,7 +246,8 @@ export default function InsightCatcher() {
     stopTimer();
     setSaving(true); setCurrentPhase('complete'); setShowCompleteModal(true);
     try {
-      await supabase.from('sessions').insert([{
+      const sessionData = {
+        id: `sess_${Date.now()}`,
         project_id: selectedProject,
         project_name: config?.projects.find(p => p.id === selectedProject)?.name,
         script_id: selectedScriptId, script_title: script.title,
@@ -255,9 +256,23 @@ export default function InsightCatcher() {
         session_start_time: sessionStartTime, session_end_time: new Date(),
         task_status: taskStatus, warmup_status: warmupStatus,
         wrapup_status: wrapupStatus, session_notes: sessionNotes, tags: {},
-      }]);
-      await loadSavedSessions();
-    } catch (err) { console.error(err); }
+      };
+      
+      // Save to SharePoint via serverless function
+      const response = await fetch('/api/save-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ session: sessionData }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to save session');
+      }
+
+      console.log('Session saved to SharePoint');
+      // Note: loadSavedSessions() can be re-enabled later with a SharePoint read endpoint
+    } catch (err) { console.error('Error saving session:', err); alert('Failed to save session: ' + err.message); }
     setSaving(false);
   };
 
