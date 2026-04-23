@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { CheckCircle2, Play, Pause, RotateCcw, AlertTriangle, Copy, Download, Eye, EyeOff, MessageSquare, Lightbulb, Target, CheckSquare, Square, Timer, FileText, Users, Mic, FolderOpen, Trash2, Loader2, RefreshCw, Home, FlaskConical, Search, X, Info, ChevronDown, ChevronRight } from 'lucide-react';
-import { supabase } from './supabase';
+import { CheckCircle2, Play, Pause, RotateCcw, AlertTriangle, Copy, Download, Eye, EyeOff, MessageSquare, Lightbulb, Target, CheckSquare, Square, Timer, FileText, Users, Mic, FolderOpen, Trash2, Loader2, RefreshCw, Home, FlaskConical, Search, X, Info, ChevronDown, ChevronRight, LogOut } from 'lucide-react';
+import { supabase, signOut, onAuthStateChange } from './supabase';
+import Login from './Login';
 
 const t = {
   canvasBg:     '#E9EEF3',
@@ -122,6 +123,9 @@ function Stepper({ currentPhase, onPhaseClick }) {
 }
 
 export default function InsightCatcher() {
+  const [authenticated, setAuthenticated] = useState(false);
+  const [authLoading, setAuthLoading] = useState(true);
+  
   const [config, setConfig] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -148,8 +152,30 @@ export default function InsightCatcher() {
   const [saving, setSaving] = useState(false);
   const [showCompleteModal, setShowCompleteModal] = useState(false);
 
+  // Check auth on mount
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        setAuthenticated(!!session);
+      } catch (err) {
+        console.error('Auth check failed:', err);
+      } finally {
+        setAuthLoading(false);
+      }
+    };
+    checkAuth();
+
+    // Listen for auth changes
+    const { data: { subscription } } = onAuthStateChange((event, session) => {
+      setAuthenticated(!!session);
+    });
+
+    return () => subscription?.unsubscribe();
+  }, []);
+
   useEffect(() => { loadConfig(); }, []);
-  // useEffect(() => { if (config) loadSavedSessions(); }, [config]);
+  useEffect(() => { if (config) loadSavedSessions(); }, [config]);
 
   const loadConfig = async () => {
     try {
@@ -219,21 +245,50 @@ export default function InsightCatcher() {
   const saveCompletedSession = async () => {
     stopTimer();
     setSaving(true); setCurrentPhase('complete'); setShowCompleteModal(true);
-    // Supabase session saving disabled - no auth configured
-    // try {
-    //   await supabase.from('sessions').insert([{
-    //     project_id: selectedProject,
-    //     project_name: config?.projects.find(p => p.id === selectedProject)?.name,
-    //     script_id: selectedScriptId, script_title: script.title,
-    //     script_type: script.type || 'usability',
-    //     participant_id: participantId, runner_name: runnerName,
-    //     session_start_time: sessionStartTime, session_end_time: new Date(),
-    //     task_status: taskStatus, warmup_status: warmupStatus,
-    //     wrapup_status: wrapupStatus, session_notes: sessionNotes, tags: {},
-    //   }]);
-    //   await loadSavedSessions();
-    // } catch (err) { console.error(err); }
+    try {
+      await supabase.from('sessions').insert([{
+        project_id: selectedProject,
+        project_name: config?.projects.find(p => p.id === selectedProject)?.name,
+        script_id: selectedScriptId, script_title: script.title,
+        script_type: script.type || 'usability',
+        participant_id: participantId, runner_name: runnerName,
+        session_start_time: sessionStartTime, session_end_time: new Date(),
+        task_status: taskStatus, warmup_status: warmupStatus,
+        wrapup_status: wrapupStatus, session_notes: sessionNotes, tags: {},
+      }]);
+      await loadSavedSessions();
+    } catch (err) { console.error(err); }
     setSaving(false);
+  };
+
+  const downloadSession = () => {
+    const sessionData = {
+      project_id: selectedProject,
+      project_name: config?.projects.find(p => p.id === selectedProject)?.name,
+      script_id: selectedScriptId,
+      script_title: script.title,
+      script_type: script.type || 'usability',
+      participant_id: participantId,
+      runner_name: runnerName,
+      session_start_time: sessionStartTime,
+      session_end_time: new Date(),
+      task_status: taskStatus,
+      warmup_status: warmupStatus,
+      wrapup_status: wrapupStatus,
+      session_notes: sessionNotes,
+      tags: {}
+    };
+    
+    const dataStr = JSON.stringify(sessionData, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `session_${participantId || 'unnamed'}_${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   const deleteSession = async (id) => {
@@ -284,6 +339,15 @@ export default function InsightCatcher() {
 
   const completedTasks = script ? Object.values(taskStatus).filter(t => t?.done).length : 0;
   const totalTasks = script?.tasks?.length || 0;
+
+  // Check auth
+  if (authLoading) return (
+    <div style={{ minHeight: '100vh', background: t.canvasBg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <Loader2 style={{ color: t.brand, animation: 'spin 1s linear infinite' }} size={28} />
+    </div>
+  );
+
+  if (!authenticated) return <Login onAuthSuccess={() => setAuthenticated(true)} />;
 
   if (loading && !config) return (
     <div style={{ minHeight: '100vh', background: t.canvasBg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -349,6 +413,10 @@ export default function InsightCatcher() {
                   {savedSessions.length}
                 </span>
               )}
+            </button>
+            <button onClick={() => signOut().then(() => setAuthenticated(false))}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.textSub, padding: 4, fontSize: 12 }}>
+              <LogOut size={17} />
             </button>
           </div>
         </div>
@@ -420,7 +488,7 @@ export default function InsightCatcher() {
               <h2 style={{ fontSize: 20, fontWeight: 700, color: t.textHeader, marginBottom: 4 }}>
                 {saving ? 'Saving your session...' : 'That\'s a wrap! 🎉'}
               </h2>
-              {!saving && <p style={{ color: t.textSub, fontSize: 13 }}>Session saved to your central database.</p>}
+              {!saving && <p style={{ color: t.textSub, fontSize: 13 }}>Download your session data and save it to OneDrive.</p>}
             </div>
             {!saving && (
               <>
@@ -446,6 +514,9 @@ export default function InsightCatcher() {
                   <Btn variant="ghost" style={{ flex: 1, justifyContent: 'center' }} onClick={copySessionSummary}>
                     <Copy size={13} />Copy summary
                   </Btn>
+                  <Btn variant="ghost" style={{ flex: 1, justifyContent: 'center' }} onClick={downloadSession}>
+                    <Download size={13} />Save to OneDrive
+                  </Btn>
                   <Btn variant="ghost" style={{ flex: 1, justifyContent: 'center' }} onClick={exportMarkdown}>
                     <Download size={13} />Download report
                   </Btn>
@@ -466,8 +537,8 @@ export default function InsightCatcher() {
         </div>
       )}
 
-      {/* ── Saved sessions modal ── */}
-      {showSavedSessions && (
+      {/* ── Saved sessions modal disabled (no Supabase) ── */}
+      {/* {showSavedSessions && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(2,34,18,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, padding: 24 }}>
           <Card style={{ width: '100%', maxWidth: 560, maxHeight: '80vh', display: 'flex', flexDirection: 'column' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: `1px solid ${t.strokeLight}` }}>
@@ -491,7 +562,7 @@ export default function InsightCatcher() {
             </div>
           </Card>
         </div>
-      )}
+      )} */}
 
       <style>{`
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
