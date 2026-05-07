@@ -61,7 +61,7 @@ export default function Login({ onAuthSuccess }) {
         boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
       }}>
         <h1 style={{ fontSize: 24, fontWeight: 700, color: t.textMain, marginBottom: 8 }}>
-          InsightCatcher
+          UXBuddy
         </h1>
         <p style={{ fontSize: 14, color: t.textSub, marginBottom: 24 }}>
           {isSignUp ? 'Create a new account' : 'Sign in to your account'}
@@ -137,9 +137,30 @@ export default function Login({ onAuthSuccess }) {
               cursor: loading ? 'not-allowed' : 'pointer',
               opacity: loading ? 0.6 : 1,
               fontFamily: 'inherit',
+              marginBottom: 12,
             }}
           >
             {loading ? 'Please wait...' : isSignUp ? 'Sign Up' : 'Sign In'}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => onAuthSuccess()}
+            style={{
+              width: '100%',
+              padding: '12px 16px',
+              background: t.hoverBg,
+              color: t.brand,
+              border: `1px solid ${t.brand}`,
+              borderRadius: 6,
+              fontSize: 14,
+              fontWeight: 600,
+              cursor: 'pointer',
+              fontFamily: 'inherit',
+              marginBottom: 4,
+            }}
+          >
+            Continue as Guest
           </button>
         </form>
 
@@ -159,6 +180,29 @@ export default function Login({ onAuthSuccess }) {
         >
           {isSignUp ? 'Already have an account? Sign In' : "Don't have an account? Sign Up"}
         </button>
+
+        <div style={{ marginTop: 16, paddingTop: 16, borderTop: `1px solid ${t.strokeDefault}` }}>
+          <button
+            onClick={() => onAuthSuccess()}
+            style={{
+              width: '100%',
+              padding: '12px 16px',
+              background: t.hoverBg,
+              color: t.brand,
+              border: `1px solid ${t.brand}`,
+              borderRadius: 6,
+              fontSize: 14,
+              fontWeight: 600,
+              cursor: 'pointer',
+              fontFamily: 'inherit',
+            }}
+          >
+            Continue as Guest
+          </button>
+          <p style={{ fontSize: 12, color: t.textDetail, marginTop: 8, textAlign: 'center' }}>
+            Skip login to explore UXBuddy
+          </p>
+        </div>
       </div>
     </div>
   );
