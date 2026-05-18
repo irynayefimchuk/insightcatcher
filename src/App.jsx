@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { CheckCircle2, Play, Pause, RotateCcw, AlertTriangle, Copy, Download, Eye, EyeOff, MessageSquare, Lightbulb, Target, CheckSquare, Square, Timer, FileText, Users, Mic, FolderOpen, Trash2, Loader2, RefreshCw, Home, FlaskConical, Search, X, Info, ChevronDown, ChevronRight, LogOut } from 'lucide-react';
+import { CheckCircle2, Play, Pause, RotateCcw, AlertTriangle, Copy, Download, Eye, EyeOff, MessageSquare, Lightbulb, Target, CheckSquare, Square, Timer, FileText, Users, Mic, FolderOpen, Trash2, Loader2, RefreshCw, Bot, FlaskConical, Search, X, Info, ChevronDown, ChevronRight, LogOut } from 'lucide-react';
 import { supabase, signOut, onAuthStateChange } from './supabase';
 import Login from './Login';
 
@@ -55,6 +55,8 @@ const MOMS_TEST_DONTS = [
 const PHASES = ['setup', 'warmup', 'tasks', 'wrapup'];
 const PHASE_LABELS = { setup: 'Setup', warmup: 'Warm-up', tasks: 'Tasks', wrapup: 'Wrap-up' };
 
+const getPhases = (scriptType) => scriptType === 'discovery' ? ['setup', 'tasks', 'wrapup'] : ['setup', 'warmup', 'tasks', 'wrapup'];
+
 const Card = ({ children, style }) => (
   <div style={{ background: t.cardBg, border: `1px solid ${t.strokeDefault}`, borderRadius: 10, ...style }}>
     {children}
@@ -89,14 +91,14 @@ const Btn = ({ onClick, disabled, children, variant = 'default', style }) => {
   );
 };
 
-function Stepper({ currentPhase, onPhaseClick }) {
-  const currentIdx = PHASES.indexOf(currentPhase);
+function Stepper({ currentPhase, onPhaseClick, phases = PHASES }) {
+  const currentIdx = phases.indexOf(currentPhase);
   return (
     <div style={{ display: 'flex', alignItems: 'center' }}>
-      {PHASES.map((phase, i) => {
+      {phases.map((phase, i) => {
         const isDone = i < currentIdx;
         const isActive = i === currentIdx;
-        const isLast = i === PHASES.length - 1;
+        const isLast = i === phases.length - 1;
         return (
           <React.Fragment key={phase}>
             <button onClick={() => onPhaseClick(phase)}
@@ -122,7 +124,7 @@ function Stepper({ currentPhase, onPhaseClick }) {
   );
 }
 
-export default function InsightCatcher() {
+export default function UXBuddy() {
   const [authenticated, setAuthenticated] = useState(false);
   const [authLoading, setAuthLoading] = useState(true);
   
@@ -151,6 +153,7 @@ export default function InsightCatcher() {
   const [showSavedSessions, setShowSavedSessions] = useState(false);
   const [saving, setSaving] = useState(false);
   const [showCompleteModal, setShowCompleteModal] = useState(false);
+  const [contextChips, setContextChips] = useState([]);
 
   // Check auth on mount
   useEffect(() => {
@@ -184,7 +187,7 @@ export default function InsightCatcher() {
       if (!res.ok) throw new Error('Failed to load config');
       const data = await res.json();
       setConfig(data);
-      const last = localStorage.getItem('insightcatcher-last-project');
+      const last = localStorage.getItem('uxbuddy-last-project');
       if (last && data.projects.find(p => p.id === last)) setSelectedProject(last);
       setLoading(false);
     } catch (err) { setError(err.message); setLoading(false); }
@@ -210,16 +213,16 @@ export default function InsightCatcher() {
     const data = await loadScript(projectId, scriptInfo.file);
     if (data) {
       setScript(data); setSelectedScriptId(scriptInfo.id); setSelectedProject(projectId);
-      localStorage.setItem('insightcatcher-last-project', projectId);
-      resetSession(); setCurrentPhase('setup');
+      localStorage.setItem('uxbuddy-last-project', projectId);
+      resetSession(data.contextTags || []); setCurrentPhase('setup');
     }
     setLoading(false);
   };
 
-  const resetSession = () => {
+  const resetSession = (initialContextTags = []) => {
     setCurrentTaskIndex(0); setTaskStatus({}); setWarmupStatus({}); setWrapupStatus({});
     setSessionNotes(''); setParticipantId(''); setSessionStartTime(null);
-    setTimer(0); setTimerRunning(false); setShowCompleteModal(false);
+    setTimer(0); setTimerRunning(false); setShowCompleteModal(false); setContextChips(initialContextTags);
   };
 
   useEffect(() => {
@@ -234,12 +237,17 @@ export default function InsightCatcher() {
   const toggleSection = (id) => setExpandedSections(p => ({ ...p, [id]: !p[id] }));
   const updateTaskStatus = (taskId, field, value) =>
     setTaskStatus(p => ({ ...p, [taskId]: { ...p[taskId], [field]: value } }));
-  const startSession = () => { setSessionStartTime(new Date()); setCurrentPhase('warmup'); };
+  const startSession = () => { setSessionStartTime(new Date()); setCurrentPhase(script.type === 'discovery' ? 'tasks' : 'warmup'); setCurrentTaskIndex(0); };
 
   const nextPhase = () => {
-    if (currentPhase === 'warmup') { setCurrentPhase('tasks'); setCurrentTaskIndex(0); }
-    else if (currentPhase === 'tasks') setCurrentPhase('wrapup');
-    else if (currentPhase === 'wrapup') saveCompletedSession();
+    const phases = getPhases(script.type);
+    const currentIdx = phases.indexOf(currentPhase);
+    if (currentIdx < phases.length - 1) {
+      setCurrentPhase(phases[currentIdx + 1]);
+      if (phases[currentIdx + 1] === 'tasks') setCurrentTaskIndex(0);
+    } else {
+      saveCompletedSession();
+    }
   };
 
   const saveCompletedSession = async () => {
@@ -329,7 +337,8 @@ export default function InsightCatcher() {
   };
 
   const nextTask = () => {
-    if (currentTaskIndex < script.tasks.length - 1) {
+    const tasksLength = script?.tasks?.length || 0;
+    if (currentTaskIndex < tasksLength - 1) {
       setCurrentTaskIndex(i => i + 1); setTimer(0); setTimerRunning(false);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } else nextPhase();
@@ -370,7 +379,10 @@ export default function InsightCatcher() {
   };
 
   const completedTasks = script ? Object.values(taskStatus).filter(t => t?.done).length : 0;
-  const totalTasks = script?.tasks?.length || 0;
+  // Handle both old flat tasks and new groups schema
+  const totalTasks = script 
+    ? (script.tasks?.length || (script.groups ? script.groups.reduce((sum, g) => sum + g.questions.length, 0) : 0))
+    : 0;
 
   // Check auth
   if (authLoading) return (
@@ -406,7 +418,7 @@ export default function InsightCatcher() {
           <button onClick={() => { setCurrentPhase('select'); setScript(null); }}
             style={{ display: 'flex', alignItems: 'center', gap: 6, color: t.brand, fontWeight: 700, fontSize: 15,
               background: 'none', border: 'none', cursor: 'pointer', padding: 0, whiteSpace: 'nowrap' }}>
-            <Home size={15} />InsightCatcher
+            <Bot size={15} />UXBuddy
           </button>
           {script && currentPhase !== 'select' && (
             <>
@@ -457,7 +469,7 @@ export default function InsightCatcher() {
         {script && currentPhase !== 'select' && currentPhase !== 'complete' && (
           <div style={{ borderTop: `1px solid ${t.strokeLight}`, background: t.cardBg }}>
             <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 44 }}>
-              <Stepper currentPhase={currentPhase} onPhaseClick={setCurrentPhase} />
+              <Stepper currentPhase={currentPhase} onPhaseClick={setCurrentPhase} phases={getPhases(script.type)} />
               <div style={{ display: 'flex', gap: 6 }}>
                 <Btn variant="ghost" style={{ padding: '3px 12px', fontSize: 12 }}
                   onClick={() => { if (confirm('Restart? All notes will be lost.')) { resetSession(); setCurrentPhase('setup'); } }}>
@@ -470,10 +482,10 @@ export default function InsightCatcher() {
               </div>
             </div>
           </div>
-        )}
+        )}}
 
-        {/* Task breadcrumb row */}
-        {script && currentPhase === 'tasks' && (
+        {/* Task breadcrumb row (old flat task schema only) */}
+        {script && currentPhase === 'tasks' && script.tasks && (
           <div style={{ borderTop: `1px solid ${t.strokeLight}`, background: t.canvasBg }}>
             <div style={{ maxWidth: 1280, margin: '0 auto', padding: '6px 32px', display: 'flex', gap: 4, overflowX: 'auto', scrollbarWidth: 'none' }}>
               {script.tasks.map((task, i) => {
@@ -498,8 +510,8 @@ export default function InsightCatcher() {
       <main style={{ maxWidth: 1280, margin: '0 auto', padding: '16px 32px 120px' }}>
         {currentPhase === 'select' && <SelectPhase config={config} selectedProject={selectedProject} setSelectedProject={setSelectedProject} onSelectScript={selectScript} loading={loading} scriptTypeFilter={scriptTypeFilter} setScriptTypeFilter={setScriptTypeFilter} />}
         {currentPhase === 'setup' && script && <SetupPhase script={script} participantId={participantId} setParticipantId={setParticipantId} runnerName={runnerName} setRunnerName={setRunnerName} onStart={startSession} />}
-        {currentPhase === 'warmup' && script && <WarmupPhase warmup={script.warmup} status={warmupStatus} setStatus={setWarmupStatus} onNext={nextPhase} startTimer={startTimer} />}
-        {currentPhase === 'tasks' && script && <TasksPhase tasks={script.tasks} currentIndex={currentTaskIndex} setCurrentIndex={setCurrentTaskIndex} status={taskStatus} updateStatus={updateTaskStatus} showScript={showScript} setShowScript={setShowScript} onNext={nextTask} onPrev={prevTask} startTimer={startTimer} expandedSections={expandedSections} toggleSection={toggleSection} />}
+        {currentPhase === 'warmup' && script && script.type !== 'discovery' && <WarmupPhase warmup={script.warmup} status={warmupStatus} setStatus={setWarmupStatus} onNext={nextPhase} startTimer={startTimer} />}
+        {currentPhase === 'tasks' && script && <TasksPhase script={script} tasks={script.tasks} currentIndex={currentTaskIndex} setCurrentIndex={setCurrentTaskIndex} status={taskStatus} updateStatus={updateTaskStatus} showScript={showScript} setShowScript={setShowScript} onNext={nextTask} onPrev={prevTask} startTimer={startTimer} expandedSections={expandedSections} toggleSection={toggleSection} contextChips={contextChips} setContextChips={setContextChips} />}
         {currentPhase === 'wrapup' && script && <WrapupPhase wrapup={script.wrapup} observerNotes={script.observerNotes} status={wrapupStatus} setStatus={setWrapupStatus} sessionNotes={sessionNotes} setSessionNotes={setSessionNotes} onFinish={nextPhase} />}
         {currentPhase === 'complete' && !showCompleteModal && (
           <div style={{ textAlign: 'center', padding: 48 }}>
@@ -531,9 +543,9 @@ export default function InsightCatcher() {
                       ['Run by', runnerName || 'Unknown'],
                       ['Project', config?.projects.find(p => p.id === selectedProject)?.name || '—'],
                       ['Duration', sessionDuration()],
-                      ['Completed', `${Object.values(taskStatus).filter(t => t?.completion === 'completed').length} / ${script.tasks.length}`],
-                      ['Partial', `${Object.values(taskStatus).filter(t => t?.completion === 'partial').length} tasks`],
-                      ["Couldn't do it", `${Object.values(taskStatus).filter(t => t?.completion === 'failed').length} tasks`],
+                      ['Completed', `${Object.values(taskStatus).filter(t => t?.completion === 'completed').length} / ${totalTasks}`],
+                      ['Partial', `${Object.values(taskStatus).filter(t => t?.completion === 'partial').length} items`],
+                      ["Could not do", `${Object.values(taskStatus).filter(t => t?.completion === 'failed').length} items`],
                     ].map(([label, val]) => (
                       <div key={label}>
                         <div style={{ color: t.textDetail, fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 2 }}>{label}</div>
@@ -560,7 +572,7 @@ export default function InsightCatcher() {
                   </Btn>
                   <Btn variant="primary" style={{ flex: 1, justifyContent: 'center' }}
                     onClick={() => { setShowCompleteModal(false); resetSession(); setCurrentPhase('select'); setScript(null); }}>
-                    <Home size={13} />Back to Home
+                    <Bot size={13} />Back to UXBuddy
                   </Btn>
                 </div>
               </>
@@ -610,8 +622,16 @@ export default function InsightCatcher() {
 // ─── Select phase ─────────────────────────────────────────────────────────────
 function SelectPhase({ config, selectedProject, setSelectedProject, onSelectScript, loading, scriptTypeFilter, setScriptTypeFilter }) {
   const [showAddInfo, setShowAddInfo] = useState(false);
-  const allScripts = config?.projects.flatMap(p => p.scripts.map(s => ({ ...s, projectId: p.id, projectName: p.name }))) || [];
-  const filtered = scriptTypeFilter === 'all' ? allScripts : allScripts.filter(s => (s.type || 'usability') === scriptTypeFilter);
+  
+  // Group scripts by project and filter by type
+  const groupedProjects = config?.projects
+    .map(project => ({
+      ...project,
+      scripts: project.scripts.filter(s => scriptTypeFilter === 'all' || (s.type || 'usability') === scriptTypeFilter)
+    }))
+    .filter(project => project.scripts.length > 0) || [];
+
+  const hasAnyScripts = groupedProjects.some(p => p.scripts.length > 0);
 
   return (
     <div style={{ maxWidth: 720, margin: '0 auto' }}>
@@ -650,29 +670,36 @@ function SelectPhase({ config, selectedProject, setSelectedProject, onSelectScri
         ))}
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        {filtered.length === 0
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        {!hasAnyScripts
           ? <p style={{ color: t.textDetail, textAlign: 'center', padding: 40, fontSize: 14 }}>Nothing here yet — scripts will appear once they're added.</p>
-          : filtered.map(scriptInfo => (
-            <button key={`${scriptInfo.projectId}-${scriptInfo.id}`}
-              onClick={() => onSelectScript(scriptInfo.projectId, scriptInfo)} disabled={loading}
-              style={{ background: t.cardBg, border: `1px solid ${t.strokeDefault}`, borderRadius: 10, padding: '16px 20px',
-                textAlign: 'left', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontFamily: 'inherit' }}
-              onMouseEnter={e => e.currentTarget.style.borderColor = t.brand}
-              onMouseLeave={e => e.currentTarget.style.borderColor = t.strokeDefault}>
-              <div>
-                <div style={{ fontWeight: 600, color: t.textMain, marginBottom: 4, fontSize: 15 }}>{scriptInfo.name}</div>
-                <div style={{ fontSize: 12, color: t.textDetail, display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <span>{scriptInfo.projectName}</span>
-                  <span style={{ padding: '2px 8px', borderRadius: 20, fontSize: 11, fontWeight: 500,
-                    background: (scriptInfo.type || 'usability') === 'discovery' ? t.hoverBg : t.nearPositive,
-                    color: (scriptInfo.type || 'usability') === 'discovery' ? t.brand : t.positive }}>
-                    {(scriptInfo.type || 'usability') === 'discovery' ? 'Discovery' : 'Usability'}
-                  </span>
-                </div>
+          : groupedProjects.map(project => (
+            <div key={project.id}>
+              <h3 style={{ fontSize: 14, fontWeight: 600, color: t.textHeader, marginBottom: 8, display: 'flex', alignItems: 'center', gap: 8 }}>
+                <FolderOpen size={15} style={{ color: t.brand }} />
+                {project.name}
+              </h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, paddingLeft: 8 }}>
+                {project.scripts.map(scriptInfo => (
+                  <button key={`${project.id}-${scriptInfo.id}`}
+                    onClick={() => onSelectScript(project.id, scriptInfo)} disabled={loading}
+                    style={{ background: t.cardBg, border: `1px solid ${t.strokeDefault}`, borderRadius: 10, padding: '14px 16px',
+                      textAlign: 'left', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontFamily: 'inherit' }}
+                    onMouseEnter={e => e.currentTarget.style.borderColor = t.brand}
+                    onMouseLeave={e => e.currentTarget.style.borderColor = t.strokeDefault}>
+                    <div>
+                      <div style={{ fontWeight: 600, color: t.textMain, marginBottom: 3, fontSize: 14 }}>{scriptInfo.name}</div>
+                      <span style={{ padding: '2px 8px', borderRadius: 20, fontSize: 11, fontWeight: 500, display: 'inline-block',
+                        background: (scriptInfo.type || 'usability') === 'discovery' ? t.hoverBg : t.nearPositive,
+                        color: (scriptInfo.type || 'usability') === 'discovery' ? t.brand : t.positive }}>
+                        {(scriptInfo.type || 'usability') === 'discovery' ? 'Discovery' : 'Usability'}
+                      </span>
+                    </div>
+                    <ChevronRight size={18} style={{ color: t.brand, flexShrink: 0 }} />
+                  </button>
+                ))}
               </div>
-              <ChevronRight size={18} style={{ color: t.brand, flexShrink: 0 }} />
-            </button>
+            </div>
           ))
         }
       </div>
@@ -828,20 +855,151 @@ function WarmupPhase({ warmup, status, setStatus, onNext, startTimer }) {
 }
 
 // ─── Tasks phase — two columns ────────────────────────────────────────────────
-function TasksPhase({ tasks, currentIndex, setCurrentIndex, status, updateStatus, showScript, setShowScript, onNext, onPrev, startTimer, expandedSections, toggleSection }) {
+function TasksPhase({ script, tasks, currentIndex, setCurrentIndex, status, updateStatus, showScript, setShowScript, onNext, onPrev, startTimer, expandedSections, toggleSection, contextChips, setContextChips }) {
+  // NEW: Detect which schema is in use
+  const hasGroups = script && script.groups && Array.isArray(script.groups);
+  
+  if (hasGroups) {
+    return <GroupBasedTasksPhase 
+      script={script} 
+      status={status} 
+      updateStatus={updateStatus} 
+      startTimer={startTimer} 
+      expandedSections={expandedSections} 
+      toggleSection={toggleSection} 
+      onNext={onNext} 
+      onPrev={onPrev} 
+      contextChips={contextChips}
+      setContextChips={setContextChips}
+    />;
+  }
+
+  // OLD: Existing flat task schema code continues below
   const task = tasks[currentIndex];
-  const taskStat = status[task.id] || { done: false, success: null, notes: '', tags: [] };
+  const taskStat = status[task.id] || { done: false, success: null, notes: '', tags: [], reactions: [], followUpQuestions: [] };
+  const isDiscovery = script && script.type === 'discovery';
+
+  // Default follow-up questions for discovery tags
+  const DEFAULT_FOLLOWUP = {
+    'confused': 'What part lost you? Can you point to it?',
+    'hesitated': 'I noticed you paused there. What were you thinking?',
+    'surprised': 'Was that what you expected? What did you expect instead?',
+    'skipped': 'What do you think this section is for?',
+    'strong-opinion': 'Tell me more about that. Why does it matter?',
+    'unexpected-path': 'That is interesting. Is that how you would normally approach it?',
+  };
+
+  const getFollowUpQuestion = (tagId) => {
+    if (!isDiscovery) return null;
+    return (task.followUpByTag && task.followUpByTag[tagId]) || DEFAULT_FOLLOWUP[tagId] || null;
+  };
+
+  // Discovery-specific tags
+  const DISCOVERY_TAGS = [
+    { id: 'confused', label: '😕 Confused', color: '#DC2626', bg: 'rgba(220,38,38,0.1)' },
+    { id: 'got-it', label: '✅ Got it', color: '#16A34A', bg: 'rgba(22,163,74,0.1)' },
+    { id: 'hesitated', label: '⏸ Hesitated', color: '#F59E0B', bg: 'rgba(245,158,11,0.1)' },
+    { id: 'surprised', label: '😮 Surprised', color: '#8B5CF6', bg: 'rgba(139,92,246,0.1)' },
+    { id: 'skipped', label: '⏭ Skipped', color: '#0891B2', bg: 'rgba(8,145,178,0.1)' },
+    { id: 'strong-opinion', label: '💬 Strong opinion', color: '#EA580C', bg: 'rgba(234,88,12,0.1)' },
+    { id: 'unexpected-path', label: '🔀 Unexpected path', color: '#7C3AED', bg: 'rgba(124,58,237,0.1)' },
+  ];
+
+  // Discovery-specific reactions (bottom bar)
+  const DISCOVERY_REACTIONS = [
+    { value: 'sparked', label: '🔥 Sparked discussion', bg: 'rgba(234,179,8,0.12)', color: '#CA8A04', border: '#FACC15' },
+    { value: 'quiet', label: '😐 Went quiet', bg: 'rgba(96,165,250,0.12)', color: '#1E40AF', border: '#60A5FA' },
+    { value: 'friction', label: '⚡ Hit friction', bg: 'rgba(239,68,68,0.12)', color: '#911616', border: '#EF4444' },
+  ];
+
+  const tagSet = isDiscovery ? DISCOVERY_TAGS : TAGS;
 
   useEffect(() => {
     startTimer(task.timeMinutes);
-    // Auto-expand success and watch for on every task
-    toggleSection(`success-${task.id}`);
-    toggleSection(`watch-${task.id}`);
+    // Auto-expand success and watch for on every task (now do this immediately when task loads)
+    if (!expandedSections[`success-${task.id}`]) toggleSection(`success-${task.id}`);
+    if (!expandedSections[`watch-${task.id}`]) toggleSection(`watch-${task.id}`);
   }, [currentIndex]);
 
   const toggleTag = (tagId) => {
     const cur = taskStat.tags || [];
-    updateStatus(task.id, 'tags', cur.includes(tagId) ? cur.filter(x => x !== tagId) : [...cur, tagId]);
+    const newTags = cur.includes(tagId) ? cur.filter(x => x !== tagId) : [...cur, tagId];
+    updateStatus(task.id, 'tags', newTags);
+    
+    // Handle follow-up questions for discovery mode
+    if (isDiscovery) {
+      const followUpQuestions = taskStat.followUpQuestions || [];
+      const tag = tagSet.find(t => t.id === tagId);
+      if (tag && tagId !== 'got-it') {
+        if (cur.includes(tagId)) {
+          // Tag is being removed - remove its follow-up question
+          const filtered = followUpQuestions.filter(fq => fq.tagId !== tagId);
+          updateStatus(task.id, 'followUpQuestions', filtered);
+        } else {
+          const question = getFollowUpQuestion(tagId);
+          if (question) {
+            // Tag is being added - add its follow-up question
+            const newFollowUp = {
+              id: Math.random().toString(36).substr(2, 9),
+              tagId,
+              tagLabel: tag.label,
+              question,
+              timestamp: Date.now()
+            };
+            updateStatus(task.id, 'followUpQuestions', [newFollowUp, ...followUpQuestions]);
+            // Auto-expand follow-up questions panel
+            if (!expandedSections[`followup-${task.id}`]) {
+              toggleSection(`followup-${task.id}`);
+            }
+          }
+        }
+      }
+    }
+  };
+
+  // Handle observations change for hashtag support
+  const handleObservationsChange = (text) => {
+    updateStatus(task.id, 'notes', text);
+    
+    // Parse hashtags from observations
+    const hashtagRegex = /#(\w+)/g;
+    let match;
+    const newChips = [...contextChips];
+    while ((match = hashtagRegex.exec(text)) !== null) {
+      const chipName = match[1].toLowerCase();
+      if (!newChips.includes(chipName) && newChips.length < 10) {
+        newChips.push(chipName);
+      }
+    }
+    if (newChips.length !== contextChips.length) {
+      setContextChips(newChips);
+    }
+  };
+
+  // Extract used context chips from observations text
+  const getUsedContextChips = () => {
+    const text = taskStat.notes || '';
+    const used = [];
+    contextChips.forEach(chip => {
+      if (text.includes(chip)) {
+        used.push(chip);
+      }
+    });
+    return used;
+  };
+
+  const insertContextChip = (chip) => {
+    const textarea = document.querySelector('textarea');
+    if (!textarea) return;
+    const start = textarea.selectionStart || 0;
+    const end = textarea.selectionEnd || 0;
+    const text = taskStat.notes || '';
+    const newText = text.substring(0, start) + chip + ' ' + text.substring(end);
+    updateStatus(task.id, 'notes', newText);
+    setTimeout(() => {
+      textarea.focus();
+      textarea.setSelectionRange(start + chip.length + 1, start + chip.length + 1);
+    }, 0);
   };
 
   return (
@@ -899,7 +1057,7 @@ function TasksPhase({ tasks, currentIndex, setCurrentIndex, status, updateStatus
           <div style={{ padding: '14px 24px', borderBottom: `1px solid ${t.strokeLight}` }}>
             <div style={{ fontSize: 11, fontWeight: 600, color: t.textDetail, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>Quick tags</div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-              {TAGS.map(tag => {
+              {tagSet.map(tag => {
                 const active = (taskStat.tags || []).includes(tag.id);
                 return (
                   <button key={tag.id} onClick={() => toggleTag(tag.id)}
@@ -913,29 +1071,84 @@ function TasksPhase({ tasks, currentIndex, setCurrentIndex, status, updateStatus
             </div>
           </div>
 
+          {contextChips && contextChips.length > 0 && (
+            <div style={{ padding: '14px 24px', borderBottom: `1px solid ${t.strokeLight}` }}>
+              <button onClick={() => toggleSection(`context-${task.id}`)}
+                style={{ width: '100%', padding: '0 0 8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'none', border: 'none', cursor: 'pointer', marginBottom: 8 }}>
+                <div style={{ fontSize: 11, fontWeight: 600, color: t.textDetail, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Context</div>
+                {expandedSections[`context-${task.id}`] ? <ChevronDown size={13} style={{ color: t.brand }} /> : <ChevronRight size={13} style={{ color: t.brand }} />}
+              </button>
+              {expandedSections[`context-${task.id}`] && (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                  {contextChips.map(chip => (
+                    <button key={chip} onClick={() => insertContextChip(chip)}
+                      style={{ padding: '5px 10px', borderRadius: 16, fontSize: 12, cursor: 'pointer', fontFamily: 'inherit',
+                        background: t.subtleBg, color: t.textMain, border: `1px solid ${t.strokeLight}`,
+                        fontWeight: 500, transition: 'all 0.2s' }}>
+                      {chip}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {(taskStat.tags || []).length > 0 && !isDiscovery && (
+            <div style={{ padding: '14px 24px', borderBottom: `1px solid ${t.strokeLight}`, background: t.subtleBg }}>
+              <div style={{ fontSize: 11, fontWeight: 600, color: t.textDetail, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>Selected tags</div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, alignItems: 'center' }}>
+                {(taskStat.tags || []).map(tagId => {
+                  const tag = tagSet.find(t => t.id === tagId);
+                  return tag ? (
+                    <button key={tagId} onClick={() => toggleTag(tagId)}
+                      style={{ padding: '4px 10px', borderRadius: 14, fontSize: 11, cursor: 'pointer', fontFamily: 'inherit',
+                        background: tag.bg, color: tag.color, border: `1px solid ${tag.color}`,
+                        fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4 }}>
+                      {tag.label}
+                      <span style={{ fontSize: 9, fontWeight: 700 }}>×</span>
+                    </button>
+                  ) : null;
+                })}
+                {getUsedContextChips().length > 0 && (
+                  <>
+                    <span style={{ fontSize: 10, color: t.textDetail, fontWeight: 500 }}>|</span>
+                    {getUsedContextChips().map(chip => (
+                      <span key={chip} style={{ padding: '3px 8px', borderRadius: 12, fontSize: 11, background: t.hoverBg, 
+                        color: t.textMain, fontWeight: 500, border: `1px solid ${t.strokeDefault}` }}>
+                        {chip}
+                      </span>
+                    ))}
+                  </>
+                )}
+              </div>
+            </div>
+          )}
+
           <div style={{ padding: '14px 24px' }}>
             <div style={{ fontSize: 11, fontWeight: 600, color: t.textDetail, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>Observations</div>
-            <Input value={taskStat.notes || ''} onChange={e => updateStatus(task.id, 'notes', e.target.value)} placeholder="What did you notice? Quotes, hesitations, surprises..." rows={6} />
+            <Input value={taskStat.notes || ''} onChange={e => handleObservationsChange(e.target.value)} placeholder="What did you notice? Quotes, hesitations, surprises..." rows={6} />
           </div>
         </Card>
 
         {/* Right: reference panel (fixed) */}
-        <div style={{ position: 'fixed', top: 150, right: 'max(32px, calc((100vw - 1280px) / 2 + 32px))', width: 320, height: 'calc(100vh - 170px)', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 10, zIndex: 30 }}>
-          <Card style={{ overflow: 'hidden' }}>
-            <button onClick={() => toggleSection(`success-${task.id}`)}
-              style={{ width: '100%', padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'none', border: 'none', cursor: 'pointer' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-                <Target size={13} style={{ color: t.positive }} />
-                <span style={{ fontSize: 13, fontWeight: 600, color: t.positive }}>Success looks like</span>
-              </div>
-              {expandedSections[`success-${task.id}`] ? <ChevronDown size={13} style={{ color: t.brand }} /> : <ChevronRight size={13} style={{ color: t.brand }} />}
-            </button>
-            {expandedSections[`success-${task.id}`] && (
-              <div style={{ padding: '0 16px 14px' }}>
-                <p style={{ fontSize: 13, color: t.textSub, lineHeight: 1.6 }}>{task.success}</p>
-              </div>
-            )}
-          </Card>
+        <div style={{ position: 'fixed', top: 200, right: 'max(32px, calc((100vw - 1280px) / 2 + 32px))', width: 320, height: 'calc(100vh - 220px)', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 10, zIndex: 30 }}>
+          {!isDiscovery && (
+            <Card style={{ overflow: 'hidden' }}>
+              <button onClick={() => toggleSection(`success-${task.id}`)}
+                style={{ width: '100%', padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'none', border: 'none', cursor: 'pointer' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+                  <Target size={13} style={{ color: t.positive }} />
+                  <span style={{ fontSize: 13, fontWeight: 600, color: t.positive }}>Success looks like</span>
+                </div>
+                {expandedSections[`success-${task.id}`] ? <ChevronDown size={13} style={{ color: t.brand }} /> : <ChevronRight size={13} style={{ color: t.brand }} />}
+              </button>
+              {expandedSections[`success-${task.id}`] && (
+                <div style={{ padding: '0 16px 14px' }}>
+                  <p style={{ fontSize: 13, color: t.textSub, lineHeight: 1.6 }}>{task.success}</p>
+                </div>
+              )}
+            </Card>
+          )}
 
           <Card style={{ overflow: 'hidden' }}>
             <button onClick={() => toggleSection(`watch-${task.id}`)}
@@ -954,6 +1167,34 @@ function TasksPhase({ tasks, currentIndex, setCurrentIndex, status, updateStatus
               </ul>
             )}
           </Card>
+
+          {isDiscovery && (taskStat.followUpQuestions || []).length > 0 && (
+            <Card style={{ overflow: 'hidden' }}>
+              <button onClick={() => toggleSection(`followup-${task.id}`)}
+                style={{ width: '100%', padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'none', border: 'none', cursor: 'pointer' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+                  <MessageSquare size={13} style={{ color: t.brand }} />
+                  <span style={{ fontSize: 13, fontWeight: 600, color: t.textSub }}>Follow-up questions</span>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 20, height: 20, background: t.brand, color: t.cardBg, fontSize: 11, fontWeight: 700, borderRadius: '50%', marginLeft: 'auto', marginRight: 4 }}>
+                    {(taskStat.followUpQuestions || []).length}
+                  </span>
+                </div>
+                {expandedSections[`followup-${task.id}`] ? <ChevronDown size={13} style={{ color: t.brand }} /> : <ChevronRight size={13} style={{ color: t.brand }} />}
+              </button>
+              {expandedSections[`followup-${task.id}`] && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+                  {(taskStat.followUpQuestions || []).map((fq, idx) => (
+                    <div key={fq.id} style={{ padding: '12px 16px', borderTop: `1px solid ${t.strokeLight}`, fontSize: 13 }}>
+                      <div style={{ color: t.textDetail, fontSize: 11, fontWeight: 600, marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                        {fq.tagLabel}
+                      </div>
+                      <p style={{ color: t.textSub, lineHeight: 1.5 }}>{fq.question}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </Card>
+          )}
 
           {task.note && (
             <Card style={{ padding: '12px 16px', background: task.note.type === 'warning' ? 'rgba(249,196,0,0.07)' : t.subtleBg }}>
@@ -986,24 +1227,345 @@ function TasksPhase({ tasks, currentIndex, setCurrentIndex, status, updateStatus
             {taskStat.done ? <CheckSquare size={14} /> : <Square size={14} />}Done
           </button>
           <div style={{ flex: 1 }} />
-          {/* 3-point completion scale */}
+          {isDiscovery ? (
+            // Discovery-mode reactions
+            DISCOVERY_REACTIONS.map(({ value, label, bg, color, border }) => (
+              <button key={value}
+                onClick={() => updateStatus(task.id, 'reaction', taskStat.reaction === value ? null : value)}
+                style={{ padding: '8px 14px', borderRadius: 6, fontSize: 13, fontWeight: 500, cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', gap: 5, fontFamily: 'inherit',
+                  background: taskStat.reaction === value ? bg : 'transparent',
+                  color: taskStat.reaction === value ? color : t.textSub,
+                  border: `1px solid ${taskStat.reaction === value ? border : t.strokeDefault}` }}>
+                {label}
+              </button>
+            ))
+          ) : (
+            // Usability-mode completion scale
+            [
+              { value: 'completed', label: '✅ Completed', bg: t.nearPositive, color: t.positive, border: t.positive },
+              { value: 'partial',   label: '⚠️ Partially',  bg: '#FEF3C7',      color: '#92400E', border: '#F59E0B' },
+              { value: 'failed',    label: "❌ Couldn't do it", bg: t.nearNegative, color: t.negative, border: t.negative },
+            ].map(({ value, label, bg, color, border }) => (
+              <button key={value}
+                onClick={() => updateStatus(task.id, 'completion', taskStat.completion === value ? null : value)}
+                style={{ padding: '8px 14px', borderRadius: 6, fontSize: 13, fontWeight: 500, cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', gap: 5, fontFamily: 'inherit',
+                  background: taskStat.completion === value ? bg : 'transparent',
+                  color: taskStat.completion === value ? color : t.textSub,
+                  border: `1px solid ${taskStat.completion === value ? border : t.strokeDefault}` }}>
+                {label}
+              </button>
+            ))
+          )}
+          <Btn variant="cta" onClick={() => { updateStatus(task.id, 'done', true); onNext(); }}>
+            {currentIndex < tasks.length - 1 ? 'Next Task →' : 'Finish Tasks →'}
+          </Btn>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── New: Group-based tasks (for new schema with groups/questions) ────────────
+function GroupBasedTasksPhase({ script, status, updateStatus, startTimer, expandedSections, toggleSection, onNext, onPrev, contextChips, setContextChips }) {
+  const [currentGroupIndex, setCurrentGroupIndex] = useState(0);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  
+  const currentGroup = script.groups[currentGroupIndex];
+  const currentQuestion = currentGroup?.questions[currentQuestionIndex];
+  const qStat = status[currentQuestion?.id] || { done: false, notes: '', tags: [], completion: null };
+  
+  const totalGroups = script.groups.length;
+  const totalQuestions = currentGroup?.questions.length || 0;
+  
+  useEffect(() => {
+    startTimer(currentGroup?.timeMinutes || 10);
+  }, [currentGroupIndex, currentQuestionIndex]);
+
+  const handleNextQuestion = () => {
+    if (currentQuestionIndex < totalQuestions - 1) {
+      setCurrentQuestionIndex(i => i + 1);
+    } else if (currentGroupIndex < totalGroups - 1) {
+      setCurrentGroupIndex(i => i + 1);
+      setCurrentQuestionIndex(0);
+    } else {
+      onNext();
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handlePrevQuestion = () => {
+    if (currentQuestionIndex > 0) {
+      setCurrentQuestionIndex(i => i - 1);
+    } else if (currentGroupIndex > 0) {
+      setCurrentGroupIndex(i => i - 1);
+      setCurrentQuestionIndex(script.groups[currentGroupIndex - 1].questions.length - 1);
+    }
+  };
+
+  return (
+    <div>
+      {/* Group header */}
+      <div style={{ padding: '24px 0 16px', marginBottom: 12, borderBottom: `2px solid ${t.brand}` }}>
+        <div style={{ fontSize: 12, fontWeight: 700, color: t.brand, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>
+          Section {currentGroupIndex + 1} of {totalGroups}
+        </div>
+        <h2 style={{ fontSize: 26, fontWeight: 700, color: t.textHeader, marginBottom: 6 }}>
+          {currentGroup.tabName}
+        </h2>
+        <p style={{ fontSize: 15, color: t.textDetail }}>
+          {currentGroup.tabContext}
+        </p>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: 24, alignItems: 'start', marginBottom: 100 }}>
+        
+        {/* Left: Questions */}
+        <Card style={{ overflow: 'hidden' }}>
+          
+          {/* Question navigation pills */}
+          <div style={{ padding: '14px 20px', borderBottom: `1px solid ${t.strokeLight}`, background: t.subtleBg }}>
+            <div style={{ fontSize: 11, fontWeight: 600, color: t.textDetail, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 10 }}>
+              Question {currentQuestionIndex + 1} of {totalQuestions}
+            </div>
+            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+              {currentGroup.questions.map((q, idx) => {
+                const qSt = status[q.id] || {};
+                const isCurrent = idx === currentQuestionIndex;
+                return (
+                  <button 
+                    key={q.id} 
+                    onClick={() => setCurrentQuestionIndex(idx)}
+                    style={{
+                      padding: '6px 14px',
+                      borderRadius: 20,
+                      fontSize: 12,
+                      fontWeight: isCurrent ? 600 : 500,
+                      cursor: 'pointer',
+                      background: isCurrent ? t.brand : qSt.done ? t.nearPositive : t.cardBg,
+                      color: isCurrent ? '#fff' : qSt.done ? t.positive : t.textSub,
+                      border: `1px solid ${isCurrent ? t.brand : qSt.done ? t.positive : t.strokeDefault}`,
+                      fontFamily: 'inherit'
+                    }}
+                  >
+                    {qSt.done && !isCurrent ? '✓ ' : ''}{q.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Main question */}
+          <div style={{ padding: '24px 24px 18px' }}>
+            <div style={{ fontSize: 14, fontWeight: 600, color: t.textSub, marginBottom: 8 }}>
+              Question: {currentQuestion?.label}
+            </div>
+            <div style={{
+              fontSize: 20,
+              fontWeight: 700,
+              color: t.textMain,
+              lineHeight: 1.4,
+              marginBottom: 6
+            }}>
+              {currentQuestion?.mainQuestion}
+            </div>
+          </div>
+
+          {/* Probing questions - secondary style */}
+          {currentQuestion?.probingQuestions && currentQuestion.probingQuestions.length > 0 && (
+            <div style={{
+              padding: '0 24px 20px',
+              borderTop: `1px solid ${t.strokeLight}`
+            }}>
+              <div style={{
+                fontSize: 12,
+                fontWeight: 500,
+                color: t.textDetail,
+                marginBottom: 12,
+                textTransform: 'uppercase',
+                letterSpacing: '0.04em'
+              }}>
+                Probing questions (if needed)
+              </div>
+              <div style={{
+                background: t.subtleBg,
+                borderRadius: 8,
+                padding: '14px 16px',
+                borderLeft: `3px solid ${t.textDetail}`
+              }}>
+                <ul style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {currentQuestion.probingQuestions.map((pq, idx) => (
+                    <li key={idx} style={{
+                      fontSize: 14,
+                      color: t.textSub,
+                      lineHeight: 1.5,
+                      display: 'flex',
+                      gap: 10
+                    }}>
+                      <span style={{ color: t.textDetail, flexShrink: 0 }}>→</span>
+                      <span style={{ fontStyle: 'italic' }}>{pq}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          )}
+
+          {/* Notes section */}
+          <div style={{ padding: '18px 24px', borderTop: `1px solid ${t.strokeLight}` }}>
+            <div style={{ fontSize: 12, fontWeight: 600, color: t.textDetail, marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              Observations
+            </div>
+            <Input 
+              value={qStat.notes || ''} 
+              onChange={e => updateStatus(currentQuestion.id, 'notes', e.target.value)} 
+              placeholder="What did you observe? Key quotes, reactions, hesitations..."
+              rows={5}
+            />
+          </div>
+
+          {/* Tags section */}
+          <div style={{ padding: '14px 24px 18px', borderTop: `1px solid ${t.strokeLight}` }}>
+            <div style={{ fontSize: 12, fontWeight: 600, color: t.textDetail, marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              Quick tags
+            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+              {TAGS.map(tag => {
+                const active = (qStat.tags || []).includes(tag.id);
+                return (
+                  <button key={tag.id}
+                    onClick={() => {
+                      const newTags = active 
+                        ? (qStat.tags || []).filter(t => t !== tag.id)
+                        : [...(qStat.tags || []), tag.id];
+                      updateStatus(currentQuestion.id, 'tags', newTags);
+                    }}
+                    style={{
+                      padding: '6px 12px',
+                      borderRadius: 20,
+                      fontSize: 12,
+                      cursor: 'pointer',
+                      fontFamily: 'inherit',
+                      background: active ? tag.bg : 'transparent',
+                      color: active ? tag.color : t.textDetail,
+                      border: `1px solid ${active ? tag.color : t.strokeDefault}`,
+                      fontWeight: active ? 600 : 400
+                    }}
+                  >
+                    {tag.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </Card>
+
+        {/* Right: Moderator guidance - ALWAYS VISIBLE */}
+        <div style={{ position: 'fixed', top: 200, right: 'max(32px, calc((100vw - 1280px) / 2 + 32px))', width: 340, maxHeight: 'calc(100vh - 220px)', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 12, zIndex: 30 }}>
+          
+          {/* What to do */}
+          <Card style={{ padding: '16px 18px', borderLeft: `3px solid ${t.brand}` }}>
+            <div style={{ fontSize: 12, fontWeight: 700, color: t.brand, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 10 }}>
+              What to do
+            </div>
+            <p style={{ fontSize: 13, color: t.textSub, lineHeight: 1.6 }}>
+              {currentQuestion?.whatToDo}
+            </p>
+          </Card>
+
+          {/* What to listen for */}
+          <Card style={{ padding: '16px 18px', borderLeft: `3px solid ${t.positive}` }}>
+            <div style={{ fontSize: 12, fontWeight: 700, color: t.positive, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 10 }}>
+              What to listen for
+            </div>
+            <p style={{ fontSize: 13, color: t.textSub, lineHeight: 1.6 }}>
+              {currentQuestion?.whatToListenFor}
+            </p>
+          </Card>
+        </div>
+      </div>
+
+      {/* Sticky bottom action bar */}
+      <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: t.cardBg, borderTop: `1px solid ${t.strokeDefault}`, padding: '10px 32px', zIndex: 40 }}>
+        <div style={{ maxWidth: 1280, margin: '0 auto', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <button 
+            onClick={handlePrevQuestion} 
+            disabled={currentGroupIndex === 0 && currentQuestionIndex === 0}
+            style={{
+              background: 'none',
+              border: `1px solid ${t.strokeDefault}`,
+              borderRadius: 6,
+              padding: '8px 14px',
+              cursor: currentGroupIndex === 0 && currentQuestionIndex === 0 ? 'not-allowed' : 'pointer',
+              color: currentGroupIndex === 0 && currentQuestionIndex === 0 ? t.textDisabled : t.brand,
+              fontSize: 13,
+              fontFamily: 'inherit',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 4
+            }}
+          >
+            ← Previous
+          </button>
+
+          <button 
+            onClick={() => updateStatus(currentQuestion.id, 'done', !qStat.done)}
+            style={{
+              background: 'none',
+              border: `1px solid ${t.strokeDefault}`,
+              borderRadius: 6,
+              padding: '8px 14px',
+              cursor: 'pointer',
+              color: qStat.done ? t.positive : t.textSub,
+              fontSize: 13,
+              fontFamily: 'inherit',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 5
+            }}
+          >
+            {qStat.done ? <CheckSquare size={14} /> : <Square size={14} />}
+            Done
+          </button>
+
+          <div style={{ flex: 1 }} />
+
+          {/* Completion buttons */}
           {[
             { value: 'completed', label: '✅ Completed', bg: t.nearPositive, color: t.positive, border: t.positive },
-            { value: 'partial',   label: '⚠️ Partially',  bg: '#FEF3C7',      color: '#92400E', border: '#F59E0B' },
-            { value: 'failed',    label: "❌ Couldn't do it", bg: t.nearNegative, color: t.negative, border: t.negative },
+            { value: 'partial', label: '⚠️ Partially', bg: '#FEF3C7', color: '#92400E', border: '#F59E0B' },
+            { value: 'failed', label: '❌ Could not do', bg: t.nearNegative, color: t.negative, border: t.negative },
           ].map(({ value, label, bg, color, border }) => (
             <button key={value}
-              onClick={() => updateStatus(task.id, 'completion', taskStat.completion === value ? null : value)}
-              style={{ padding: '8px 14px', borderRadius: 6, fontSize: 13, fontWeight: 500, cursor: 'pointer',
-                display: 'flex', alignItems: 'center', gap: 5, fontFamily: 'inherit',
-                background: taskStat.completion === value ? bg : 'transparent',
-                color: taskStat.completion === value ? color : t.textSub,
-                border: `1px solid ${taskStat.completion === value ? border : t.strokeDefault}` }}>
+              onClick={() => updateStatus(currentQuestion.id, 'completion', qStat.completion === value ? null : value)}
+              style={{
+                padding: '8px 14px',
+                borderRadius: 6,
+                fontSize: 13,
+                fontWeight: 500,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 5,
+                fontFamily: 'inherit',
+                background: qStat.completion === value ? bg : 'transparent',
+                color: qStat.completion === value ? color : t.textSub,
+                border: `1px solid ${qStat.completion === value ? border : t.strokeDefault}`
+              }}
+            >
               {label}
             </button>
           ))}
-          <Btn variant="cta" onClick={() => { updateStatus(task.id, 'done', true); onNext(); }}>
-            {currentIndex < tasks.length - 1 ? 'Next Task →' : 'Finish Tasks →'}
+
+          <Btn 
+            variant="cta" 
+            onClick={handleNextQuestion}
+            style={{ marginLeft: 8 }}
+          >
+            {currentGroupIndex === totalGroups - 1 && currentQuestionIndex === totalQuestions - 1 
+              ? 'Finish Questions →'
+              : 'Next →'}
           </Btn>
         </div>
       </div>
