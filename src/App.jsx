@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { CheckCircle2, Play, Pause, RotateCcw, AlertTriangle, Copy, Download, Eye, EyeOff, MessageSquare, Lightbulb, Target, CheckSquare, Square, Timer, FileText, Users, Mic, FolderOpen, Trash2, Loader2, RefreshCw, Bot, FlaskConical, Search, X, Info, ChevronDown, ChevronRight, LogOut } from 'lucide-react';
+import { CheckCircle2, Play, Pause, RotateCcw, AlertTriangle, Copy, Download, Eye, EyeOff, MessageSquare, Lightbulb, Target, CheckSquare, Square, Timer, FileText, Users, Mic, FolderOpen, Trash2, Loader2, RefreshCw, Bot, FlaskConical, Search, X, Info, ChevronDown, ChevronRight, LogOut, Archive, ArchiveRestore } from 'lucide-react';
 import { supabase, signOut, onAuthStateChange } from './supabase';
 import Login from './Login';
 
@@ -620,14 +620,35 @@ export default function UXBuddy() {
 }
 
 // ─── Select phase ─────────────────────────────────────────────────────────────
+const ARCHIVED_KEY = 'uxbuddy-archived-scripts';
+const loadArchived = () => {
+  try { return new Set(JSON.parse(localStorage.getItem(ARCHIVED_KEY) || '[]')); }
+  catch { return new Set(); }
+};
+const saveArchived = (set) => {
+  try { localStorage.setItem(ARCHIVED_KEY, JSON.stringify([...set])); } catch {}
+};
+
 function SelectPhase({ config, selectedProject, setSelectedProject, onSelectScript, loading, scriptTypeFilter, setScriptTypeFilter }) {
   const [showAddInfo, setShowAddInfo] = useState(false);
-  
-  // Group scripts by project and filter by type, sorted freshest first
+  const [archived, setArchived] = useState(() => loadArchived());
+  const [view, setView] = useState('active'); // 'active' | 'archived'
+
+  const toggleArchive = (scriptId) => {
+    setArchived(prev => {
+      const next = new Set(prev);
+      if (next.has(scriptId)) next.delete(scriptId); else next.add(scriptId);
+      saveArchived(next);
+      return next;
+    });
+  };
+
+  // Group scripts by project: filter by archive view + type, sorted freshest first
   const groupedProjects = config?.projects
     .map(project => ({
       ...project,
       scripts: project.scripts
+        .filter(s => view === 'archived' ? archived.has(s.id) : !archived.has(s.id))
         .filter(s => scriptTypeFilter === 'all' || (s.type || 'usability') === scriptTypeFilter)
         .slice()
         .sort((a, b) => (b.createdDate || '').localeCompare(a.createdDate || ''))
@@ -635,13 +656,18 @@ function SelectPhase({ config, selectedProject, setSelectedProject, onSelectScri
     .filter(project => project.scripts.length > 0) || [];
 
   const hasAnyScripts = groupedProjects.some(p => p.scripts.length > 0);
+  const archivedCount = config?.projects.reduce((sum, p) => sum + p.scripts.filter(s => archived.has(s.id)).length, 0) || 0;
 
   return (
     <div style={{ maxWidth: 720, margin: '0 auto' }}>
       <div style={{ padding: '24px 0 20px', display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
         <div>
-          <h2 style={{ fontSize: 22, fontWeight: 700, color: t.textHeader, marginBottom: 4 }}>Select a test</h2>
-          <p style={{ color: t.textSub, fontSize: 14 }}>Choose a script to run your session</p>
+          <h2 style={{ fontSize: 22, fontWeight: 700, color: t.textHeader, marginBottom: 4 }}>
+            {view === 'archived' ? 'Archived tests' : 'Select a test'}
+          </h2>
+          <p style={{ color: t.textSub, fontSize: 14 }}>
+            {view === 'archived' ? 'Restore a test to make it visible again.' : 'Choose a script to run your session'}
+          </p>
         </div>
         <div style={{ position: 'relative' }}>
           <button onClick={() => setShowAddInfo(!showAddInfo)}
@@ -660,6 +686,26 @@ function SelectPhase({ config, selectedProject, setSelectedProject, onSelectScri
         </div>
       </div>
 
+      {/* Active / Archived top-level toggle */}
+      <div style={{ display: 'flex', gap: 2, marginBottom: 10, background: t.subtleBg, borderRadius: 8, padding: 3, width: 'fit-content' }}>
+        {[
+          { id: 'active', label: 'Active', count: null },
+          { id: 'archived', label: 'Archived', count: archivedCount, icon: <Archive size={12} /> }
+        ].map(tab => (
+          <button key={tab.id} onClick={() => setView(tab.id)}
+            style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 14px', borderRadius: 6, fontSize: 13,
+              fontWeight: view === tab.id ? 600 : 400, cursor: 'pointer', border: 'none',
+              background: view === tab.id ? t.cardBg : 'transparent',
+              color: view === tab.id ? t.brand : t.textSub,
+              boxShadow: view === tab.id ? '0 1px 3px rgba(0,0,0,0.08)' : 'none' }}>
+            {tab.icon}{tab.label}
+            {tab.count !== null && tab.count > 0 && (
+              <span style={{ background: view === tab.id ? t.hoverBg : 'transparent', color: view === tab.id ? t.brand : t.textDetail, padding: '0 6px', borderRadius: 10, fontSize: 11, fontWeight: 600 }}>{tab.count}</span>
+            )}
+          </button>
+        ))}
+      </div>
+
       <div style={{ display: 'flex', gap: 2, marginBottom: 16, background: t.subtleBg, borderRadius: 8, padding: 3, width: 'fit-content' }}>
         {[{ id: 'all', label: 'All' }, { id: 'discovery', label: 'Discovery', icon: <Search size={12} /> }, { id: 'usability', label: 'Usability', icon: <FlaskConical size={12} /> }].map(tab => (
           <button key={tab.id} onClick={() => setScriptTypeFilter(tab.id)}
@@ -675,7 +721,9 @@ function SelectPhase({ config, selectedProject, setSelectedProject, onSelectScri
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
         {!hasAnyScripts
-          ? <p style={{ color: t.textDetail, textAlign: 'center', padding: 40, fontSize: 14 }}>Nothing here yet — scripts will appear once they're added.</p>
+          ? <p style={{ color: t.textDetail, textAlign: 'center', padding: 40, fontSize: 14 }}>
+              {view === 'archived' ? 'No archived tests.' : "Nothing here yet — scripts will appear once they're added."}
+            </p>
           : groupedProjects.map(project => (
             <div key={project.id}>
               <h3 style={{ fontSize: 14, fontWeight: 600, color: t.textHeader, marginBottom: 8, display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -683,24 +731,40 @@ function SelectPhase({ config, selectedProject, setSelectedProject, onSelectScri
                 {project.name}
               </h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8, paddingLeft: 8 }}>
-                {project.scripts.map(scriptInfo => (
-                  <button key={`${project.id}-${scriptInfo.id}`}
-                    onClick={() => onSelectScript(project.id, scriptInfo)} disabled={loading}
-                    style={{ background: t.cardBg, border: `1px solid ${t.strokeDefault}`, borderRadius: 10, padding: '14px 16px',
-                      textAlign: 'left', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontFamily: 'inherit' }}
-                    onMouseEnter={e => e.currentTarget.style.borderColor = t.brand}
-                    onMouseLeave={e => e.currentTarget.style.borderColor = t.strokeDefault}>
-                    <div>
-                      <div style={{ fontWeight: 600, color: t.textMain, marginBottom: 3, fontSize: 14 }}>{scriptInfo.name}</div>
-                      <span style={{ padding: '2px 8px', borderRadius: 20, fontSize: 11, fontWeight: 500, display: 'inline-block',
-                        background: (scriptInfo.type || 'usability') === 'discovery' ? t.hoverBg : t.nearPositive,
-                        color: (scriptInfo.type || 'usability') === 'discovery' ? t.brand : t.positive }}>
-                        {(scriptInfo.type || 'usability') === 'discovery' ? 'Discovery' : 'Usability'}
-                      </span>
+                {project.scripts.map(scriptInfo => {
+                  const isArchived = archived.has(scriptInfo.id);
+                  return (
+                    <div key={`${project.id}-${scriptInfo.id}`}
+                      style={{ background: t.cardBg, border: `1px solid ${t.strokeDefault}`, borderRadius: 10,
+                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                        opacity: isArchived ? 0.75 : 1 }}>
+                      <button
+                        onClick={() => onSelectScript(project.id, scriptInfo)} disabled={loading || isArchived}
+                        style={{ background: 'none', border: 'none', padding: '14px 16px', textAlign: 'left',
+                          cursor: isArchived ? 'default' : 'pointer', flex: 1, fontFamily: 'inherit',
+                          display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+                        <div>
+                          <div style={{ fontWeight: 600, color: t.textMain, marginBottom: 3, fontSize: 14 }}>{scriptInfo.name}</div>
+                          <span style={{ padding: '2px 8px', borderRadius: 20, fontSize: 11, fontWeight: 500, display: 'inline-block',
+                            background: (scriptInfo.type || 'usability') === 'discovery' ? t.hoverBg : t.nearPositive,
+                            color: (scriptInfo.type || 'usability') === 'discovery' ? t.brand : t.positive }}>
+                            {(scriptInfo.type || 'usability') === 'discovery' ? 'Discovery' : 'Usability'}
+                          </span>
+                        </div>
+                        {!isArchived && <ChevronRight size={18} style={{ color: t.brand, flexShrink: 0 }} />}
+                      </button>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); toggleArchive(scriptInfo.id); }}
+                        title={isArchived ? 'Restore' : 'Archive'}
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '14px 16px',
+                          color: t.textDetail, display: 'flex', alignItems: 'center', borderLeft: `1px solid ${t.strokeLight}` }}
+                        onMouseEnter={e => e.currentTarget.style.color = isArchived ? t.positive : t.brand}
+                        onMouseLeave={e => e.currentTarget.style.color = t.textDetail}>
+                        {isArchived ? <ArchiveRestore size={16} /> : <Archive size={16} />}
+                      </button>
                     </div>
-                    <ChevronRight size={18} style={{ color: t.brand, flexShrink: 0 }} />
-                  </button>
-                ))}
+                  );
+                })}
               </div>
             </div>
           ))
