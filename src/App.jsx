@@ -507,7 +507,11 @@ export default function UXBuddy() {
         )}
       </header>
 
-      <main style={{ maxWidth: 1280, margin: '0 auto', padding: '16px 32px 120px' }}>
+      <main style={{
+        maxWidth: (currentPhase === 'tasks' && script && script.groups) ? 'none' : 1280,
+        margin: '0 auto',
+        padding: (currentPhase === 'tasks' && script && script.groups) ? '12px 20px 80px' : '16px 32px 120px'
+      }}>
         {currentPhase === 'select' && <SelectPhase config={config} selectedProject={selectedProject} setSelectedProject={setSelectedProject} onSelectScript={selectScript} loading={loading} scriptTypeFilter={scriptTypeFilter} setScriptTypeFilter={setScriptTypeFilter} />}
         {currentPhase === 'setup' && script && <SetupPhase script={script} participantId={participantId} setParticipantId={setParticipantId} runnerName={runnerName} setRunnerName={setRunnerName} onStart={startSession} />}
         {currentPhase === 'warmup' && script && script.type !== 'discovery' && !script.groups && <WarmupPhase warmup={script.warmup} status={warmupStatus} setStatus={setWarmupStatus} onNext={nextPhase} startTimer={startTimer} />}
@@ -1318,177 +1322,217 @@ function GroupBasedTasksPhase({ script, status, updateStatus, startTimer, expand
   };
 
   return (
-    <div>
-      {/* TWO-LEVEL NAVIGATOR */}
-      <div style={{ marginBottom: 20, paddingTop: 8 }}>
-        {/* Level 1: Group chips */}
-        <div style={{ marginBottom: 12 }}>
-          <div style={{ fontSize: 11, fontWeight: 600, color: t.textDetail, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 10 }}>
-            Sections
+    <div style={{ width: '100%' }}>
+      {/* 3-COLUMN DASHBOARD: Sections nav | Main content | Guidance */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'minmax(240px, 280px) minmax(0, 1fr) minmax(300px, 340px)',
+        gap: 16,
+        alignItems: 'stretch',
+        height: 'calc(100vh - 170px)',
+        marginBottom: 64
+      }}>
+
+        {/* ── LEFT: Sections + questions table of contents ── */}
+        <Card style={{ overflow: 'auto', padding: 0 }}>
+          <div style={{ padding: '14px 16px', borderBottom: `1px solid ${t.strokeLight}`, background: t.subtleBg, position: 'sticky', top: 0, zIndex: 2 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: t.textDetail, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              Script outline
+            </div>
+            <div style={{ fontSize: 11, color: t.textDetail, marginTop: 2 }}>
+              {script.groups.length} sections · {script.groups.reduce((sum, g) => sum + g.questions.length, 0)} questions
+            </div>
           </div>
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            {script.groups.map((group, idx) => {
-              const isCurrent = idx === currentGroupIndex;
+
+          <div style={{ padding: '6px 6px 12px' }}>
+            {script.groups.map((group, gIdx) => {
+              const isCurrentGroup = gIdx === currentGroupIndex;
               const notedCount = getGroupNoteCount(group);
               const totalCount = group.questions.length;
               return (
-                <button
-                  key={group.id}
-                  onClick={() => jumpToGroup(idx)}
-                  style={{
-                    padding: '10px 16px',
-                    borderRadius: 8,
-                    fontSize: 13,
-                    fontWeight: isCurrent ? 600 : 500,
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 8,
-                    fontFamily: 'inherit',
-                    background: isCurrent ? t.brand : t.cardBg,
-                    color: isCurrent ? '#fff' : t.textMain,
-                    border: `1px solid ${isCurrent ? t.brand : t.strokeDefault}`,
-                    transition: 'all 0.2s'
-                  }}
-                  onMouseEnter={e => !isCurrent && (e.target.style.borderColor = t.brand)}
-                  onMouseLeave={e => !isCurrent && (e.target.style.borderColor = t.strokeDefault)}
-                >
-                  <span>{group.tabName}</span>
-                  <span style={{
-                    background: isCurrent ? 'rgba(255,255,255,0.3)' : t.subtleBg,
-                    color: isCurrent ? '#fff' : t.textSub,
-                    padding: '2px 8px',
-                    borderRadius: 12,
-                    fontSize: 11,
-                    fontWeight: 600
-                  }}>
-                    {notedCount}/{totalCount}
-                  </span>
-                </button>
+                <div key={group.id} style={{ marginBottom: 4 }}>
+                  {/* Group row */}
+                  <button
+                    onClick={() => jumpToGroup(gIdx)}
+                    style={{
+                      width: '100%',
+                      textAlign: 'left',
+                      padding: '8px 10px',
+                      borderRadius: 6,
+                      cursor: 'pointer',
+                      background: isCurrentGroup ? t.hoverBg : 'transparent',
+                      border: 'none',
+                      fontFamily: 'inherit',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: 6
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0, flex: 1 }}>
+                      <span style={{
+                        width: 18,
+                        height: 18,
+                        borderRadius: 4,
+                        background: isCurrentGroup ? t.brand : t.strokeDefault,
+                        color: isCurrentGroup ? '#fff' : t.textSub,
+                        fontSize: 10,
+                        fontWeight: 700,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0
+                      }}>
+                        {gIdx + 1}
+                      </span>
+                      <span style={{
+                        fontSize: 13,
+                        fontWeight: isCurrentGroup ? 700 : 600,
+                        color: isCurrentGroup ? t.brand : t.textMain,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap'
+                      }}>
+                        {group.tabName}
+                      </span>
+                    </div>
+                    <span style={{
+                      fontSize: 10,
+                      fontWeight: 600,
+                      color: notedCount === totalCount && totalCount > 0 ? t.positive : t.textDetail,
+                      flexShrink: 0
+                    }}>
+                      {notedCount}/{totalCount}
+                    </span>
+                  </button>
+
+                  {/* Questions under current group only */}
+                  {isCurrentGroup && (
+                    <div style={{ paddingLeft: 18, marginTop: 2, marginBottom: 4 }}>
+                      {group.questions.map((q, qIdx) => {
+                        const qSt = status[q.id] || {};
+                        const isCurrentQ = qIdx === currentQuestionIndex;
+                        return (
+                          <button
+                            key={q.id}
+                            onClick={() => setCurrentQuestionIndex(qIdx)}
+                            style={{
+                              width: '100%',
+                              textAlign: 'left',
+                              padding: '6px 10px',
+                              borderRadius: 4,
+                              cursor: 'pointer',
+                              background: isCurrentQ ? t.brand : 'transparent',
+                              border: 'none',
+                              fontFamily: 'inherit',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 8,
+                              marginBottom: 1
+                            }}
+                          >
+                            <span style={{
+                              width: 16,
+                              height: 16,
+                              borderRadius: '50%',
+                              background: isCurrentQ ? '#fff' : qSt.done ? t.positive : 'transparent',
+                              color: isCurrentQ ? t.brand : '#fff',
+                              border: `1.5px solid ${isCurrentQ ? '#fff' : qSt.done ? t.positive : t.strokeStrong}`,
+                              fontSize: 9,
+                              fontWeight: 700,
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              flexShrink: 0
+                            }}>
+                              {qSt.done ? '✓' : qIdx + 1}
+                            </span>
+                            <span style={{
+                              fontSize: 12,
+                              color: isCurrentQ ? '#fff' : t.textSub,
+                              fontWeight: isCurrentQ ? 600 : 400,
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap'
+                            }}>
+                              {q.label}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
               );
             })}
           </div>
-        </div>
+        </Card>
 
-        {/* Level 2: Question dots for active group */}
-        <div>
-          <div style={{ fontSize: 11, fontWeight: 600, color: t.textDetail, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 10 }}>
-            Questions in this section
-          </div>
-          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-            {currentGroup.questions.map((q, idx) => {
-              const qSt = status[q.id] || {};
-              const isCurrent = idx === currentQuestionIndex;
-              return (
-                <button
-                  key={q.id}
-                  onClick={() => setCurrentQuestionIndex(idx)}
-                  style={{
-                    width: 32,
-                    height: 32,
-                    borderRadius: '50%',
-                    fontSize: 12,
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    background: isCurrent ? t.brand : qSt.done ? t.nearPositive : t.cardBg,
-                    color: isCurrent ? '#fff' : qSt.done ? t.positive : t.textSub,
-                    border: `2px solid ${isCurrent ? t.brand : qSt.done ? t.positive : t.strokeDefault}`,
-                    fontFamily: 'inherit'
-                  }}
-                  title={q.label}
-                >
-                  {qSt.done && !isCurrent ? '✓' : idx + 1}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-
-      {/* PERSISTENT BANNER */}
-      <div style={{
-        background: t.hoverBg,
-        border: `1px solid ${t.strokeDefault}`,
-        borderRadius: 10,
-        padding: '16px 20px',
-        marginBottom: 20,
-        borderLeft: `4px solid ${t.brand}`,
-        position: 'sticky',
-        top: 200,
-        zIndex: 25
-      }}>
-        <div style={{ fontSize: 12, fontWeight: 700, color: t.brand, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>
-          Current section
-        </div>
-        <h3 style={{ fontSize: 18, fontWeight: 700, color: t.textHeader, marginBottom: 4 }}>
-          {currentGroup.tabName}
-        </h3>
-        <p style={{ fontSize: 14, color: t.textDetail }}>
-          {currentGroup.tabContext}
-        </p>
-      </div>
-
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: 24, alignItems: 'start', marginBottom: 100 }}>
-        
-        {/* Left: Questions */}
-        <Card style={{ overflow: 'hidden' }}>
-          
-          {/* Question header */}
-          <div style={{ padding: '16px 20px', borderBottom: `1px solid ${t.strokeLight}`, background: t.subtleBg }}>
-            <div style={{ fontSize: 11, fontWeight: 600, color: t.textDetail, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              Question {currentQuestionIndex + 1} of {totalQuestions}
+        {/* ── MIDDLE: Main content ── */}
+        <Card style={{ overflow: 'auto', padding: 0, display: 'flex', flexDirection: 'column' }}>
+          {/* Banner header — where you are */}
+          <div style={{
+            padding: '14px 22px',
+            borderBottom: `1px solid ${t.strokeLight}`,
+            borderLeft: `4px solid ${t.brand}`,
+            background: t.hoverBg,
+            position: 'sticky',
+            top: 0,
+            zIndex: 2
+          }}>
+            <div style={{ fontSize: 10, fontWeight: 700, color: t.brand, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 2 }}>
+              You are here · Section {currentGroupIndex + 1} of {totalGroups}
             </div>
+            <h3 style={{ fontSize: 17, fontWeight: 700, color: t.textHeader, marginBottom: 2 }}>
+              {currentGroup.tabName}
+            </h3>
+            <p style={{ fontSize: 12, color: t.textDetail, lineHeight: 1.4 }}>
+              {currentGroup.tabContext}
+            </p>
           </div>
 
           {/* Main question */}
-          <div style={{ padding: '24px 24px 18px' }}>
-            <div style={{ fontSize: 14, fontWeight: 600, color: t.textSub, marginBottom: 8 }}>
-              {currentQuestion?.label}
+          <div style={{ padding: '20px 22px 14px' }}>
+            <div style={{ fontSize: 11, fontWeight: 600, color: t.textDetail, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>
+              Question {currentQuestionIndex + 1} of {totalQuestions} · {currentQuestion?.label}
             </div>
             <div style={{
-              fontSize: 20,
+              fontSize: 19,
               fontWeight: 700,
               color: t.textMain,
-              lineHeight: 1.4,
-              marginBottom: 6
+              lineHeight: 1.4
             }}>
               {currentQuestion?.mainQuestion}
             </div>
           </div>
 
-          {/* Probing questions - secondary style */}
+          {/* Probing questions */}
           {currentQuestion?.probingQuestions && currentQuestion.probingQuestions.length > 0 && (
-            <div style={{
-              padding: '0 24px 20px',
-              borderTop: `1px solid ${t.strokeLight}`
-            }}>
-              <div style={{
-                fontSize: 12,
-                fontWeight: 500,
-                color: t.textDetail,
-                marginBottom: 12,
-                textTransform: 'uppercase',
-                letterSpacing: '0.04em'
-              }}>
-                Probing questions (if needed)
-              </div>
+            <div style={{ padding: '0 22px 14px' }}>
               <div style={{
                 background: t.subtleBg,
                 borderRadius: 8,
-                padding: '14px 16px',
+                padding: '10px 14px',
                 borderLeft: `3px solid ${t.textDetail}`
               }}>
-                <ul style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <div style={{
+                  fontSize: 10,
+                  fontWeight: 700,
+                  color: t.textDetail,
+                  marginBottom: 6,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em'
+                }}>
+                  Probing questions
+                </div>
+                <ul style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                   {currentQuestion.probingQuestions.map((pq, idx) => (
                     <li key={idx} style={{
-                      fontSize: 14,
+                      fontSize: 13,
                       color: t.textSub,
                       lineHeight: 1.5,
                       display: 'flex',
-                      gap: 10
+                      gap: 8
                     }}>
                       <span style={{ color: t.textDetail, flexShrink: 0 }}>→</span>
                       <span style={{ fontStyle: 'italic' }}>{pq}</span>
@@ -1499,39 +1543,26 @@ function GroupBasedTasksPhase({ script, status, updateStatus, startTimer, expand
             </div>
           )}
 
-          {/* Notes section */}
-          <div style={{ padding: '18px 24px', borderTop: `1px solid ${t.strokeLight}` }}>
-            <div style={{ fontSize: 12, fontWeight: 600, color: t.textDetail, marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              Observations
-            </div>
-            <Input 
-              value={qStat.notes || ''} 
-              onChange={e => updateStatus(currentQuestion.id, 'notes', e.target.value)} 
-              placeholder="What did you observe? Key quotes, reactions, hesitations..."
-              rows={5}
-            />
-          </div>
-
-          {/* Tags section */}
-          <div style={{ padding: '14px 24px 18px', borderTop: `1px solid ${t.strokeLight}` }}>
-            <div style={{ fontSize: 12, fontWeight: 600, color: t.textDetail, marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+          {/* Quick tags */}
+          <div style={{ padding: '0 22px 14px' }}>
+            <div style={{ fontSize: 10, fontWeight: 700, color: t.textDetail, marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
               Quick tags
             </div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
               {TAGS.map(tag => {
                 const active = (qStat.tags || []).includes(tag.id);
                 return (
                   <button key={tag.id}
                     onClick={() => {
-                      const newTags = active 
-                        ? (qStat.tags || []).filter(t => t !== tag.id)
+                      const newTags = active
+                        ? (qStat.tags || []).filter(x => x !== tag.id)
                         : [...(qStat.tags || []), tag.id];
                       updateStatus(currentQuestion.id, 'tags', newTags);
                     }}
                     style={{
-                      padding: '6px 12px',
-                      borderRadius: 20,
-                      fontSize: 12,
+                      padding: '4px 10px',
+                      borderRadius: 16,
+                      fontSize: 11,
                       cursor: 'pointer',
                       fontFamily: 'inherit',
                       background: active ? tag.bg : 'transparent',
@@ -1546,27 +1577,51 @@ function GroupBasedTasksPhase({ script, status, updateStatus, startTimer, expand
               })}
             </div>
           </div>
+
+          {/* Notes — fills remaining space */}
+          <div style={{ padding: '0 22px 18px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+            <div style={{ fontSize: 10, fontWeight: 700, color: t.textDetail, marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              Observations
+            </div>
+            <textarea
+              value={qStat.notes || ''}
+              onChange={e => updateStatus(currentQuestion.id, 'notes', e.target.value)}
+              placeholder="What did you observe? Key quotes, reactions, hesitations..."
+              style={{
+                width: '100%',
+                flex: 1,
+                minHeight: 120,
+                background: t.cardBg,
+                border: `1px solid ${t.formStroke}`,
+                borderRadius: 6,
+                padding: '10px 14px',
+                fontSize: 13,
+                color: t.textMain,
+                outline: 'none',
+                fontFamily: 'inherit',
+                resize: 'none',
+                lineHeight: 1.5
+              }}
+            />
+          </div>
         </Card>
 
-        {/* Right: Moderator guidance - ALWAYS VISIBLE */}
-        <div style={{ position: 'fixed', top: 400, right: 'max(32px, calc((100vw - 1280px) / 2 + 32px))', width: 340, maxHeight: 'calc(100vh - 420px)', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 12, zIndex: 30 }}>
-          
-          {/* What to do */}
-          <Card style={{ padding: '16px 18px', borderLeft: `3px solid ${t.brand}` }}>
-            <div style={{ fontSize: 12, fontWeight: 700, color: t.brand, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 10 }}>
+        {/* ── RIGHT: Moderator guidance ── */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, overflow: 'auto' }}>
+          <Card style={{ padding: '14px 16px', borderLeft: `3px solid ${t.brand}` }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: t.brand, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>
               What to do
             </div>
-            <p style={{ fontSize: 13, color: t.textSub, lineHeight: 1.6 }}>
+            <p style={{ fontSize: 13, color: t.textSub, lineHeight: 1.55 }}>
               {currentQuestion?.whatToDo}
             </p>
           </Card>
 
-          {/* What to listen for */}
-          <Card style={{ padding: '16px 18px', borderLeft: `3px solid ${t.positive}` }}>
-            <div style={{ fontSize: 12, fontWeight: 700, color: t.positive, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 10 }}>
+          <Card style={{ padding: '14px 16px', borderLeft: `3px solid ${t.positive}` }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: t.positive, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>
               What to listen for
             </div>
-            <p style={{ fontSize: 13, color: t.textSub, lineHeight: 1.6 }}>
+            <p style={{ fontSize: 13, color: t.textSub, lineHeight: 1.55 }}>
               {currentQuestion?.whatToListenFor}
             </p>
           </Card>
@@ -1574,35 +1629,32 @@ function GroupBasedTasksPhase({ script, status, updateStatus, startTimer, expand
       </div>
 
       {/* Sticky bottom action bar */}
-      <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: t.cardBg, borderTop: `1px solid ${t.strokeDefault}`, padding: '10px 32px', zIndex: 40 }}>
-        <div style={{ maxWidth: 1280, margin: '0 auto', display: 'flex', alignItems: 'center', gap: 8 }}>
-          <button 
-            onClick={handlePrevQuestion} 
+      <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: t.cardBg, borderTop: `1px solid ${t.strokeDefault}`, padding: '8px 20px', zIndex: 40 }}>
+        <div style={{ margin: '0 auto', display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+          <button
+            onClick={handlePrevQuestion}
             disabled={currentGroupIndex === 0 && currentQuestionIndex === 0}
             style={{
               background: 'none',
               border: `1px solid ${t.strokeDefault}`,
               borderRadius: 6,
-              padding: '8px 14px',
+              padding: '7px 12px',
               cursor: currentGroupIndex === 0 && currentQuestionIndex === 0 ? 'not-allowed' : 'pointer',
               color: currentGroupIndex === 0 && currentQuestionIndex === 0 ? t.textDisabled : t.brand,
               fontSize: 13,
-              fontFamily: 'inherit',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 4
+              fontFamily: 'inherit'
             }}
           >
             ← Previous
           </button>
 
-          <button 
+          <button
             onClick={() => updateStatus(currentQuestion.id, 'done', !qStat.done)}
             style={{
               background: 'none',
               border: `1px solid ${t.strokeDefault}`,
               borderRadius: 6,
-              padding: '8px 14px',
+              padding: '7px 12px',
               cursor: 'pointer',
               color: qStat.done ? t.positive : t.textSub,
               fontSize: 13,
@@ -1618,7 +1670,6 @@ function GroupBasedTasksPhase({ script, status, updateStatus, startTimer, expand
 
           <div style={{ flex: 1 }} />
 
-          {/* Completion buttons */}
           {[
             { value: 'completed', label: '✅ Completed', bg: t.nearPositive, color: t.positive, border: t.positive },
             { value: 'partial', label: '⚠️ Partially', bg: '#FEF3C7', color: '#92400E', border: '#F59E0B' },
@@ -1627,14 +1678,11 @@ function GroupBasedTasksPhase({ script, status, updateStatus, startTimer, expand
             <button key={value}
               onClick={() => updateStatus(currentQuestion.id, 'completion', qStat.completion === value ? null : value)}
               style={{
-                padding: '8px 14px',
+                padding: '7px 12px',
                 borderRadius: 6,
                 fontSize: 13,
                 fontWeight: 500,
                 cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 5,
                 fontFamily: 'inherit',
                 background: qStat.completion === value ? bg : 'transparent',
                 color: qStat.completion === value ? color : t.textSub,
@@ -1645,13 +1693,13 @@ function GroupBasedTasksPhase({ script, status, updateStatus, startTimer, expand
             </button>
           ))}
 
-          <Btn 
-            variant="cta" 
+          <Btn
+            variant="cta"
             onClick={handleNextQuestion}
-            style={{ marginLeft: 8 }}
+            style={{ marginLeft: 4 }}
           >
-            {currentGroupIndex === totalGroups - 1 && currentQuestionIndex === totalQuestions - 1 
-              ? 'Finish Questions →'
+            {currentGroupIndex === totalGroups - 1 && currentQuestionIndex === totalQuestions - 1
+              ? 'Finish →'
               : 'Next →'}
           </Btn>
         </div>

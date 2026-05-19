@@ -2,7 +2,7 @@
 
 ## Overview
 
-InsightCatcher saves research session data to SharePoint instead of a database. Sessions are stored as JSON files in:
+UXBuddy saves research session data to SharePoint instead of a database. Sessions are stored as JSON files in:
 
 ```
 https://healthcarequalitycatalyst.sharepoint.com/sites/UserExperience/sessions/{study_id}/{yyyy}/{mm}/{session_id}.json
@@ -14,7 +14,7 @@ https://healthcarequalitycatalyst.sharepoint.com/sites/UserExperience/sessions/{
 
 Ask IT to create an Azure app registration with these details:
 
-- **Name:** `InsightCatcher-SharePoint-API`
+- **Name:** `UXBuddy-SharePoint-API`
 - **Type:** Web application
 - **Purpose:** Machine-to-machine (M2M) authentication for research session storage
 

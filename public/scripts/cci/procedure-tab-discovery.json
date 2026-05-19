@@ -1,0 +1,213 @@
+{
+  "id": "procedure-tab-discovery",
+  "type": "discovery",
+  "title": "Procedure Tab - Discovery",
+  "subtitle": "Understanding how clinicians navigate procedure-specific data",
+  "version": "1.0",
+  "totalTimeMinutes": 18,
+  "description": "Goal: understand how clinicians interpret procedure-level performance data, mental models about provider performance, and what would make them take action. Listen for natural reactions without introduction of solutions.",
+  "contextTags": [
+    "KPIs",
+    "provider chart",
+    "bar segments",
+    "peer band",
+    "recommendations",
+    "assign action",
+    "dropdown",
+    "page layout"
+  ],
+
+  "setup": {
+    "rules": [
+      "I am going to show you something we are working on. There are no right or wrong answers.",
+      "I did not design this, so you will not hurt my feelings.",
+      "I want your honest reaction."
+    ],
+    "noHelpPolicy": "Do NOT mention research tools, or any solution you have in mind. If they ask what you are building, say \"I am still trying to understand the problem first.\" This is a learning session, not a pitch. If they ask leading questions back at you, deflect and return to their experience."
+  },
+
+  "tasks": [
+    {
+      "id": "1",
+      "name": "First Impression",
+      "subtitle": "Does the page communicate its purpose without explanation?",
+      "timeMinutes": 4,
+      "script": "Take a look at this page. Tell me what you think it is showing you and what you could do here.",
+      "success": "They can articulate the page purpose without explanation. They understand there is data to interpret and potential actions to take.",
+      "watchFor": [
+        "Whether they immediately understand the procedure focus or seem confused",
+        "What visual element catches their attention first",
+        "Whether they scan or focus deeply on specific areas",
+        "Any signs of cognitive overload or being overwhelmed",
+        "Whether they attempt to interact or click elements without prompting"
+      ],
+      "probes": [
+        "What stands out first?",
+        "What do the numbers at the top tell you?"
+      ],
+      "learnWhy": "First impressions reveal whether the information architecture is intuitive. If they get lost immediately, the whole design is at risk.",
+      "tags": [
+        "clear",
+        "confusing",
+        "noticed-KPIs",
+        "noticed-chart",
+        "noticed-recommendations",
+        "skipped-section",
+        "overwhelmed",
+        "tried-to-click"
+      ],
+      "followUpByTag": {
+        "clear": "What made it clear?",
+        "confusing": "What was confusing?",
+        "noticed-KPIs": "What did those numbers tell you?",
+        "noticed-chart": "What does that chart help you understand?",
+        "noticed-recommendations": "How would you use those?",
+        "skipped-section": "Which section did you skip and why?",
+        "overwhelmed": "What felt like too much?",
+        "tried-to-click": "What were you trying to do?"
+      }
+    },
+    {
+      "id": "2",
+      "name": "Reading the Visual and Connecting to Actions",
+      "subtitle": "Can they decode the provider chart AND connect it to recommendation cards below?",
+      "timeMinutes": 4,
+      "script": "If you had to pick one provider to talk to first, which one would you choose and why? Then: Now look at the section below the chart. How does it relate to what you just told me?",
+      "success": "They can interpret the chart visually, understand performance bands, and see how recommendations map to provider issues. They make explicit connections between chart interpretation and actions.",
+      "watchFor": [
+        "Whether they can read the chart easily or struggle to decode it",
+        "Whether color coding has meaning to them or is ignored",
+        "Whether they understand peer band context and what it means",
+        "Whether they see recommendations as connected to the chart or as separate elements",
+        "Whether they notice interactive or actionable elements like assign buttons",
+        "Whether they refer back to the chart when discussing recommendations"
+      ],
+      "probes": [
+        "What do the colored sections mean?",
+        "What does peer band mean?",
+        "If you did recommendation 1, what would change?"
+      ],
+      "learnWhy": "This reveals the strength of the visual system and whether the recommendations are perceived as targeted or generic.",
+      "tags": [
+        "read-chart-easily",
+        "struggled-with-chart",
+        "understood-colors",
+        "ignored-colors",
+        "got-peer-band",
+        "confused-by-peer-band",
+        "connected-recs-to-chart",
+        "saw-them-as-separate",
+        "noticed-assign",
+        "missed-assign"
+      ],
+      "followUpByTag": {
+        "read-chart-easily": "What made it easy to understand?",
+        "struggled-with-chart": "What was hard about it?",
+        "understood-colors": "What did the colors communicate to you?",
+        "ignored-colors": "Did you look at the color coding? Why or why not?",
+        "got-peer-band": "How does peer band matter to your decision-making?",
+        "confused-by-peer-band": "What would make peer band clearer?",
+        "connected-recs-to-chart": "How did you see them as connected?",
+        "saw-them-as-separate": "How would you connect them?",
+        "noticed-assign": "What would you do with that?",
+        "missed-assign": "See this button? What do you think it does?"
+      }
+    },
+    {
+      "id": "3",
+      "name": "Mental Model and Navigation",
+      "subtitle": "Does the user think in procedures? How do they expect to arrive and leave?",
+      "timeMinutes": 5,
+      "script": "Imagine you want to look at cost savings across your whole service line, not just Total Knee. Walk me through how you would expect to get to this page and what you would do after.",
+      "success": "You understand their mental model: procedures as a starting point, providers, or cost drivers. You know whether they see this page in isolation or as part of a larger journey.",
+      "watchFor": [
+        "Whether they naturally think about problems in terms of procedures or providers",
+        "Whether they look for navigation controls like dropdowns or menus",
+        "Whether they expect to see an overview or comparison view first",
+        "Whether they mention other pages or tools they would need",
+        "Whether they show confusion about how to navigate between procedure views",
+        "Whether they attempt to click on elements to navigate"
+      ],
+      "probes": [
+        "If you wanted to switch procedures, what would you do?",
+        "What would you need to see before this page?"
+      ],
+      "learnWhy": "Navigation expectations reveal whether the page feels like a dead end or a natural waypoint in a larger system.",
+      "tags": [
+        "thinks-in-procedures",
+        "thinks-in-providers",
+        "thinks-in-cost-drivers",
+        "found-dropdown",
+        "missed-dropdown",
+        "wants-overview-first",
+        "wants-comparison",
+        "clicked-opps-hub",
+        "confused-by-navigation"
+      ],
+      "followUpByTag": {
+        "thinks-in-procedures": "So procedures are your primary entry point?",
+        "thinks-in-providers": "Would you usually start by looking at a specific provider?",
+        "thinks-in-cost-drivers": "How do you typically identify which cost drivers to focus on?",
+        "found-dropdown": "Good - how would you expect that to work?",
+        "missed-dropdown": "Would a selector here help you navigate between procedures?",
+        "wants-overview-first": "What would that overview show you?",
+        "wants-comparison": "How would you want to compare across procedures?",
+        "clicked-opps-hub": "What were you looking for there?",
+        "confused-by-navigation": "How would you expect navigation to work?"
+      }
+    },
+    {
+      "id": "4",
+      "name": "Value and Gaps",
+      "subtitle": "What would they keep, cut, or add?",
+      "timeMinutes": 5,
+      "script": "If this page existed in a tool you use every day, what would be most useful about it? And what would you change or remove?",
+      "success": "You have clear signals about what resonates and what is noise. You know whether they would actually return to this tool and how often.",
+      "watchFor": [
+        "What specific aspect they name as most valuable: data, recommendations, visual, or actionability",
+        "Whether they would actually use this regularly or if it feels like a one-off report",
+        "What elements they want to remove or change and their reasoning",
+        "Whether they mention wanting to track results over time",
+        "Whether they discuss sharing this information with others",
+        "Whether they mention needing training or guided walkthrough"
+      ],
+      "probes": [
+        "Anything you expected to see that is not here?",
+        "Would you share this with someone?"
+      ],
+      "learnWhy": "This is your signal of whether you are solving a real problem or creating information they will ignore.",
+      "tags": [
+        "values-aggregation",
+        "indifferent-to-aggregation",
+        "would-share",
+        "would-not-share",
+        "wants-to-remove-something",
+        "wants-something-added",
+        "mentioned-tracking",
+        "mentioned-asking-AI",
+        "needs-walkthrough",
+        "would-use-daily",
+        "would-use-rarely"
+      ],
+      "followUpByTag": {
+        "values-aggregation": "Why does having aggregate information matter to you?",
+        "indifferent-to-aggregation": "What would make aggregation valuable to your work?",
+        "would-share": "Who would you share this with and why?",
+        "would-not-share": "What would need to be different to make it worth sharing?",
+        "wants-to-remove-something": "What and why?",
+        "wants-something-added": "What and why?",
+        "mentioned-tracking": "How would you want to track that over time?",
+        "mentioned-asking-AI": "What kinds of questions would you ask?",
+        "needs-walkthrough": "What parts are unclear or need explanation?",
+        "would-use-daily": "What would make it that essential to your routine?",
+        "would-use-rarely": "What is missing for regular use?"
+      }
+    }
+  ],
+
+  "wrapup": {
+    "timeMinutes": 0,
+    "intro": "",
+    "questions": []
+  }
+}

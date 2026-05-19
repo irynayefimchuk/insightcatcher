@@ -5,7 +5,7 @@
   "subtitle": "Understanding where research fits in our org",
   "version": "1.0",
   "totalTimeMinutes": 45,
-  "description": " Goal: understand where the current process breaks down before pitching any solution. Do NOT mention InsightCatcher or any specific tool. Listen for pain, don't create it.",
+  "description": " Goal: understand where the current process breaks down before pitching any solution. Do NOT mention UXBuddy or any specific tool. Listen for pain, don't create it.",
 
   "setup": {
     "rules": [
@@ -13,7 +13,7 @@
       "There are no right or wrong answers — I'm trying to learn, not audit.",
       "I may stay quiet at times — I just want to make sure I hear the full picture."
     ],
-    "noHelpPolicy": "Do NOT mention InsightCatcher, research tools, or any solution you have in mind. If they ask what you're building, say 'I'm still trying to understand the problem first.' This is a learning session, not a pitch. If they ask leading questions back at you, deflect and return to their experience."
+    "noHelpPolicy": "Do NOT mention UXBuddy, research tools, or any solution you have in mind. If they ask what you're building, say 'I'm still trying to understand the problem first.' This is a learning session, not a pitch. If they ask leading questions back at you, deflect and return to their experience."
   },
 
   "warmup": {
