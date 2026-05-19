@@ -1,10 +1,10 @@
 {
   "id": "cost-intelligence-demo-2026-05",
   "title": "CCI Cost Intelligence Demo",
-  "subtitle": "Full product walkthrough — Snapshot, Opportunities, Procedure Detail",
-  "version": "1.0",
+  "subtitle": "Snapshot, Opportunities Hub, Procedure Recommendations",
+  "version": "1.1",
   "createdDate": "2026-05-18",
-  "totalTimeMinutes": 60,
+  "totalTimeMinutes": 55,
   "setup": {
     "rules": [
       "We are testing the product, not you. There are no wrong answers.",
@@ -24,190 +24,193 @@
         {
           "id": "op-1",
           "label": "Current workflow",
-          "mainQuestion": "Walk me through how you currently identify which cost opportunities are worth pursuing. How do you decide where to focus first?",
+          "mainQuestion": "Walk me through how you find where surgical costs are running high today. What do you actually do?",
           "probingQuestions": [
-            "What does that process look like week to week?",
-            "Who else is involved in that decision?",
-            "What data do you rely on most?"
+            "What do you have to pull together to get there?",
+            "Who else gets involved?"
           ],
           "whatToDo": "Let them answer fully without interrupting. Do not mention the product or any features.",
-          "whatToListenFor": "What triggers their attention — volume, variance, physician outliers, service line? What data sources do they trust or distrust?"
+          "whatToListenFor": "What triggers their attention. What data sources, reports, or people they rely on. Where the work actually starts."
         },
         {
           "id": "op-2",
-          "label": "Pain in current process",
-          "mainQuestion": "What is the most frustrating part of that process right now?",
+          "label": "Where it breaks",
+          "mainQuestion": "In that process — where do you get stuck, or stop trusting what you are looking at?",
           "probingQuestions": [
-            "How much time does that take you?",
-            "Has that caused you to miss something important before?",
-            "If that problem went away, what would change for you?"
+            "Has a number ever turned out wrong on you? What happened?"
           ],
           "whatToDo": "Stay curious and neutral. Do not reassure them that the product solves this — yet.",
-          "whatToListenFor": "Time waste, data gaps, lack of trust in numbers, difficulty explaining to stakeholders. These are the pain points the product should address."
-        }
-      ]
-    },
-    {
-      "id": "snapshot-tab",
-      "tabName": "Snapshot Tab",
-      "tabContext": "Navigate to the Snapshot tab. Allow the participant to orient themselves before asking anything.",
-      "timeMinutes": 14,
-      "questions": [
-        {
-          "id": "snap-1",
-          "label": "First impression",
-          "mainQuestion": "Take a moment and look at this screen. Tell me what you are seeing.",
-          "probingQuestions": [
-            "What stands out to you first?",
-            "What do you think this screen is for?",
-            "Is there anything here you would want to click on?"
-          ],
-          "whatToDo": "Do not explain anything. Give them at least 20 seconds of silence first. Watch where their eyes go.",
-          "whatToListenFor": "Do they read the numbers or the labels first? Do they notice the left panel? Do they gravitate toward a specific card or number?"
-        },
-        {
-          "id": "snap-2",
-          "label": "Finding a focus area",
-          "mainQuestion": "Based on what you can see here, where would you start if you were looking for your biggest cost opportunity?",
-          "probingQuestions": [
-            "What made you pick that one?",
-            "Is there anything here that would change your mind?",
-            "What would you need to see to feel confident about that choice?"
-          ],
-          "whatToDo": "Let them navigate freely. Resist the urge to guide them. Note what they click and what they skip.",
-          "whatToListenFor": "Do they use the sort tabs? Do they read the opportunity cards? Do they look at the left panel at all? Any confusion about what a number means?"
-        },
-        {
-          "id": "snap-3",
-          "label": "Left panel usefulness",
-          "mainQuestion": "What do you make of the information on the left side of the screen?",
-          "probingQuestions": [
-            "Is that information useful to you in this context?",
-            "When would you look at that?",
-            "Is anything missing from it?"
-          ],
-          "whatToDo": "Point broadly to the left panel area without naming any specific element.",
-          "whatToListenFor": "Do they understand what the filters or summary metrics represent? Is the density too high or too low? Do they see it as context or noise?"
+          "whatToListenFor": "Trust gaps, data quality concerns, time waste, moments where the work stalls or gets handed off."
         }
       ]
     },
     {
       "id": "opportunities-hub",
-      "tabName": "Opportunities Hub",
-      "tabContext": "Navigate to the Opportunities tab. Let them land on it and look before asking.",
+      "tabName": "Opportunities Hub — Supply card",
+      "tabContext": "Show the Opportunities Hub with a single Supply card visible. Let them land on it without explanation.",
       "timeMinutes": 14,
       "questions": [
         {
           "id": "opp-1",
-          "label": "Scanning the list",
-          "mainQuestion": "Looking at the list of opportunities in front of you — how would you decide which ones deserve your attention?",
+          "label": "Cold read",
+          "mainQuestion": "Before I explain anything — what do you think this card is telling you?",
           "probingQuestions": [
-            "What column or number would you look at first?",
-            "Is the way this is sorted useful to you?",
-            "Is there a way you would want to group or filter this?"
+            "What on the card tells you that?",
+            "Who do you picture using this?"
           ],
-          "whatToDo": "Do not mention sorting or filtering unless they bring it up. Watch what they scroll past and what they pause on.",
-          "whatToListenFor": "Do they prioritize by dollar value, volume, or something else? Are they looking for physician names? Do they want to see service line or department grouping?"
+          "whatToDo": "Stay silent for at least 15 seconds. Do not explain any element. Note what they read first.",
+          "whatToListenFor": "Whether they grasp the supply variance story unaided. Which elements anchor their reading. Who they see as the user."
         },
         {
           "id": "opp-2",
-          "label": "Acting on an opportunity",
-          "mainQuestion": "Pick one opportunity from this list that you would want to act on. Tell me why you chose that one.",
+          "label": "The number",
+          "mainQuestion": "It says you could save 120 to 195 thousand. What does that number mean to you?",
           "probingQuestions": [
-            "What would your next step be after picking this?",
-            "Who would you bring this to?",
-            "What would you need before you could take that to your CMO or CFO?"
+            "Is that money already saved, or something else?",
+            "It is a range, not one figure. Does that help you or bother you?"
           ],
-          "whatToDo": "Let them choose without guidance. If they hesitate, say: There is no wrong answer — just whatever feels most relevant to you.",
-          "whatToListenFor": "What justifies action in their mind? Is it size of opportunity, confidence in the data, physician relationship, or something else entirely?"
+          "whatToDo": "Do not define the number. Let them interpret it in their own terms first.",
+          "whatToListenFor": "Whether they read it as realized vs potential. Whether the range reads as honest or vague. Whether they want one number to anchor on."
         },
         {
           "id": "opp-3",
-          "label": "Missing information",
-          "mainQuestion": "Is there anything you would want to see on this page that is not here?",
+          "label": "The pairwise comparison",
+          "mainQuestion": "This card puts one high-cost provider next to one low-cost provider. What is your honest reaction to comparing them that way?",
           "probingQuestions": [
-            "If you could add one column to this list, what would it be?",
-            "Is there a view you wish you could switch to?",
-            "What would make this page more useful in your day to day work?"
+            "What would you need to know before you trusted that those two are a fair match?",
+            "The providers show as codes, not names. Does that work for you?"
           ],
-          "whatToDo": "This is a generative question — let them think out loud. Do not prompt with suggestions.",
-          "whatToListenFor": "Requests for payer mix, physician tenure, prior engagement history, benchmark comparisons, or trend over time."
+          "whatToDo": "Do not defend the pairing. Let them push on it if they want to.",
+          "whatToListenFor": "Case mix, acuity, payer, volume — what they need to feel the comparison is fair. Comfort or discomfort with anonymized provider codes."
+        },
+        {
+          "id": "opp-4",
+          "label": "What is missing",
+          "mainQuestion": "If you were going to act on this card — what is not here that you would need first?",
+          "probingQuestions": [
+            "What would you check before you brought this to anyone?"
+          ],
+          "whatToDo": "This is a generative question. Do not prompt with suggestions. Let the silence pull more out.",
+          "whatToListenFor": "Specific gaps — patient mix, time period, who else they would loop in, what they would verify before sharing."
         }
       ]
     },
     {
-      "id": "procedure-detail",
-      "tabName": "Procedure Detail",
-      "tabContext": "Click into one of the opportunity cards to open the procedure detail view.",
-      "timeMinutes": 14,
+      "id": "procedure-recommendations",
+      "tabName": "Procedure Recommendations",
+      "tabContext": "Navigate to the Procedure Recommendations view. One procedure aggregating multiple opportunities, with the cost drivers panel and the benchmark slider visible.",
+      "timeMinutes": 16,
       "questions": [
         {
-          "id": "pd-1",
-          "label": "Understanding the detail view",
-          "mainQuestion": "Tell me what you are looking at now. What is this screen showing you?",
+          "id": "pr-1",
+          "label": "Does the aggregation land",
+          "mainQuestion": "Now everything for one procedure is in one place. Is this how you would want to think about it — or would you rather stay with the single cards?",
           "probingQuestions": [
-            "Is that what you expected to see when you clicked in?",
-            "What does this tell you that the list view did not?",
-            "Is anything here surprising?"
+            "Where would you look first on this screen?"
           ],
-          "whatToDo": "Stay quiet for the first 15 seconds. Let them read and react before asking anything.",
-          "whatToListenFor": "Do they understand the physician breakdown immediately? Do they look for cost vs charge data? Do they understand the benchmark line?"
+          "whatToDo": "Let them orient before asking. Watch their eye path.",
+          "whatToListenFor": "Whether the procedure-level frame matches how they reason. Whether they miss the granularity of single cards."
         },
         {
-          "id": "pd-2",
-          "label": "Physician variation",
-          "mainQuestion": "Looking at the physician data on this screen — what story does this tell you?",
+          "id": "pr-2",
+          "label": "The recommendation",
+          "mainQuestion": "Read this recommendation. Does it feel like the app is telling you what to do, or showing you what it found?",
           "probingQuestions": [
-            "Does the variation here seem meaningful to you?",
-            "What would you do with this information?",
-            "Would you feel comfortable sharing this with the physicians involved?"
+            "Which of those would you trust more?",
+            "Is there anything it does not know about your world that it should?"
           ],
-          "whatToDo": "Do not say the word outlier. Let them use their own vocabulary to describe what they see.",
-          "whatToListenFor": "How do they frame physician variation — as a performance issue, a data issue, or a workflow issue? Do they see this as actionable or politically sensitive?"
+          "whatToDo": "Let them sit with the wording. Do not paraphrase the recommendation for them.",
+          "whatToListenFor": "Tone perception — prescriptive vs evidentiary. What context they feel the system is missing about their setting."
         },
         {
-          "id": "pd-3",
-          "label": "Readiness to act",
-          "mainQuestion": "If you walked out of this tool right now, do you feel like you have enough to take action on this opportunity?",
+          "id": "pr-3",
+          "label": "Cost drivers panel",
+          "mainQuestion": "This panel breaks the cost into drivers — supplies, length of stay, pharmacy, and so on. Now that you have seen it — is this useful to you, or just more detail?",
           "probingQuestions": [
-            "What would you still need?",
-            "Who would you share this with and in what format?",
-            "What would success look like 90 days from now?"
+            "Clicking a driver filters the recommendations below it. Does that connection make sense?",
+            "If you had to start somewhere, would this panel change where you start?"
           ],
-          "whatToDo": "This is the key confidence-check question. Let them answer fully before probing.",
-          "whatToListenFor": "What gaps remain — is it data confidence, physician engagement process, executive sponsorship, or time? What format do they need to take it upstream?"
+          "whatToDo": "Briefly explain the panel and the click-to-filter behaviour, then ask. Do not click through it for them.",
+          "whatToListenFor": "Whether drivers map to how they already break down cost. Whether the filtering interaction is discoverable and meaningful."
+        },
+        {
+          "id": "pr-4",
+          "label": "The benchmark",
+          "mainQuestion": "There is a benchmark you can set — Easy, Moderate, Hard. Looking at it, which setting is the tougher target to hit?",
+          "probingQuestions": [
+            "Where do you think that benchmark number comes from?",
+            "Would you trust the one the app picked, or set your own?"
+          ],
+          "whatToDo": "Do not explain the percentile logic. See if the labels are self-evident.",
+          "whatToListenFor": "Whether Easy and Hard read in the expected direction. Trust in a system-set benchmark vs desire for control."
+        },
+        {
+          "id": "pr-5",
+          "label": "The moving line",
+          "mainQuestion": "When you change the benchmark, the green line moves and the list of high-cost and low-cost providers shifts with it. Walk me through what that change is telling you.",
+          "probingQuestions": [
+            "A harder benchmark leaves more providers above the line. Does that match what you would expect?",
+            "Does seeing the low-cost providers below the line help you, or is it just extra?"
+          ],
+          "whatToDo": "Have them move the slider themselves. Watch whether they connect the line, the list, and the benchmark setting.",
+          "whatToListenFor": "Whether they grasp the linkage. Whether low-cost providers register as a useful reference point or as noise."
         }
       ]
     },
     {
-      "id": "closing",
-      "tabName": "Closing — no screen",
+      "id": "snapshot",
+      "tabName": "Snapshot",
+      "tabContext": "Show the Snapshot screen — the first screen of the app, splitting the view into Procedures, Providers, and Cost Drivers.",
+      "timeMinutes": 12,
+      "questions": [
+        {
+          "id": "sn-1",
+          "label": "Ten-second read",
+          "mainQuestion": "In about ten seconds — what is this screen trying to tell you?",
+          "probingQuestions": [
+            "What is the headline here?"
+          ],
+          "whatToDo": "Time them silently. Do not point at anything.",
+          "whatToListenFor": "Whether the page communicates a single message or feels like a wall of widgets."
+        },
+        {
+          "id": "sn-2",
+          "label": "The split",
+          "mainQuestion": "Procedures, Providers, Cost Drivers. Does splitting it up that way match how you think — or would you cut it differently?",
+          "probingQuestions": [
+            "Is anything filed in a place you would not expect?"
+          ],
+          "whatToDo": "Let them critique freely. Do not justify the structure.",
+          "whatToListenFor": "Mental model fit. Items that feel misfiled. Categories they would add or merge."
+        },
+        {
+          "id": "sn-3",
+          "label": "Does the overview earn its place",
+          "mainQuestion": "This is the first screen someone opens, before the detail. Would you actually start your work here — or go straight past it to the cards?",
+          "probingQuestions": [
+            "What would this screen need to be worth stopping on?"
+          ],
+          "whatToDo": "This is a hard question about value. Do not flinch from a negative answer.",
+          "whatToListenFor": "Whether the overview adds value or is treated as a pass-through. What specifically would make it sticky."
+        }
+      ]
+    },
+    {
+      "id": "close",
+      "tabName": "Close",
       "tabContext": "Close or minimize the prototype. Closing questions only — no screen needed.",
-      "timeMinutes": 10,
+      "timeMinutes": 5,
       "questions": [
         {
           "id": "cl-1",
-          "label": "Overall reaction",
-          "mainQuestion": "Stepping back from everything you just saw — what is your overall reaction?",
+          "label": "The forced cut",
+          "mainQuestion": "If the team could keep only one of the three tabs you saw — which one stays? And what do you lose without the other two?",
           "probingQuestions": [
-            "Was there a moment that felt particularly useful?",
-            "Was there a moment where you lost trust in what you were seeing?",
-            "Does this feel like something your team would actually use?"
+            "What made the other two easier to give up?",
+            "One last thing — what is one thing you held back from saying? (only if the room feels honest, then stop and do not fill the silence)"
           ],
-          "whatToDo": "Keep this open and unhurried. This is where the most honest feedback tends to come out.",
-          "whatToListenFor": "Overall sentiment, specific moments of delight or friction, and any signals about adoption barriers within their organization."
-        },
-        {
-          "id": "cl-2",
-          "label": "One thing to change",
-          "mainQuestion": "If you could change one thing about what you saw today to make it more useful for your work, what would it be?",
-          "probingQuestions": [
-            "Why is that the most important thing to you?",
-            "How would that change how you use it?",
-            "Is there anything else you would want us to know?"
-          ],
-          "whatToDo": "Accept their answer without defending the product. Say: That is really helpful — thank you.",
-          "whatToListenFor": "The single biggest unmet need. This is the most important data point from the session."
+          "whatToDo": "Let the forced choice do the work. After the optional last probe, stop talking. Do not fill the silence.",
+          "whatToListenFor": "The tab that earns its place under pressure. What they regret losing. Anything held back that surfaces in the silence."
         }
       ]
     }

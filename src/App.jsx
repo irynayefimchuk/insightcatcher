@@ -414,7 +414,7 @@ export default function UXBuddy() {
 
       {/* ── Sticky header ── */}
       <header style={{ position: 'sticky', top: 0, zIndex: 50, background: t.cardBg, borderBottom: `1px solid ${t.strokeDefault}` }}>
-        <div style={{ margin: '0 auto', padding: '0 24px', display: 'flex', alignItems: 'center', gap: 16, height: 48 }}>
+        <div style={{ margin: '0 auto', padding: '0 clamp(24px, 3vw, 54px)', display: 'flex', alignItems: 'center', gap: 16, height: 48 }}>
           <button onClick={() => { setCurrentPhase('select'); setScript(null); }}
             style={{ display: 'flex', alignItems: 'center', gap: 6, color: t.brand, fontWeight: 700, fontSize: 15,
               background: 'none', border: 'none', cursor: 'pointer', padding: 0, whiteSpace: 'nowrap' }}>
@@ -468,7 +468,7 @@ export default function UXBuddy() {
         {/* Stepper row */}
         {script && currentPhase !== 'select' && currentPhase !== 'complete' && (
           <div style={{ borderTop: `1px solid ${t.strokeLight}`, background: t.cardBg }}>
-            <div style={{ margin: '0 auto', padding: '0 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 40 }}>
+            <div style={{ margin: '0 auto', padding: '0 clamp(24px, 3vw, 54px)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 40 }}>
               <Stepper currentPhase={currentPhase} onPhaseClick={setCurrentPhase} phases={getPhases(script.type, !!script.groups)} />
               <div style={{ display: 'flex', gap: 6 }}>
                 <Btn variant="ghost" style={{ padding: '3px 12px', fontSize: 12 }}
@@ -510,7 +510,7 @@ export default function UXBuddy() {
       <main style={{
         maxWidth: (currentPhase === 'tasks' && script && script.groups) ? 'none' : 1280,
         margin: '0 auto',
-        padding: (currentPhase === 'tasks' && script && script.groups) ? '10px 16px 64px' : '16px 32px 120px'
+        padding: (currentPhase === 'tasks' && script && script.groups) ? '10px clamp(24px, 3vw, 54px) 64px' : '16px 32px 120px'
       }}>
         {currentPhase === 'select' && <SelectPhase config={config} selectedProject={selectedProject} setSelectedProject={setSelectedProject} onSelectScript={selectScript} loading={loading} scriptTypeFilter={scriptTypeFilter} setScriptTypeFilter={setScriptTypeFilter} />}
         {currentPhase === 'setup' && script && <SetupPhase script={script} participantId={participantId} setParticipantId={setParticipantId} runnerName={runnerName} setRunnerName={setRunnerName} onStart={startSession} />}
