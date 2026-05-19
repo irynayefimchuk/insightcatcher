@@ -627,11 +627,14 @@ export default function UXBuddy() {
 function SelectPhase({ config, selectedProject, setSelectedProject, onSelectScript, loading, scriptTypeFilter, setScriptTypeFilter }) {
   const [showAddInfo, setShowAddInfo] = useState(false);
   
-  // Group scripts by project and filter by type
+  // Group scripts by project and filter by type, sorted freshest first
   const groupedProjects = config?.projects
     .map(project => ({
       ...project,
-      scripts: project.scripts.filter(s => scriptTypeFilter === 'all' || (s.type || 'usability') === scriptTypeFilter)
+      scripts: project.scripts
+        .filter(s => scriptTypeFilter === 'all' || (s.type || 'usability') === scriptTypeFilter)
+        .slice()
+        .sort((a, b) => (b.createdDate || '').localeCompare(a.createdDate || ''))
     }))
     .filter(project => project.scripts.length > 0) || [];
 

@@ -8,7 +8,8 @@
           "id": "ux-discovery-stakeholder",
           "name": "Product Development Process Interview — Apr 2026",
           "file": "ux-discovery-stakeholder.json",
-          "type": "discovery"
+          "type": "discovery",
+          "createdDate": "2026-04-01"
         }
       ]
     },
@@ -17,22 +18,25 @@
       "name": "CCI (Clinical Cost Intelligence)",
       "scripts": [
         {
-          "id": "procedure-tab-discovery",
-          "name": "Procedure Tab - Discovery — Apr 2026",
-          "file": "procedure-tab-discovery.json",
-          "type": "discovery"
+          "id": "cost-intelligence-demo",
+          "name": "Cost Intelligence Demo — May 2026",
+          "file": "cost-intelligence-demo.json",
+          "type": "usability",
+          "createdDate": "2026-05-18"
         },
         {
           "id": "snapshot-test-v2",
           "name": "CCI Snapshot Test v2 — Apr 2026",
           "file": "cci-snapshot-test-v2.json",
-          "type": "usability"
+          "type": "usability",
+          "createdDate": "2026-04-15"
         },
         {
-          "id": "cost-intelligence-demo",
-          "name": "Cost Intelligence Demo — May 2026",
-          "file": "cost-intelligence-demo.json",
-          "type": "usability"
+          "id": "procedure-tab-discovery",
+          "name": "Procedure Tab - Discovery — Apr 2026",
+          "file": "procedure-tab-discovery.json",
+          "type": "discovery",
+          "createdDate": "2026-04-10"
         }
       ]
     }
