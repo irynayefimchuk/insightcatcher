@@ -1351,6 +1351,7 @@ function GroupBasedTasksPhase({ script, status, updateStatus, startTimer, expand
               const isCurrentGroup = gIdx === currentGroupIndex;
               const notedCount = getGroupNoteCount(group);
               const totalCount = group.questions.length;
+              const isGroupDone = totalCount > 0 && notedCount === totalCount;
               return (
                 <div key={group.id} style={{ marginBottom: 4 }}>
                   {/* Group row */}
@@ -1376,8 +1377,8 @@ function GroupBasedTasksPhase({ script, status, updateStatus, startTimer, expand
                         width: 18,
                         height: 18,
                         borderRadius: 4,
-                        background: isCurrentGroup ? t.brand : t.subtleBg,
-                        color: isCurrentGroup ? '#fff' : t.textDetail,
+                        background: isCurrentGroup ? t.brand : isGroupDone ? t.positive : t.subtleBg,
+                        color: isCurrentGroup || isGroupDone ? '#fff' : t.textDetail,
                         fontSize: 10,
                         fontWeight: 700,
                         display: 'flex',
@@ -1385,12 +1386,12 @@ function GroupBasedTasksPhase({ script, status, updateStatus, startTimer, expand
                         justifyContent: 'center',
                         flexShrink: 0
                       }}>
-                        {gIdx + 1}
+                        {isGroupDone && !isCurrentGroup ? '✓' : gIdx + 1}
                       </span>
                       <span style={{
                         fontSize: 13,
                         fontWeight: isCurrentGroup ? 600 : 500,
-                        color: isCurrentGroup ? t.textHeader : t.textSub,
+                        color: isCurrentGroup ? t.textHeader : isGroupDone ? t.positive : t.textSub,
                         overflow: 'hidden',
                         textOverflow: 'ellipsis',
                         whiteSpace: 'nowrap'
@@ -1401,7 +1402,7 @@ function GroupBasedTasksPhase({ script, status, updateStatus, startTimer, expand
                     <span style={{
                       fontSize: 10,
                       fontWeight: 600,
-                      color: notedCount === totalCount && totalCount > 0 ? t.positive : t.textDetail,
+                      color: isGroupDone ? t.positive : t.textDetail,
                       flexShrink: 0
                     }}>
                       {notedCount}/{totalCount}
