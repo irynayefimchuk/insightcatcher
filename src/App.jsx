@@ -796,12 +796,12 @@ function SelectPhase({ config, selectedProject, setSelectedProject, onSelectScri
 function SetupPhase({ script, participantId, setParticipantId, runnerName, setRunnerName, onStart }) {
   return (
     <div>
-      <div style={{ padding: '16px 0 16px', paddingRight: 'calc(320px + 52px)' }}>
+      <div style={{ padding: '8px 0 14px' }}>
         <h2 style={{ fontSize: 22, fontWeight: 700, color: t.textHeader, marginBottom: 4 }}>{script.title}</h2>
         {script.description && <p style={{ color: t.textSub, fontSize: 14, lineHeight: 1.6 }}>{script.description}</p>}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, alignItems: 'start' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 14, alignItems: 'start' }}>
         {/* Left: participant fields */}
         <Card style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
           <h3 style={{ fontSize: 15, fontWeight: 600, color: t.textHeader, marginBottom: 4 }}>Session details</h3>
