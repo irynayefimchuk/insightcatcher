@@ -55,7 +55,7 @@ const MOMS_TEST_DONTS = [
 const PHASES = ['setup', 'warmup', 'tasks', 'wrapup'];
 const PHASE_LABELS = { setup: 'Setup', warmup: 'Warm-up', tasks: 'Tasks', wrapup: 'Wrap-up' };
 
-const getPhases = (scriptType, hasGroups) => (scriptType === 'discovery' || hasGroups) ? ['setup', 'tasks', 'wrapup'] : ['setup', 'warmup', 'tasks', 'wrapup'];
+const getPhases = (scriptType, hasGroups) => hasGroups ? ['setup', 'tasks'] : (scriptType === 'discovery') ? ['setup', 'tasks', 'wrapup'] : ['setup', 'warmup', 'tasks', 'wrapup'];
 
 const Card = ({ children, style }) => (
   <div style={{ background: t.cardBg, border: `1px solid ${t.strokeDefault}`, borderRadius: 10, ...style }}>
@@ -94,30 +94,26 @@ const Btn = ({ onClick, disabled, children, variant = 'default', style }) => {
 function Stepper({ currentPhase, onPhaseClick, phases = PHASES }) {
   const currentIdx = phases.indexOf(currentPhase);
   return (
-    <div style={{ display: 'flex', alignItems: 'center' }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
       {phases.map((phase, i) => {
         const isDone = i < currentIdx;
         const isActive = i === currentIdx;
-        const isLast = i === phases.length - 1;
         return (
-          <React.Fragment key={phase}>
-            <button onClick={() => onPhaseClick(phase)}
-              style={{ display: 'flex', alignItems: 'center', gap: 7, background: isActive ? t.hoverBg : 'transparent',
-                border: 'none', cursor: 'pointer', padding: '4px 10px', borderRadius: 6, fontFamily: 'inherit' }}>
-              <div style={{ width: 22, height: 22, borderRadius: '50%', display: 'flex', alignItems: 'center',
-                justifyContent: 'center', fontSize: 10, fontWeight: 700, flexShrink: 0,
-                background: isDone ? t.positive : isActive ? t.brand : 'transparent',
-                color: isDone || isActive ? '#fff' : t.textDisabled,
-                border: isDone || isActive ? 'none' : `2px solid ${t.strokeStrong}` }}>
-                {isDone ? '✓' : i + 1}
-              </div>
-              <span style={{ fontSize: 13, fontWeight: isActive ? 600 : 400,
-                color: isDone ? t.positive : isActive ? t.brand : t.textDetail, whiteSpace: 'nowrap' }}>
-                {PHASE_LABELS[phase]}
-              </span>
-            </button>
-            {!isLast && <div style={{ width: 20, height: 2, background: isDone ? t.positive : t.strokeDefault, flexShrink: 0 }} />}
-          </React.Fragment>
+          <button key={phase} onClick={() => onPhaseClick(phase)}
+            style={{
+              background: isActive ? t.hoverBg : 'transparent',
+              border: 'none',
+              cursor: 'pointer',
+              padding: '5px 12px',
+              borderRadius: 6,
+              fontFamily: 'inherit',
+              fontSize: 13,
+              fontWeight: isActive ? 600 : 500,
+              color: isActive ? t.brand : isDone ? t.positive : t.textSub,
+              whiteSpace: 'nowrap'
+            }}>
+            {PHASE_LABELS[phase]}
+          </button>
         );
       })}
     </div>
@@ -516,7 +512,7 @@ export default function UXBuddy() {
         {currentPhase === 'setup' && script && <SetupPhase script={script} participantId={participantId} setParticipantId={setParticipantId} runnerName={runnerName} setRunnerName={setRunnerName} onStart={startSession} />}
         {currentPhase === 'warmup' && script && script.type !== 'discovery' && !script.groups && <WarmupPhase warmup={script.warmup} status={warmupStatus} setStatus={setWarmupStatus} onNext={nextPhase} startTimer={startTimer} />}
         {currentPhase === 'tasks' && script && <TasksPhase script={script} tasks={script.tasks} currentIndex={currentTaskIndex} setCurrentIndex={setCurrentTaskIndex} status={taskStatus} updateStatus={updateTaskStatus} showScript={showScript} setShowScript={setShowScript} onNext={nextTask} onPrev={prevTask} startTimer={startTimer} expandedSections={expandedSections} toggleSection={toggleSection} contextChips={contextChips} setContextChips={setContextChips} />}
-        {currentPhase === 'wrapup' && script && <WrapupPhase wrapup={script.wrapup} observerNotes={script.observerNotes} status={wrapupStatus} setStatus={setWrapupStatus} sessionNotes={sessionNotes} setSessionNotes={setSessionNotes} onFinish={nextPhase} />}
+        {currentPhase === 'wrapup' && script && !script.groups && <WrapupPhase wrapup={script.wrapup} observerNotes={script.observerNotes} status={wrapupStatus} setStatus={setWrapupStatus} sessionNotes={sessionNotes} setSessionNotes={setSessionNotes} onFinish={nextPhase} />}
         {currentPhase === 'complete' && !showCompleteModal && (
           <div style={{ textAlign: 'center', padding: 48 }}>
             <CheckCircle2 style={{ color: t.positive, margin: '0 auto 16px' }} size={40} />
