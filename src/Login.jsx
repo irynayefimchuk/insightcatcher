@@ -181,28 +181,7 @@ export default function Login({ onAuthSuccess }) {
           {isSignUp ? 'Already have an account? Sign In' : "Don't have an account? Sign Up"}
         </button>
 
-        <div style={{ marginTop: 16, paddingTop: 16, borderTop: `1px solid ${t.strokeDefault}` }}>
-          <button
-            onClick={() => onAuthSuccess()}
-            style={{
-              width: '100%',
-              padding: '12px 16px',
-              background: t.hoverBg,
-              color: t.brand,
-              border: `1px solid ${t.brand}`,
-              borderRadius: 6,
-              fontSize: 14,
-              fontWeight: 600,
-              cursor: 'pointer',
-              fontFamily: 'inherit',
-            }}
-          >
-            Continue as Guest
-          </button>
-          <p style={{ fontSize: 12, color: t.textDetail, marginTop: 8, textAlign: 'center' }}>
-            Skip login to explore UXBuddy
-          </p>
-        </div>
+
       </div>
     </div>
   );
