@@ -6,7 +6,7 @@
       "scripts": [
         {
           "id": "ux-discovery-stakeholder",
-          "name": "Product Development Process Interview",
+          "name": "Product Development Process Interview — Apr 2026",
           "file": "ux-discovery-stakeholder.json",
           "type": "discovery"
         }
@@ -17,15 +17,21 @@
       "name": "CCI (Clinical Cost Intelligence)",
       "scripts": [
         {
+          "id": "procedure-tab-discovery",
+          "name": "Procedure Tab - Discovery — Apr 2026",
+          "file": "procedure-tab-discovery.json",
+          "type": "discovery"
+        },
+        {
           "id": "snapshot-test-v2",
-          "name": "CCI Snapshot Test",
+          "name": "CCI Snapshot Test v2 — Apr 2026",
           "file": "cci-snapshot-test-v2.json",
           "type": "usability"
         },
         {
-          "id": "example-test",
-          "name": "Usability Test Template",
-          "file": "example-test.json",
+          "id": "cost-intelligence-demo",
+          "name": "Cost Intelligence Demo — May 2026",
+          "file": "cost-intelligence-demo.json",
           "type": "usability"
         }
       ]
