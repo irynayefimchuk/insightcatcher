@@ -1271,17 +1271,24 @@ function TasksPhase({ script, tasks, currentIndex, setCurrentIndex, status, upda
 function GroupBasedTasksPhase({ script, status, updateStatus, startTimer, expandedSections, toggleSection, onNext, onPrev, contextChips, setContextChips }) {
   const [currentGroupIndex, setCurrentGroupIndex] = useState(0);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [groupStatus, setGroupStatus] = useState({});
   
   const currentGroup = script.groups[currentGroupIndex];
   const currentQuestion = currentGroup?.questions[currentQuestionIndex];
   const qStat = status[currentQuestion?.id] || { done: false, notes: '', tags: [], completion: null };
+  const gStat = groupStatus[currentGroup?.id] || { status: 'active' };
   
   const totalGroups = script.groups.length;
   const totalQuestions = currentGroup?.questions.length || 0;
   
+  // Count noted questions per group
+  const getGroupNoteCount = (group) => {
+    return group.questions.filter(q => status[q.id]?.done).length;
+  };
+  
   useEffect(() => {
     startTimer(currentGroup?.timeMinutes || 10);
-  }, [currentGroupIndex, currentQuestionIndex]);
+  }, [currentGroupIndex]);
 
   const handleNextQuestion = () => {
     if (currentQuestionIndex < totalQuestions - 1) {
@@ -1304,17 +1311,122 @@ function GroupBasedTasksPhase({ script, status, updateStatus, startTimer, expand
     }
   };
 
+  const jumpToGroup = (groupIdx) => {
+    setCurrentGroupIndex(groupIdx);
+    setCurrentQuestionIndex(0);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <div>
-      {/* Group header */}
-      <div style={{ padding: '24px 0 16px', marginBottom: 12, borderBottom: `2px solid ${t.brand}` }}>
-        <div style={{ fontSize: 12, fontWeight: 700, color: t.brand, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>
-          Section {currentGroupIndex + 1} of {totalGroups}
+      {/* TWO-LEVEL NAVIGATOR */}
+      <div style={{ marginBottom: 20, paddingTop: 8 }}>
+        {/* Level 1: Group chips */}
+        <div style={{ marginBottom: 12 }}>
+          <div style={{ fontSize: 11, fontWeight: 600, color: t.textDetail, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 10 }}>
+            Sections
+          </div>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            {script.groups.map((group, idx) => {
+              const isCurrent = idx === currentGroupIndex;
+              const notedCount = getGroupNoteCount(group);
+              const totalCount = group.questions.length;
+              return (
+                <button
+                  key={group.id}
+                  onClick={() => jumpToGroup(idx)}
+                  style={{
+                    padding: '10px 16px',
+                    borderRadius: 8,
+                    fontSize: 13,
+                    fontWeight: isCurrent ? 600 : 500,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8,
+                    fontFamily: 'inherit',
+                    background: isCurrent ? t.brand : t.cardBg,
+                    color: isCurrent ? '#fff' : t.textMain,
+                    border: `1px solid ${isCurrent ? t.brand : t.strokeDefault}`,
+                    transition: 'all 0.2s'
+                  }}
+                  onMouseEnter={e => !isCurrent && (e.target.style.borderColor = t.brand)}
+                  onMouseLeave={e => !isCurrent && (e.target.style.borderColor = t.strokeDefault)}
+                >
+                  <span>{group.tabName}</span>
+                  <span style={{
+                    background: isCurrent ? 'rgba(255,255,255,0.3)' : t.subtleBg,
+                    color: isCurrent ? '#fff' : t.textSub,
+                    padding: '2px 8px',
+                    borderRadius: 12,
+                    fontSize: 11,
+                    fontWeight: 600
+                  }}>
+                    {notedCount}/{totalCount}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
         </div>
-        <h2 style={{ fontSize: 26, fontWeight: 700, color: t.textHeader, marginBottom: 6 }}>
+
+        {/* Level 2: Question dots for active group */}
+        <div>
+          <div style={{ fontSize: 11, fontWeight: 600, color: t.textDetail, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 10 }}>
+            Questions in this section
+          </div>
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+            {currentGroup.questions.map((q, idx) => {
+              const qSt = status[q.id] || {};
+              const isCurrent = idx === currentQuestionIndex;
+              return (
+                <button
+                  key={q.id}
+                  onClick={() => setCurrentQuestionIndex(idx)}
+                  style={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: '50%',
+                    fontSize: 12,
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: isCurrent ? t.brand : qSt.done ? t.nearPositive : t.cardBg,
+                    color: isCurrent ? '#fff' : qSt.done ? t.positive : t.textSub,
+                    border: `2px solid ${isCurrent ? t.brand : qSt.done ? t.positive : t.strokeDefault}`,
+                    fontFamily: 'inherit'
+                  }}
+                  title={q.label}
+                >
+                  {qSt.done && !isCurrent ? '✓' : idx + 1}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* PERSISTENT BANNER */}
+      <div style={{
+        background: t.hoverBg,
+        border: `1px solid ${t.strokeDefault}`,
+        borderRadius: 10,
+        padding: '16px 20px',
+        marginBottom: 20,
+        borderLeft: `4px solid ${t.brand}`,
+        position: 'sticky',
+        top: 200,
+        zIndex: 25
+      }}>
+        <div style={{ fontSize: 12, fontWeight: 700, color: t.brand, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>
+          Current section
+        </div>
+        <h3 style={{ fontSize: 18, fontWeight: 700, color: t.textHeader, marginBottom: 4 }}>
           {currentGroup.tabName}
-        </h2>
-        <p style={{ fontSize: 15, color: t.textDetail }}>
+        </h3>
+        <p style={{ fontSize: 14, color: t.textDetail }}>
           {currentGroup.tabContext}
         </p>
       </div>
@@ -1324,42 +1436,17 @@ function GroupBasedTasksPhase({ script, status, updateStatus, startTimer, expand
         {/* Left: Questions */}
         <Card style={{ overflow: 'hidden' }}>
           
-          {/* Question navigation pills */}
-          <div style={{ padding: '14px 20px', borderBottom: `1px solid ${t.strokeLight}`, background: t.subtleBg }}>
-            <div style={{ fontSize: 11, fontWeight: 600, color: t.textDetail, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 10 }}>
+          {/* Question header */}
+          <div style={{ padding: '16px 20px', borderBottom: `1px solid ${t.strokeLight}`, background: t.subtleBg }}>
+            <div style={{ fontSize: 11, fontWeight: 600, color: t.textDetail, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
               Question {currentQuestionIndex + 1} of {totalQuestions}
-            </div>
-            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-              {currentGroup.questions.map((q, idx) => {
-                const qSt = status[q.id] || {};
-                const isCurrent = idx === currentQuestionIndex;
-                return (
-                  <button 
-                    key={q.id} 
-                    onClick={() => setCurrentQuestionIndex(idx)}
-                    style={{
-                      padding: '6px 14px',
-                      borderRadius: 20,
-                      fontSize: 12,
-                      fontWeight: isCurrent ? 600 : 500,
-                      cursor: 'pointer',
-                      background: isCurrent ? t.brand : qSt.done ? t.nearPositive : t.cardBg,
-                      color: isCurrent ? '#fff' : qSt.done ? t.positive : t.textSub,
-                      border: `1px solid ${isCurrent ? t.brand : qSt.done ? t.positive : t.strokeDefault}`,
-                      fontFamily: 'inherit'
-                    }}
-                  >
-                    {qSt.done && !isCurrent ? '✓ ' : ''}{q.label}
-                  </button>
-                );
-              })}
             </div>
           </div>
 
           {/* Main question */}
           <div style={{ padding: '24px 24px 18px' }}>
             <div style={{ fontSize: 14, fontWeight: 600, color: t.textSub, marginBottom: 8 }}>
-              Question: {currentQuestion?.label}
+              {currentQuestion?.label}
             </div>
             <div style={{
               fontSize: 20,
@@ -1462,7 +1549,7 @@ function GroupBasedTasksPhase({ script, status, updateStatus, startTimer, expand
         </Card>
 
         {/* Right: Moderator guidance - ALWAYS VISIBLE */}
-        <div style={{ position: 'fixed', top: 200, right: 'max(32px, calc((100vw - 1280px) / 2 + 32px))', width: 340, maxHeight: 'calc(100vh - 220px)', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 12, zIndex: 30 }}>
+        <div style={{ position: 'fixed', top: 400, right: 'max(32px, calc((100vw - 1280px) / 2 + 32px))', width: 340, maxHeight: 'calc(100vh - 420px)', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 12, zIndex: 30 }}>
           
           {/* What to do */}
           <Card style={{ padding: '16px 18px', borderLeft: `3px solid ${t.brand}` }}>
