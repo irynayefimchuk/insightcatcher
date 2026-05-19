@@ -55,7 +55,7 @@ const MOMS_TEST_DONTS = [
 const PHASES = ['setup', 'warmup', 'tasks', 'wrapup'];
 const PHASE_LABELS = { setup: 'Setup', warmup: 'Warm-up', tasks: 'Tasks', wrapup: 'Wrap-up' };
 
-const getPhases = (scriptType) => scriptType === 'discovery' ? ['setup', 'tasks', 'wrapup'] : ['setup', 'warmup', 'tasks', 'wrapup'];
+const getPhases = (scriptType, hasGroups) => (scriptType === 'discovery' || hasGroups) ? ['setup', 'tasks', 'wrapup'] : ['setup', 'warmup', 'tasks', 'wrapup'];
 
 const Card = ({ children, style }) => (
   <div style={{ background: t.cardBg, border: `1px solid ${t.strokeDefault}`, borderRadius: 10, ...style }}>
@@ -237,10 +237,10 @@ export default function UXBuddy() {
   const toggleSection = (id) => setExpandedSections(p => ({ ...p, [id]: !p[id] }));
   const updateTaskStatus = (taskId, field, value) =>
     setTaskStatus(p => ({ ...p, [taskId]: { ...p[taskId], [field]: value } }));
-  const startSession = () => { setSessionStartTime(new Date()); setCurrentPhase(script.type === 'discovery' ? 'tasks' : 'warmup'); setCurrentTaskIndex(0); };
+  const startSession = () => { setSessionStartTime(new Date()); setCurrentPhase((script.type === 'discovery' || script.groups) ? 'tasks' : 'warmup'); setCurrentTaskIndex(0); };
 
   const nextPhase = () => {
-    const phases = getPhases(script.type);
+    const phases = getPhases(script.type, !!script.groups);
     const currentIdx = phases.indexOf(currentPhase);
     if (currentIdx < phases.length - 1) {
       setCurrentPhase(phases[currentIdx + 1]);
@@ -469,7 +469,7 @@ export default function UXBuddy() {
         {script && currentPhase !== 'select' && currentPhase !== 'complete' && (
           <div style={{ borderTop: `1px solid ${t.strokeLight}`, background: t.cardBg }}>
             <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 44 }}>
-              <Stepper currentPhase={currentPhase} onPhaseClick={setCurrentPhase} phases={getPhases(script.type)} />
+              <Stepper currentPhase={currentPhase} onPhaseClick={setCurrentPhase} phases={getPhases(script.type, !!script.groups)} />
               <div style={{ display: 'flex', gap: 6 }}>
                 <Btn variant="ghost" style={{ padding: '3px 12px', fontSize: 12 }}
                   onClick={() => { if (confirm('Restart? All notes will be lost.')) { resetSession(); setCurrentPhase('setup'); } }}>
@@ -510,7 +510,7 @@ export default function UXBuddy() {
       <main style={{ maxWidth: 1280, margin: '0 auto', padding: '16px 32px 120px' }}>
         {currentPhase === 'select' && <SelectPhase config={config} selectedProject={selectedProject} setSelectedProject={setSelectedProject} onSelectScript={selectScript} loading={loading} scriptTypeFilter={scriptTypeFilter} setScriptTypeFilter={setScriptTypeFilter} />}
         {currentPhase === 'setup' && script && <SetupPhase script={script} participantId={participantId} setParticipantId={setParticipantId} runnerName={runnerName} setRunnerName={setRunnerName} onStart={startSession} />}
-        {currentPhase === 'warmup' && script && script.type !== 'discovery' && <WarmupPhase warmup={script.warmup} status={warmupStatus} setStatus={setWarmupStatus} onNext={nextPhase} startTimer={startTimer} />}
+        {currentPhase === 'warmup' && script && script.type !== 'discovery' && !script.groups && <WarmupPhase warmup={script.warmup} status={warmupStatus} setStatus={setWarmupStatus} onNext={nextPhase} startTimer={startTimer} />}
         {currentPhase === 'tasks' && script && <TasksPhase script={script} tasks={script.tasks} currentIndex={currentTaskIndex} setCurrentIndex={setCurrentTaskIndex} status={taskStatus} updateStatus={updateTaskStatus} showScript={showScript} setShowScript={setShowScript} onNext={nextTask} onPrev={prevTask} startTimer={startTimer} expandedSections={expandedSections} toggleSection={toggleSection} contextChips={contextChips} setContextChips={setContextChips} />}
         {currentPhase === 'wrapup' && script && <WrapupPhase wrapup={script.wrapup} observerNotes={script.observerNotes} status={wrapupStatus} setStatus={setWrapupStatus} sessionNotes={sessionNotes} setSessionNotes={setSessionNotes} onFinish={nextPhase} />}
         {currentPhase === 'complete' && !showCompleteModal && (
