@@ -410,7 +410,7 @@ export default function UXBuddy() {
 
       {/* ── Sticky header ── */}
       <header style={{ position: 'sticky', top: 0, zIndex: 50, background: t.cardBg, borderBottom: `1px solid ${t.strokeDefault}` }}>
-        <div style={{ margin: '0 auto', padding: '0 clamp(24px, 3vw, 54px)', display: 'flex', alignItems: 'center', gap: 16, height: 48 }}>
+        <div style={{ margin: '0 auto', padding: '0 clamp(32px, 4vw, 80px)', display: 'flex', alignItems: 'center', gap: 16, height: 48 }}>
           <button onClick={() => { setCurrentPhase('select'); setScript(null); }}
             style={{ display: 'flex', alignItems: 'center', gap: 6, color: t.brand, fontWeight: 700, fontSize: 15,
               background: 'none', border: 'none', cursor: 'pointer', padding: 0, whiteSpace: 'nowrap' }}>
@@ -464,7 +464,7 @@ export default function UXBuddy() {
         {/* Stepper row */}
         {script && currentPhase !== 'select' && currentPhase !== 'complete' && (
           <div style={{ borderTop: `1px solid ${t.strokeLight}`, background: t.cardBg }}>
-            <div style={{ margin: '0 auto', padding: '0 clamp(24px, 3vw, 54px)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 40 }}>
+            <div style={{ margin: '0 auto', padding: '0 clamp(32px, 4vw, 80px)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 40 }}>
               <Stepper currentPhase={currentPhase} onPhaseClick={setCurrentPhase} phases={getPhases(script.type, !!script.groups)} />
               <div style={{ display: 'flex', gap: 6 }}>
                 <Btn variant="ghost" style={{ padding: '3px 12px', fontSize: 12 }}
@@ -483,7 +483,7 @@ export default function UXBuddy() {
         {/* Task breadcrumb row (old flat task schema only) */}
         {script && currentPhase === 'tasks' && script.tasks && (
           <div style={{ borderTop: `1px solid ${t.strokeLight}`, background: t.canvasBg }}>
-            <div style={{ maxWidth: 1280, margin: '0 auto', padding: '6px 32px', display: 'flex', gap: 4, overflowX: 'auto', scrollbarWidth: 'none' }}>
+            <div style={{ margin: '0 auto', padding: '6px clamp(32px, 4vw, 80px)', display: 'flex', gap: 4, overflowX: 'auto', scrollbarWidth: 'none' }}>
               {script.tasks.map((task, i) => {
                 const s = taskStatus[task.id] || {};
                 const isCurrent = i === currentTaskIndex;
@@ -659,8 +659,8 @@ function SelectPhase({ config, selectedProject, setSelectedProject, onSelectScri
   const archivedCount = config?.projects.reduce((sum, p) => sum + p.scripts.filter(s => archived.has(s.id)).length, 0) || 0;
 
   return (
-    <div style={{ maxWidth: 720, margin: '0 auto' }}>
-      <div style={{ padding: '24px 0 20px', display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
+    <div>
+      <div style={{ padding: '8px 0 14px', display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 16 }}>
         <div>
           <h2 style={{ fontSize: 22, fontWeight: 700, color: t.textHeader, marginBottom: 4 }}>
             {view === 'archived' ? 'Archived tests' : 'Select a test'}
@@ -686,37 +686,55 @@ function SelectPhase({ config, selectedProject, setSelectedProject, onSelectScri
         </div>
       </div>
 
-      {/* Active / Archived top-level toggle */}
-      <div style={{ display: 'flex', gap: 2, marginBottom: 10, background: t.subtleBg, borderRadius: 8, padding: 3, width: 'fit-content' }}>
-        {[
-          { id: 'active', label: 'Active', count: null },
-          { id: 'archived', label: 'Archived', count: archivedCount, icon: <Archive size={12} /> }
-        ].map(tab => (
-          <button key={tab.id} onClick={() => setView(tab.id)}
-            style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 14px', borderRadius: 6, fontSize: 13,
-              fontWeight: view === tab.id ? 600 : 400, cursor: 'pointer', border: 'none',
-              background: view === tab.id ? t.cardBg : 'transparent',
-              color: view === tab.id ? t.brand : t.textSub,
-              boxShadow: view === tab.id ? '0 1px 3px rgba(0,0,0,0.08)' : 'none' }}>
-            {tab.icon}{tab.label}
-            {tab.count !== null && tab.count > 0 && (
-              <span style={{ background: view === tab.id ? t.hoverBg : 'transparent', color: view === tab.id ? t.brand : t.textDetail, padding: '0 6px', borderRadius: 10, fontSize: 11, fontWeight: 600 }}>{tab.count}</span>
-            )}
-          </button>
-        ))}
-      </div>
+      {/* Filters row: type filter left, archived toggle right */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: 2, background: t.subtleBg, borderRadius: 8, padding: 3, width: 'fit-content' }}>
+          {[{ id: 'all', label: 'All' }, { id: 'discovery', label: 'Discovery', icon: <Search size={12} /> }, { id: 'usability', label: 'Usability', icon: <FlaskConical size={12} /> }].map(tab => (
+            <button key={tab.id} onClick={() => setScriptTypeFilter(tab.id)}
+              style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 14px', borderRadius: 6, fontSize: 13,
+                fontWeight: scriptTypeFilter === tab.id ? 600 : 400, cursor: 'pointer', border: 'none',
+                background: scriptTypeFilter === tab.id ? t.cardBg : 'transparent',
+                color: scriptTypeFilter === tab.id ? t.brand : t.textSub,
+                boxShadow: scriptTypeFilter === tab.id ? '0 1px 3px rgba(0,0,0,0.08)' : 'none' }}>
+              {tab.icon}{tab.label}
+            </button>
+          ))}
+        </div>
 
-      <div style={{ display: 'flex', gap: 2, marginBottom: 16, background: t.subtleBg, borderRadius: 8, padding: 3, width: 'fit-content' }}>
-        {[{ id: 'all', label: 'All' }, { id: 'discovery', label: 'Discovery', icon: <Search size={12} /> }, { id: 'usability', label: 'Usability', icon: <FlaskConical size={12} /> }].map(tab => (
-          <button key={tab.id} onClick={() => setScriptTypeFilter(tab.id)}
-            style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 14px', borderRadius: 6, fontSize: 13,
-              fontWeight: scriptTypeFilter === tab.id ? 600 : 400, cursor: 'pointer', border: 'none',
-              background: scriptTypeFilter === tab.id ? t.cardBg : 'transparent',
-              color: scriptTypeFilter === tab.id ? t.brand : t.textSub,
-              boxShadow: scriptTypeFilter === tab.id ? '0 1px 3px rgba(0,0,0,0.08)' : 'none' }}>
-            {tab.icon}{tab.label}
-          </button>
-        ))}
+        {/* Single archived toggle button on the right */}
+        <button
+          onClick={() => setView(view === 'archived' ? 'active' : 'archived')}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            padding: '6px 12px',
+            borderRadius: 999,
+            fontSize: 13,
+            fontWeight: 500,
+            cursor: 'pointer',
+            fontFamily: 'inherit',
+            background: view === 'archived' ? t.hoverBg : 'transparent',
+            color: view === 'archived' ? t.brand : t.textSub,
+            border: `1px solid ${view === 'archived' ? t.brand : t.strokeDefault}`
+          }}
+          title={view === 'archived' ? 'Show active tests' : 'Show archived tests'}
+        >
+          <Archive size={13} />
+          {view === 'archived' ? 'Showing archived' : 'Show archived'}
+          {archivedCount > 0 && (
+            <span style={{
+              background: view === 'archived' ? t.brand : t.subtleBg,
+              color: view === 'archived' ? '#fff' : t.textDetail,
+              padding: '0 7px',
+              borderRadius: 999,
+              fontSize: 11,
+              fontWeight: 600,
+              minWidth: 18,
+              textAlign: 'center'
+            }}>{archivedCount}</span>
+          )}
+        </button>
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -825,8 +843,8 @@ function SetupPhase({ script, participantId, setParticipantId, runnerName, setRu
 
       {/* Sticky bottom CTA */}
       <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: t.cardBg,
-        borderTop: `1px solid ${t.strokeDefault}`, padding: '12px 32px', zIndex: 40 }}>
-        <div style={{ maxWidth: 1280, margin: '0 auto', display: 'flex', justifyContent: 'flex-end' }}>
+        borderTop: `1px solid ${t.strokeDefault}`, padding: '12px clamp(32px, 4vw, 80px)', zIndex: 40 }}>
+        <div style={{ margin: '0 auto', display: 'flex', justifyContent: 'flex-end' }}>
           <Btn variant="cta" onClick={onStart} style={{ padding: '11px 32px', fontSize: 15 }}>
             <Play size={16} />Start Session
           </Btn>
@@ -907,8 +925,8 @@ function WarmupPhase({ warmup, status, setStatus, onNext, startTimer }) {
 
       {/* Sticky bottom CTA */}
       <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: t.cardBg,
-        borderTop: `1px solid ${t.strokeDefault}`, padding: '12px 32px', zIndex: 40 }}>
-        <div style={{ maxWidth: 1280, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        borderTop: `1px solid ${t.strokeDefault}`, padding: '12px clamp(32px, 4vw, 80px)', zIndex: 40 }}>
+        <div style={{ margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <span style={{ fontSize: 13, color: t.textDetail }}>
             {notedCount} of {warmup.questions.length} questions noted
           </span>
@@ -1279,8 +1297,8 @@ function TasksPhase({ script, tasks, currentIndex, setCurrentIndex, status, upda
 
       {/* Sticky bottom action bar */}
       <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: t.cardBg,
-        borderTop: `1px solid ${t.strokeDefault}`, padding: '10px 32px', zIndex: 40 }}>
-        <div style={{ maxWidth: 1280, margin: '0 auto', display: 'flex', alignItems: 'center', gap: 8 }}>
+        borderTop: `1px solid ${t.strokeDefault}`, padding: '10px clamp(32px, 4vw, 80px)', zIndex: 40 }}>
+        <div style={{ margin: '0 auto', display: 'flex', alignItems: 'center', gap: 8 }}>
           <button onClick={onPrev} disabled={currentIndex === 0}
             style={{ background: 'none', border: `1px solid ${t.strokeDefault}`, borderRadius: 6, padding: '8px 14px',
               cursor: currentIndex === 0 ? 'not-allowed' : 'pointer', color: currentIndex === 0 ? t.textDisabled : t.brand,
@@ -1696,7 +1714,7 @@ function GroupBasedTasksPhase({ script, status, updateStatus, startTimer, expand
       </div>
 
       {/* Sticky bottom action bar — aligned with middle column for Fitts's law */}
-      <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: t.cardBg, borderTop: `1px solid ${t.strokeDefault}`, padding: '8px clamp(24px, 3vw, 54px)', zIndex: 40 }}>
+      <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: t.cardBg, borderTop: `1px solid ${t.strokeDefault}`, padding: '8px clamp(32px, 4vw, 80px)', zIndex: 40 }}>
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'minmax(220px, 260px) minmax(0, 1fr) minmax(280px, 320px)',
