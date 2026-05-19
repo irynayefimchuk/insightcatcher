@@ -414,7 +414,7 @@ export default function UXBuddy() {
 
       {/* ── Sticky header ── */}
       <header style={{ position: 'sticky', top: 0, zIndex: 50, background: t.cardBg, borderBottom: `1px solid ${t.strokeDefault}` }}>
-        <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 32px', display: 'flex', alignItems: 'center', gap: 16, height: 52 }}>
+        <div style={{ margin: '0 auto', padding: '0 24px', display: 'flex', alignItems: 'center', gap: 16, height: 48 }}>
           <button onClick={() => { setCurrentPhase('select'); setScript(null); }}
             style={{ display: 'flex', alignItems: 'center', gap: 6, color: t.brand, fontWeight: 700, fontSize: 15,
               background: 'none', border: 'none', cursor: 'pointer', padding: 0, whiteSpace: 'nowrap' }}>
@@ -468,7 +468,7 @@ export default function UXBuddy() {
         {/* Stepper row */}
         {script && currentPhase !== 'select' && currentPhase !== 'complete' && (
           <div style={{ borderTop: `1px solid ${t.strokeLight}`, background: t.cardBg }}>
-            <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 44 }}>
+            <div style={{ margin: '0 auto', padding: '0 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 40 }}>
               <Stepper currentPhase={currentPhase} onPhaseClick={setCurrentPhase} phases={getPhases(script.type, !!script.groups)} />
               <div style={{ display: 'flex', gap: 6 }}>
                 <Btn variant="ghost" style={{ padding: '3px 12px', fontSize: 12 }}
@@ -482,7 +482,7 @@ export default function UXBuddy() {
               </div>
             </div>
           </div>
-        )}}
+        )}
 
         {/* Task breadcrumb row (old flat task schema only) */}
         {script && currentPhase === 'tasks' && script.tasks && (
@@ -510,7 +510,7 @@ export default function UXBuddy() {
       <main style={{
         maxWidth: (currentPhase === 'tasks' && script && script.groups) ? 'none' : 1280,
         margin: '0 auto',
-        padding: (currentPhase === 'tasks' && script && script.groups) ? '12px 20px 80px' : '16px 32px 120px'
+        padding: (currentPhase === 'tasks' && script && script.groups) ? '10px 16px 64px' : '16px 32px 120px'
       }}>
         {currentPhase === 'select' && <SelectPhase config={config} selectedProject={selectedProject} setSelectedProject={setSelectedProject} onSelectScript={selectScript} loading={loading} scriptTypeFilter={scriptTypeFilter} setScriptTypeFilter={setScriptTypeFilter} />}
         {currentPhase === 'setup' && script && <SetupPhase script={script} participantId={participantId} setParticipantId={setParticipantId} runnerName={runnerName} setRunnerName={setRunnerName} onStart={startSession} />}
@@ -1326,11 +1326,11 @@ function GroupBasedTasksPhase({ script, status, updateStatus, startTimer, expand
       {/* 3-COLUMN DASHBOARD: Sections nav | Main content | Guidance */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'minmax(240px, 280px) minmax(0, 1fr) minmax(300px, 340px)',
-        gap: 16,
+        gridTemplateColumns: 'minmax(220px, 260px) minmax(0, 1fr) minmax(280px, 320px)',
+        gap: 14,
         alignItems: 'stretch',
-        height: 'calc(100vh - 170px)',
-        marginBottom: 64
+        height: 'calc(100vh - 160px)',
+        marginBottom: 16
       }}>
 
         {/* ── LEFT: Sections + questions table of contents ── */}
@@ -1360,7 +1360,7 @@ function GroupBasedTasksPhase({ script, status, updateStatus, startTimer, expand
                       padding: '8px 10px',
                       borderRadius: 6,
                       cursor: 'pointer',
-                      background: isCurrentGroup ? t.hoverBg : 'transparent',
+                      background: isCurrentGroup ? t.subtleBg : 'transparent',
                       border: 'none',
                       fontFamily: 'inherit',
                       display: 'flex',
@@ -1374,8 +1374,8 @@ function GroupBasedTasksPhase({ script, status, updateStatus, startTimer, expand
                         width: 18,
                         height: 18,
                         borderRadius: 4,
-                        background: isCurrentGroup ? t.brand : t.strokeDefault,
-                        color: isCurrentGroup ? '#fff' : t.textSub,
+                        background: isCurrentGroup ? t.brand : t.subtleBg,
+                        color: isCurrentGroup ? '#fff' : t.textDetail,
                         fontSize: 10,
                         fontWeight: 700,
                         display: 'flex',
@@ -1387,8 +1387,8 @@ function GroupBasedTasksPhase({ script, status, updateStatus, startTimer, expand
                       </span>
                       <span style={{
                         fontSize: 13,
-                        fontWeight: isCurrentGroup ? 700 : 600,
-                        color: isCurrentGroup ? t.brand : t.textMain,
+                        fontWeight: isCurrentGroup ? 600 : 500,
+                        color: isCurrentGroup ? t.textHeader : t.textSub,
                         overflow: 'hidden',
                         textOverflow: 'ellipsis',
                         whiteSpace: 'nowrap'
@@ -1422,7 +1422,7 @@ function GroupBasedTasksPhase({ script, status, updateStatus, startTimer, expand
                               padding: '6px 10px',
                               borderRadius: 4,
                               cursor: 'pointer',
-                              background: isCurrentQ ? t.brand : 'transparent',
+                              background: isCurrentQ ? t.hoverBg : 'transparent',
                               border: 'none',
                               fontFamily: 'inherit',
                               display: 'flex',
@@ -1435,9 +1435,9 @@ function GroupBasedTasksPhase({ script, status, updateStatus, startTimer, expand
                               width: 16,
                               height: 16,
                               borderRadius: '50%',
-                              background: isCurrentQ ? '#fff' : qSt.done ? t.positive : 'transparent',
-                              color: isCurrentQ ? t.brand : '#fff',
-                              border: `1.5px solid ${isCurrentQ ? '#fff' : qSt.done ? t.positive : t.strokeStrong}`,
+                              background: isCurrentQ ? t.brand : qSt.done ? t.positive : 'transparent',
+                              color: '#fff',
+                              border: `1.5px solid ${isCurrentQ ? t.brand : qSt.done ? t.positive : t.strokeStrong}`,
                               fontSize: 9,
                               fontWeight: 700,
                               display: 'flex',
@@ -1449,7 +1449,7 @@ function GroupBasedTasksPhase({ script, status, updateStatus, startTimer, expand
                             </span>
                             <span style={{
                               fontSize: 12,
-                              color: isCurrentQ ? '#fff' : t.textSub,
+                              color: isCurrentQ ? t.textHeader : t.textSub,
                               fontWeight: isCurrentQ ? 600 : 400,
                               overflow: 'hidden',
                               textOverflow: 'ellipsis',
@@ -1472,35 +1472,36 @@ function GroupBasedTasksPhase({ script, status, updateStatus, startTimer, expand
         <Card style={{ overflow: 'auto', padding: 0, display: 'flex', flexDirection: 'column' }}>
           {/* Banner header — where you are */}
           <div style={{
-            padding: '14px 22px',
+            padding: '10px 18px',
             borderBottom: `1px solid ${t.strokeLight}`,
-            borderLeft: `4px solid ${t.brand}`,
-            background: t.hoverBg,
+            background: t.subtleBg,
             position: 'sticky',
             top: 0,
             zIndex: 2
           }}>
-            <div style={{ fontSize: 10, fontWeight: 700, color: t.brand, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 2 }}>
-              You are here · Section {currentGroupIndex + 1} of {totalGroups}
+            <div style={{ fontSize: 10, fontWeight: 600, color: t.textDetail, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 2 }}>
+              Section {currentGroupIndex + 1} of {totalGroups} · {currentGroup.tabName}
             </div>
-            <h3 style={{ fontSize: 17, fontWeight: 700, color: t.textHeader, marginBottom: 2 }}>
-              {currentGroup.tabName}
-            </h3>
             <p style={{ fontSize: 12, color: t.textDetail, lineHeight: 1.4 }}>
               {currentGroup.tabContext}
             </p>
           </div>
 
-          {/* Main question */}
-          <div style={{ padding: '20px 22px 14px' }}>
-            <div style={{ fontSize: 11, fontWeight: 600, color: t.textDetail, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>
+          {/* Main question — on a band */}
+          <div style={{
+            padding: '16px 22px',
+            background: t.hoverBg,
+            borderLeft: `4px solid ${t.brand}`,
+            borderBottom: `1px solid ${t.strokeLight}`
+          }}>
+            <div style={{ fontSize: 10, fontWeight: 700, color: t.brand, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 4 }}>
               Question {currentQuestionIndex + 1} of {totalQuestions} · {currentQuestion?.label}
             </div>
             <div style={{
-              fontSize: 19,
+              fontSize: 18,
               fontWeight: 700,
-              color: t.textMain,
-              lineHeight: 1.4
+              color: t.textHeader,
+              lineHeight: 1.35
             }}>
               {currentQuestion?.mainQuestion}
             </div>
@@ -1508,31 +1509,31 @@ function GroupBasedTasksPhase({ script, status, updateStatus, startTimer, expand
 
           {/* Probing questions */}
           {currentQuestion?.probingQuestions && currentQuestion.probingQuestions.length > 0 && (
-            <div style={{ padding: '0 22px 14px' }}>
+            <div style={{ padding: '12px 22px 10px' }}>
               <div style={{
-                background: t.subtleBg,
-                borderRadius: 8,
-                padding: '10px 14px',
-                borderLeft: `3px solid ${t.textDetail}`
+                background: t.cardBg,
+                borderRadius: 6,
+                padding: '8px 12px',
+                border: `1px dashed ${t.strokeDefault}`
               }}>
                 <div style={{
                   fontSize: 10,
-                  fontWeight: 700,
+                  fontWeight: 600,
                   color: t.textDetail,
-                  marginBottom: 6,
+                  marginBottom: 4,
                   textTransform: 'uppercase',
                   letterSpacing: '0.05em'
                 }}>
                   Probing questions
                 </div>
-                <ul style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                <ul style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                   {currentQuestion.probingQuestions.map((pq, idx) => (
                     <li key={idx} style={{
-                      fontSize: 13,
+                      fontSize: 12,
                       color: t.textSub,
-                      lineHeight: 1.5,
+                      lineHeight: 1.45,
                       display: 'flex',
-                      gap: 8
+                      gap: 6
                     }}>
                       <span style={{ color: t.textDetail, flexShrink: 0 }}>→</span>
                       <span style={{ fontStyle: 'italic' }}>{pq}</span>
@@ -1544,8 +1545,8 @@ function GroupBasedTasksPhase({ script, status, updateStatus, startTimer, expand
           )}
 
           {/* Quick tags */}
-          <div style={{ padding: '0 22px 14px' }}>
-            <div style={{ fontSize: 10, fontWeight: 700, color: t.textDetail, marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+          <div style={{ padding: '4px 22px 10px' }}>
+            <div style={{ fontSize: 10, fontWeight: 600, color: t.textDetail, marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
               Quick tags
             </div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
@@ -1578,9 +1579,9 @@ function GroupBasedTasksPhase({ script, status, updateStatus, startTimer, expand
             </div>
           </div>
 
-          {/* Notes — fills remaining space */}
-          <div style={{ padding: '0 22px 18px', flex: 1, display: 'flex', flexDirection: 'column' }}>
-            <div style={{ fontSize: 10, fontWeight: 700, color: t.textDetail, marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+          {/* Notes — compact */}
+          <div style={{ padding: '4px 22px 16px' }}>
+            <div style={{ fontSize: 10, fontWeight: 600, color: t.textDetail, marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
               Observations
             </div>
             <textarea
@@ -1589,8 +1590,7 @@ function GroupBasedTasksPhase({ script, status, updateStatus, startTimer, expand
               placeholder="What did you observe? Key quotes, reactions, hesitations..."
               style={{
                 width: '100%',
-                flex: 1,
-                minHeight: 120,
+                height: 110,
                 background: t.cardBg,
                 border: `1px solid ${t.formStroke}`,
                 borderRadius: 6,
@@ -1607,21 +1607,21 @@ function GroupBasedTasksPhase({ script, status, updateStatus, startTimer, expand
         </Card>
 
         {/* ── RIGHT: Moderator guidance ── */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, overflow: 'auto' }}>
-          <Card style={{ padding: '14px 16px', borderLeft: `3px solid ${t.brand}` }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: t.brand, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, overflow: 'auto' }}>
+          <Card style={{ padding: '12px 14px', borderLeft: `3px solid ${t.brand}` }}>
+            <div style={{ fontSize: 10, fontWeight: 700, color: t.brand, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>
               What to do
             </div>
-            <p style={{ fontSize: 13, color: t.textSub, lineHeight: 1.55 }}>
+            <p style={{ fontSize: 12, color: t.textSub, lineHeight: 1.5 }}>
               {currentQuestion?.whatToDo}
             </p>
           </Card>
 
-          <Card style={{ padding: '14px 16px', borderLeft: `3px solid ${t.positive}` }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: t.positive, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>
+          <Card style={{ padding: '12px 14px', borderLeft: `3px solid ${t.positive}` }}>
+            <div style={{ fontSize: 10, fontWeight: 700, color: t.positive, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>
               What to listen for
             </div>
-            <p style={{ fontSize: 13, color: t.textSub, lineHeight: 1.55 }}>
+            <p style={{ fontSize: 12, color: t.textSub, lineHeight: 1.5 }}>
               {currentQuestion?.whatToListenFor}
             </p>
           </Card>
