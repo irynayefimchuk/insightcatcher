@@ -1283,10 +1283,13 @@ function GroupBasedTasksPhase({ script, status, updateStatus, startTimer, expand
   
   const totalGroups = script.groups.length;
   const totalQuestions = currentGroup?.questions.length || 0;
-  
-  // Count noted questions per group
+
+  // A question counts as interacted ("done") if user marked it, added notes, picked tags, or set a completion result.
+  const isInteracted = (qSt) => !!(qSt && (qSt.done || (qSt.notes && qSt.notes.trim()) || (qSt.tags && qSt.tags.length > 0) || qSt.completion));
+
+  // Count interacted questions per group
   const getGroupNoteCount = (group) => {
-    return group.questions.filter(q => status[q.id]?.done).length;
+    return group.questions.filter(q => isInteracted(status[q.id])).length;
   };
   
   useEffect(() => {
@@ -1434,9 +1437,9 @@ function GroupBasedTasksPhase({ script, status, updateStatus, startTimer, expand
                               width: 16,
                               height: 16,
                               borderRadius: '50%',
-                              background: isCurrentQ ? t.brand : qSt.done ? t.positive : 'transparent',
+                              background: isCurrentQ ? t.brand : isInteracted(qSt) ? t.positive : 'transparent',
                               color: '#fff',
-                              border: `1.5px solid ${isCurrentQ ? t.brand : qSt.done ? t.positive : t.strokeStrong}`,
+                              border: `1.5px solid ${isCurrentQ ? t.brand : isInteracted(qSt) ? t.positive : t.strokeStrong}`,
                               fontSize: 9,
                               fontWeight: 700,
                               display: 'flex',
@@ -1444,7 +1447,7 @@ function GroupBasedTasksPhase({ script, status, updateStatus, startTimer, expand
                               justifyContent: 'center',
                               flexShrink: 0
                             }}>
-                              {qSt.done ? '✓' : qIdx + 1}
+                              {isInteracted(qSt) ? '✓' : qIdx + 1}
                             </span>
                             <span style={{
                               fontSize: 12,
@@ -1589,7 +1592,7 @@ function GroupBasedTasksPhase({ script, status, updateStatus, startTimer, expand
               placeholder="What did you observe? Key quotes, reactions, hesitations..."
               style={{
                 width: '100%',
-                height: 110,
+                height: 230,
                 background: t.cardBg,
                 border: `1px solid ${t.formStroke}`,
                 borderRadius: 6,
@@ -1627,80 +1630,74 @@ function GroupBasedTasksPhase({ script, status, updateStatus, startTimer, expand
         </div>
       </div>
 
-      {/* Sticky bottom action bar */}
-      <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: t.cardBg, borderTop: `1px solid ${t.strokeDefault}`, padding: '8px 20px', zIndex: 40 }}>
-        <div style={{ margin: '0 auto', display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-          <button
-            onClick={handlePrevQuestion}
-            disabled={currentGroupIndex === 0 && currentQuestionIndex === 0}
-            style={{
-              background: 'none',
-              border: `1px solid ${t.strokeDefault}`,
-              borderRadius: 6,
-              padding: '7px 12px',
-              cursor: currentGroupIndex === 0 && currentQuestionIndex === 0 ? 'not-allowed' : 'pointer',
-              color: currentGroupIndex === 0 && currentQuestionIndex === 0 ? t.textDisabled : t.brand,
-              fontSize: 13,
-              fontFamily: 'inherit'
-            }}
-          >
-            ← Previous
-          </button>
+      {/* Sticky bottom action bar — aligned with middle column for Fitts's law */}
+      <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: t.cardBg, borderTop: `1px solid ${t.strokeDefault}`, padding: '8px clamp(24px, 3vw, 54px)', zIndex: 40 }}>
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'minmax(220px, 260px) minmax(0, 1fr) minmax(280px, 320px)',
+          gap: 14,
+          alignItems: 'center'
+        }}>
+          {/* Spacer aligned with left column */}
+          <div />
 
-          <button
-            onClick={() => updateStatus(currentQuestion.id, 'done', !qStat.done)}
-            style={{
-              background: 'none',
-              border: `1px solid ${t.strokeDefault}`,
-              borderRadius: 6,
-              padding: '7px 12px',
-              cursor: 'pointer',
-              color: qStat.done ? t.positive : t.textSub,
-              fontSize: 13,
-              fontFamily: 'inherit',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 5
-            }}
-          >
-            {qStat.done ? <CheckSquare size={14} /> : <Square size={14} />}
-            Done
-          </button>
-
-          <div style={{ flex: 1 }} />
-
-          {[
-            { value: 'completed', label: '✅ Completed', bg: t.nearPositive, color: t.positive, border: t.positive },
-            { value: 'partial', label: '⚠️ Partially', bg: '#FEF3C7', color: '#92400E', border: '#F59E0B' },
-            { value: 'failed', label: '❌ Could not do', bg: t.nearNegative, color: t.negative, border: t.negative },
-          ].map(({ value, label, bg, color, border }) => (
-            <button key={value}
-              onClick={() => updateStatus(currentQuestion.id, 'completion', qStat.completion === value ? null : value)}
+          {/* Action buttons aligned with middle column */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+            <button
+              onClick={handlePrevQuestion}
+              disabled={currentGroupIndex === 0 && currentQuestionIndex === 0}
               style={{
-                padding: '7px 12px',
+                background: 'none',
+                border: `1px solid ${t.strokeDefault}`,
                 borderRadius: 6,
+                padding: '7px 12px',
+                cursor: currentGroupIndex === 0 && currentQuestionIndex === 0 ? 'not-allowed' : 'pointer',
+                color: currentGroupIndex === 0 && currentQuestionIndex === 0 ? t.textDisabled : t.brand,
                 fontSize: 13,
-                fontWeight: 500,
-                cursor: 'pointer',
-                fontFamily: 'inherit',
-                background: qStat.completion === value ? bg : 'transparent',
-                color: qStat.completion === value ? color : t.textSub,
-                border: `1px solid ${qStat.completion === value ? border : t.strokeDefault}`
+                fontFamily: 'inherit'
               }}
             >
-              {label}
+              ← Previous
             </button>
-          ))}
 
-          <Btn
-            variant="cta"
-            onClick={handleNextQuestion}
-            style={{ marginLeft: 4 }}
-          >
-            {currentGroupIndex === totalGroups - 1 && currentQuestionIndex === totalQuestions - 1
-              ? 'Finish →'
-              : 'Next →'}
-          </Btn>
+            <div style={{ flex: 1 }} />
+
+            {[
+              { value: 'completed', label: '✅ Completed', bg: t.nearPositive, color: t.positive, border: t.positive },
+              { value: 'partial', label: '⚠️ Partially', bg: '#FEF3C7', color: '#92400E', border: '#F59E0B' },
+              { value: 'failed', label: '❌ Could not do', bg: t.nearNegative, color: t.negative, border: t.negative },
+            ].map(({ value, label, bg, color, border }) => (
+              <button key={value}
+                onClick={() => updateStatus(currentQuestion.id, 'completion', qStat.completion === value ? null : value)}
+                style={{
+                  padding: '7px 12px',
+                  borderRadius: 6,
+                  fontSize: 13,
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                  fontFamily: 'inherit',
+                  background: qStat.completion === value ? bg : 'transparent',
+                  color: qStat.completion === value ? color : t.textSub,
+                  border: `1px solid ${qStat.completion === value ? border : t.strokeDefault}`
+                }}
+              >
+                {label}
+              </button>
+            ))}
+
+            <Btn
+              variant="cta"
+              onClick={handleNextQuestion}
+              style={{ marginLeft: 4 }}
+            >
+              {currentGroupIndex === totalGroups - 1 && currentQuestionIndex === totalQuestions - 1
+                ? 'Finish →'
+                : 'Next →'}
+            </Btn>
+          </div>
+
+          {/* Spacer aligned with right column */}
+          <div />
         </div>
       </div>
     </div>
