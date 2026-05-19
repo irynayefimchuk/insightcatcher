@@ -504,9 +504,11 @@ export default function UXBuddy() {
       </header>
 
       <main style={{
-        maxWidth: (currentPhase === 'tasks' && script && script.groups) ? 'none' : 1280,
+        maxWidth: 'none',
         margin: '0 auto',
-        padding: (currentPhase === 'tasks' && script && script.groups) ? '10px clamp(24px, 3vw, 54px) 64px' : '16px 32px 120px'
+        padding: (currentPhase === 'tasks' && script && script.groups)
+          ? '10px clamp(32px, 4vw, 80px) 64px'
+          : '16px clamp(32px, 4vw, 80px) 120px'
       }}>
         {currentPhase === 'select' && <SelectPhase config={config} selectedProject={selectedProject} setSelectedProject={setSelectedProject} onSelectScript={selectScript} loading={loading} scriptTypeFilter={scriptTypeFilter} setScriptTypeFilter={setScriptTypeFilter} />}
         {currentPhase === 'setup' && script && <SetupPhase script={script} participantId={participantId} setParticipantId={setParticipantId} runnerName={runnerName} setRunnerName={setRunnerName} onStart={startSession} />}
